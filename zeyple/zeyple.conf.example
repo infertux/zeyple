@@ -1,0 +1,13 @@
+[zeyple]
+log_file = /var/log/zeyple.log
+
+[gpg]
+home = /etc/zeyple/keys
+
+[relay]
+host = 127.0.0.1
+port = 10026
+
+[aliases]
+#root@myserver.com = gpgaddress@mail.org
+
