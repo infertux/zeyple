@@ -1,2 +1,2 @@
 .deb package to automate the (long) installation
-handle attachements (multipart)
+handle attachements (multipart) using PGP/MIME

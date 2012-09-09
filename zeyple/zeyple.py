@@ -47,8 +47,6 @@ class Zeyple:
     def processMessage(self, string):
         message = email.message_from_string(string)
         logging.info("Processing outgoing message %s", message['Message-id'])
-        message.add_header('X-Zeyple',
-                           "processed by {0} v.{1}".format(__title__, __version__))
 
         if message['To'] is None:
             logging.warn("Message has no 'To' header, ignoring")
@@ -70,14 +68,21 @@ class Zeyple:
             logging.info("Key IDs: %s", key_ids)
 
             if key_ids:
-                payload = self._encrypt(message.get_payload(), key_ids)
+                if message.is_multipart():
+                    logging.warn("Message is multipart, ignoring")
+                else:
+                    payload = self._encrypt(message.get_payload(), key_ids)
 
-                # replace message body with encrypted payload
-                message.set_payload(payload)
+                    # replace message body with encrypted payload
+                    message.set_payload(payload)
+
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
 
-        self._sendMessage(message)
+        message.add_header('X-Zeyple',
+                           "processed by {0} v{1}".format(__title__, __version__))
+
+        return message
 
     def _loadConfiguration(self, filename='zeyple.conf'):
         self._config = SafeConfigParser()
@@ -125,6 +130,7 @@ class Zeyple:
 
 if __name__ == '__main__':
     zeyple = Zeyple()
-    string = sys.stdin.read()
-    zeyple.processMessage(string)
+    message = sys.stdin.read()
+    cipher = zeyple.processMessage(message)
+    zeyple._sendMessage(cipher)
 
