@@ -1,3 +1,6 @@
+*.swp
 *.pyc
 __pycache__/
+/.coverage
+/cover/
 /envs/
