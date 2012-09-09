@@ -8,12 +8,15 @@ import shutil
 from textwrap import dedent
 from zeyple import zeyple
 
+LINUS_ID = '79BE3E4300411886'
+
 def is_encrypted(string):
     return string.startswith(b'-----BEGIN PGP MESSAGE-----')
 
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
         shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
+        os.system("gpg --recv-keys %s 2> /dev/null" % LINUS_ID)
         self.zeyple = zeyple.Zeyple()
         self.zeyple._sendMessage = Mock() # don't try to send emails
 
@@ -33,18 +36,16 @@ class ZeypleTest(unittest.TestCase):
 
         self.assertIsNone(self.zeyple._userKey('non_existant@example.org'))
 
-        linus_id = "79BE3E4300411886"
-        os.system("gpg --recv-keys %s 2> /dev/null" % linus_id)
         self.assertEqual(
             self.zeyple._userKey('torvalds@linux-foundation.org'),
-            linus_id
+            LINUS_ID
         )
 
     def test__encrypt(self):
         """Encrypts plain text"""
 
         encrypted = self.zeyple._encrypt(
-            'The key is under the carpet.', ['79BE3E4300411886']
+            'The key is under the carpet.', [LINUS_ID]
         )
         self.assertTrue(is_encrypted(encrypted))
 
