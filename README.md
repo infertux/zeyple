@@ -1,4 +1,4 @@
-# Zeyple Encrypts Your Precious Log Emails
+# Zeyple Encrypts Your Precious Log Emails [![Build Status](https://secure.travis-ci.org/infertux/zeyple.png)](http://travis-ci.org/#!/infertux/zeyple)
 
 Zeyple automatically encrypts outgoing emails with GPG.
 
