@@ -15,7 +15,7 @@
 # |_________|                    '..'
 
 __title__ = 'Zeyple'
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2012 Cédric Félizard'
