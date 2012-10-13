@@ -114,7 +114,13 @@ class Zeyple:
         return None
 
     def _encrypt(self, message, key_ids):
-        plaintext = BytesIO(message.encode('utf-8'))
+        try:
+            message = message.decode('utf-8', 'backslashreplace')
+        except AttributeError:
+            pass
+
+        message = message.encode('utf-8')
+        plaintext = BytesIO(message)
         ciphertext = BytesIO()
 
         gpg = gpgme.Context()

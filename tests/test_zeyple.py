@@ -48,7 +48,7 @@ class ZeypleTest(unittest.TestCase):
             LINUS_ID
         )
 
-    def test__encrypt(self):
+    def test__encrypt_with_plain_text(self):
         """Encrypts plain text"""
 
         encrypted = self.zeyple._encrypt(
@@ -56,7 +56,13 @@ class ZeypleTest(unittest.TestCase):
         )
         self.assertTrue(is_encrypted(encrypted))
 
-    def test_processMessage(self):
+    def test__encrypt_with_unicode(self):
+        """Encrypts Unicode text"""
+
+        encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
+        self.assertTrue(is_encrypted(encrypted))
+
+    def test_processMessage_with_simple_message(self):
         """Encrypts simple messages"""
 
         cipher = self.zeyple.processMessage(dedent("""\
@@ -75,6 +81,7 @@ class ZeypleTest(unittest.TestCase):
         self.assertTrue(is_encrypted(cipher.get_payload()))
 
 
+    def test_processMessage_with_multipart_message(self):
         """Ignores multipart messages"""
 
         plain = self.zeyple.processMessage(dedent("""\
