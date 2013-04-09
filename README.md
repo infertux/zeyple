@@ -3,7 +3,7 @@
 Zeyple automatically encrypts outgoing emails with GPG.
 
 Although tested only with [Postfix][], Zeyple should integrate nicely with any MTA which provides a [filter][filter]/hook mechanism.
-What it does it pretty simple:
+What it does is pretty simple:
 
 1. Catches email from your MTA's queue
 1. Encrypts it if it has got the recipient's GPG public key
