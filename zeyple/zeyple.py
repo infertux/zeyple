@@ -1,19 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#                                                                    .---.
-#                 __.....__                  _________   _...._      |   |      __.....__
-#             .-''         '. .-.          .-\        |.'      '-.   |   |  .-''         '.
-#            /     .-''"'-.  `.\ \        / / \        .'```'.    '. |   | /     .-''"'-.  `.
-#           /     /________\   \\ \      / /   \      |       \     \|   |/     /________\   \
-# .--------.|                  | \ \    / /     |     |        |    ||   ||                  |
-# |____    |\    .-------------'  \ \  / /      |      \      /    . |   |\    .-------------'
-#     /   /  \    '-.____...---.   \ `  /       |     |\`'-.-'   .'  |   | \    '-.____...---.
-#   .'   /    `.             .'     \  /        |     | '-....-'`    |   |  `.             .'
-#  /    /___    `''-...... -'       / /        .'     '.             '---'    `''-...... -'
-# |         |                   |`-' /       '-----------'
-# |_________|                    '..'
-
 __title__ = 'Zeyple'
 __version__ = '0.2'
 __author__ = 'Cédric Félizard'
@@ -28,11 +15,14 @@ import smtplib
 import gpgme
 from io import BytesIO
 try:
-    from configparser import SafeConfigParser # Python 3
+    from configparser import SafeConfigParser  # Python 3
 except ImportError:
-    from ConfigParser import SafeConfigParser # Python 2
+    from ConfigParser import SafeConfigParser  # Python 2
+
 
 class Zeyple:
+    """Zeyple Encrypts Your Precious Log Emails"""
+
     def __init__(self):
         self._loadConfiguration()
 
@@ -79,8 +69,8 @@ class Zeyple:
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
 
-        message.add_header('X-Zeyple',
-                           "processed by {0} v{1}".format(__title__, __version__))
+        message.add_header(
+            'X-Zeyple', "processed by {0} v{1}".format(__title__, __version__))
 
         return message
 
@@ -107,7 +97,7 @@ class Zeyple:
         keys = [key for key in gpg.keylist(email)]
 
         if keys:
-            key = keys.pop() # XXX looks like keys[0] is the master key
+            key = keys.pop()  # XXX looks like keys[0] is the master key
             key_id = key.subkeys[0].keyid
             return key_id
 
@@ -139,4 +129,3 @@ if __name__ == '__main__':
     message = sys.stdin.read()
     cipher = zeyple.processMessage(message)
     zeyple._sendMessage(cipher)
-

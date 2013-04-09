@@ -13,3 +13,5 @@ for version in 2 3; do
     esac
 done
 
+pep8 --show-pep8 zeyple
+
