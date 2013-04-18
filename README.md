@@ -57,7 +57,7 @@ You need to be _root_ here - make sure you understand what you are doing.
     ```shell
     cat >> /etc/postfix/master.cf <<CONF
     zeyple    unix  -       n       n       -       -       pipe
-      flags= user=postfix argv=/usr/local/bin/zeyple.py
+      flags= user=zeyple argv=/usr/local/bin/zeyple.py
 
     localhost:10026 inet  n       -       n       -       10      smtpd
       -o content_filter=
