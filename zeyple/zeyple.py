@@ -86,7 +86,6 @@ class Zeyple:
         smtp = smtplib.SMTP(self._config.get('relay', 'host'),
                             self._config.get('relay', 'port'))
 
-        # TODO need to deal with Bcc?
         smtp.sendmail(message['From'], message['To'], message.as_string())
         smtp.quit()
 
