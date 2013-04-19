@@ -120,7 +120,9 @@ You will need the following development dependencies.
 
 `./test.sh` will run [nosetests][] under Python 2 and 3 thanks to [virtualenv][].
 
+# Kudos
 
+Many thanks to Harry Knitter for his feedback making Zeyple bullet-proof.
 [filter]:     http://www.postfix.org/FILTER_README.html   "Postfix After-Queue Content Filter"
 [Postfix]:    http://www.postfix.org/                     "Postfix website"
 [nosetests]:  https://github.com/nose-devs/nose           "nose"
