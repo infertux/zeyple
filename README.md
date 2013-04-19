@@ -1,6 +1,20 @@
 # Zeyple Encrypts Your Precious Log Emails [![Build Status](https://travis-ci.org/infertux/zeyple.png?branch=master)](https://travis-ci.org/infertux/zeyple)
 
-Zeyple automatically encrypts outgoing emails with GPG.
+[Source Code]: https://github.com/infertux/zeyple "Source Code on Github"
+[Bug Tracker]: https://github.com/infertux/zeyple/issues "Bug Tracker on Github"
+[Changelog]: https://github.com/infertux/zeyple/blob/master/CHANGELOG.md "Project Changelog"
+[Continuous Integration]: https://travis-ci.org/infertux/zeyple "Zeyple on Travis-CI"
+[filter]: http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter"
+[Postfix]: http://www.postfix.org/ "Postfix website"
+[nosetests]: https://github.com/nose-devs/nose "nose"
+[virtualenv]: http://www.virtualenv.org "virtualenv"
+
+**Zeyple automatically encrypts outgoing emails with GPG.**
+
+  * [Source Code]
+  * [Bug Tracker]
+  * [Changelog]
+  * [Continuous Integration]
 
 Although tested only with [Postfix][], Zeyple should integrate nicely with any MTA which provides a [filter][filter]/hook mechanism.
 What it does is pretty simple:
@@ -123,10 +137,6 @@ You will need the following development dependencies.
 # Kudos
 
 Many thanks to Harry Knitter for his feedback making Zeyple bullet-proof.
-[filter]:     http://www.postfix.org/FILTER_README.html   "Postfix After-Queue Content Filter"
-[Postfix]:    http://www.postfix.org/                     "Postfix website"
-[nosetests]:  https://github.com/nose-devs/nose           "nose"
-[virtualenv]: http://www.virtualenv.org                   "virtualenv"
 
 # License
 
