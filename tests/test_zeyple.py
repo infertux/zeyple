@@ -3,6 +3,7 @@
 
 import unittest
 from mock import Mock
+import email
 import os
 import shutil
 from textwrap import dedent
@@ -61,6 +62,28 @@ class ZeypleTest(unittest.TestCase):
 
         encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
         self.assertTrue(is_encrypted(encrypted))
+
+    def test__get_recipients_with_multiple_recipients(self):
+        """Extracts all recipients"""
+
+        message = email.message_from_string(dedent("""\
+            Received: by example.org (Postfix, from userid 0)
+                id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            To: "hey.you@domain.eu" <hey.you@domain.eu>,
+                    "another.guy@another.domain" <another.guy@another.domain>
+            Cc: =?UTF-8?B?QD59b3lsZSHJKJUHHHJHJJ==?= <hey@you.me>,
+                    =?UTF-8?B?Qjojiu8uLHhjlkhljwwjklQ=?= <zey@ple.fr>
+            Subject: Hello
+            Message-Id: <20120906233537.DD3B67981178@example.org>
+            Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            From: root@example.org (root)
+
+            test
+        """))
+
+        recipients = self.zeyple._get_recipients(message)
+        self.assertEqual(recipients, ['hey.you@domain.eu',
+            'another.guy@another.domain', 'hey@you.me', 'zey@ple.fr'])
 
     def test_processMessage_with_simple_message(self):
         """Encrypts simple messages"""

@@ -11,6 +11,7 @@ import sys
 import os
 import logging
 import email
+from email.utils import getaddresses
 import smtplib
 import gpgme
 from io import BytesIO
@@ -34,14 +35,16 @@ class Zeyple:
         # tells gpgme.Context() where are the keys
         os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
 
+    # FIXME this method is too large, break it up
     def processMessage(self, string):
         message = email.message_from_string(string)
         logging.info("Processing outgoing message %s", message['Message-id'])
 
-        if message['To'] is None:
-            logging.warn("Message has no 'To' header, ignoring")
+        recipients = self._get_recipients(message)
+
+        if not recipients:
+            logging.warn("Cannot find any recipients, ignoring")
         else:
-            recipients = message['To'].split(',')
             logging.info("Recipients: %s", recipients)
 
             key_ids = []
@@ -90,6 +93,13 @@ class Zeyple:
         smtp.quit()
 
         logging.info("Message %s sent", message['Message-id'])
+
+    def _get_recipients(self, message):
+        recipient_headers = message.get_all('to', []) + \
+            message.get_all('cc', [])
+        recipients = getaddresses(recipient_headers)
+
+        return [address for name, address in recipients]
 
     def _userKey(self, email):
         gpg = gpgme.Context()
