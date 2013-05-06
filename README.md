@@ -99,7 +99,7 @@ You need to be _root_ here - make sure you understand what you are doing.
     As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
 
 You are good to go!
-You can send you an email with `date | mail root -s test` and check it is encrypted.
+You can send you an email with `date | mail -s test root` and check it is encrypted.
 
 # Disable/enable Zeyple
 
