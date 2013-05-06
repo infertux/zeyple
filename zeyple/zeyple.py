@@ -97,7 +97,7 @@ class Zeyple:
 
         self._config = SafeConfigParser()
         self._config.read(['/etc/zeyple/' + filename, filename])
-        if [] == self._config.sections():
+        if not self._config.sections():
             raise IOError('Cannot open config file.')
 
     def _get_recipients(self, message):
