@@ -87,7 +87,9 @@ class Zeyple:
         smtp = smtplib.SMTP(self._config.get('relay', 'host'),
                             self._config.get('relay', 'port'))
 
-        smtp.sendmail(message['From'], message['To'], message.as_string())
+        recipients = self._get_recipients(message)
+
+        smtp.sendmail(message['From'], recipients, message.as_string())
         smtp.quit()
 
         logging.info("Message %s sent", message['Message-id'])
