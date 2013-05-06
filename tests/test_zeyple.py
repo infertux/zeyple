@@ -26,7 +26,7 @@ class ZeypleTest(unittest.TestCase):
         shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
         os.system("gpg --recv-keys %s 2> /dev/null" % LINUS_ID)
         self.zeyple = zeyple.Zeyple()
-        self.zeyple._sendMessage = Mock() # don't try to send emails
+        self.zeyple.send_message = Mock() # don't try to send emails
 
     def tearDown(self):
         os.remove('zeyple.conf')
@@ -39,13 +39,13 @@ class ZeypleTest(unittest.TestCase):
            '/tmp/zeyple.log'
         )
 
-    def test__userKey(self):
+    def test__user_key(self):
         """Returns the right ID for the given email address"""
 
-        self.assertIsNone(self.zeyple._userKey('non_existant@example.org'))
+        self.assertIsNone(self.zeyple._user_key('non_existant@example.org'))
 
         self.assertEqual(
-            self.zeyple._userKey('torvalds@linux-foundation.org'),
+            self.zeyple._user_key('torvalds@linux-foundation.org'),
             LINUS_ID
         )
 
@@ -85,10 +85,10 @@ class ZeypleTest(unittest.TestCase):
         self.assertEqual(recipients, ['hey.you@domain.eu',
             'another.guy@another.domain', 'hey@you.me', 'zey@ple.fr'])
 
-    def test_processMessage_with_simple_message(self):
+    def test_process_message_with_simple_message(self):
         """Encrypts simple messages"""
 
-        cipher = self.zeyple.processMessage(dedent("""\
+        cipher = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             To: torvalds@linux-foundation.org
@@ -104,10 +104,10 @@ class ZeypleTest(unittest.TestCase):
         self.assertTrue(is_encrypted(cipher.get_payload()))
 
 
-    def test_processMessage_with_multipart_message(self):
+    def test_process_message_with_multipart_message(self):
         """Ignores multipart messages"""
 
-        plain = self.zeyple.processMessage(dedent("""\
+        plain = self.zeyple.process_message(dedent("""\
             Return-Path: <torvalds@linux-foundation.org>
             Received: by example.org (Postfix, from userid 0)
                 id CE9876C78258; Sat,  8 Sep 2012 13:00:18 +0000 (UTC)

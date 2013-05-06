@@ -25,7 +25,7 @@ class Zeyple:
     """Zeyple Encrypts Your Precious Log Emails"""
 
     def __init__(self):
-        self._loadConfiguration()
+        self._load_configuration()
 
         log_file = self._config.get('zeyple', 'log_file')
         logging.basicConfig(filename=log_file, level=logging.DEBUG,
@@ -36,7 +36,9 @@ class Zeyple:
         os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
 
     # FIXME this method is too large, break it up
-    def processMessage(self, string):
+    def process_message(self, string):
+        """Encrypts the message with recipient keys"""
+
         message = email.message_from_string(string)
         logging.info("Processing outgoing message %s", message['Message-id'])
 
@@ -54,7 +56,7 @@ class Zeyple:
                     logging.info("%s is aliased as %s", recipient, alias)
                     recipient = alias
 
-                key_id = self._userKey(recipient)
+                key_id = self._user_key(recipient)
                 if key_id is not None:
                     key_ids.append(key_id)
 
@@ -77,13 +79,9 @@ class Zeyple:
 
         return message
 
-    def _loadConfiguration(self, filename='zeyple.conf'):
-        self._config = SafeConfigParser()
-        self._config.read(['/etc/zeyple/' + filename, filename])
-        if [] == self._config.sections():
-            raise IOError('Cannot open config file.')
+    def send_message(self, message):
+        """Sends the given message through the SMTP relay"""
 
-    def _sendMessage(self, message):
         logging.info("Sending message %s", message['Message-id'])
 
         smtp = smtplib.SMTP(self._config.get('relay', 'host'),
@@ -94,14 +92,26 @@ class Zeyple:
 
         logging.info("Message %s sent", message['Message-id'])
 
+    def _load_configuration(self, filename='zeyple.conf'):
+        """Reads and parses the config file"""
+
+        self._config = SafeConfigParser()
+        self._config.read(['/etc/zeyple/' + filename, filename])
+        if [] == self._config.sections():
+            raise IOError('Cannot open config file.')
+
     def _get_recipients(self, message):
+        """Extracts all recipients of the message"""
+
         recipient_headers = message.get_all('to', []) + \
             message.get_all('cc', [])
         recipients = getaddresses(recipient_headers)
 
-        return [address for name, address in recipients]
+        return [address for _name, address in recipients]
 
-    def _userKey(self, email):
+    def _user_key(self, email):
+        """Returns the GPG key for the given email address"""
+
         gpg = gpgme.Context()
         keys = [key for key in gpg.keylist(email)]
 
@@ -113,6 +123,8 @@ class Zeyple:
         return None
 
     def _encrypt(self, message, key_ids):
+        """Encrypts the message with the given keys"""
+
         try:
             message = message.decode('utf-8', 'backslashreplace')
         except AttributeError:
@@ -136,5 +148,5 @@ class Zeyple:
 if __name__ == '__main__':
     zeyple = Zeyple()
     message = sys.stdin.read()
-    cipher = zeyple.processMessage(message)
-    zeyple._sendMessage(cipher)
+    cipher = zeyple.process_message(message)
+    zeyple.send_message(cipher)
