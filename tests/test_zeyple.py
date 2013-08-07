@@ -26,7 +26,7 @@ class ZeypleTest(unittest.TestCase):
         shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
         os.system("gpg --recv-keys %s 2> /dev/null" % LINUS_ID)
         self.zeyple = zeyple.Zeyple()
-        self.zeyple.send_message = Mock() # don't try to send emails
+        self.zeyple._send_message = Mock() # don't try to send emails
 
     def tearDown(self):
         os.remove('zeyple.conf')
@@ -63,32 +63,10 @@ class ZeypleTest(unittest.TestCase):
         encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
         self.assertTrue(is_encrypted(encrypted))
 
-    def test__get_recipients_with_multiple_recipients(self):
-        """Extracts all recipients"""
-
-        message = email.message_from_string(dedent("""\
-            Received: by example.org (Postfix, from userid 0)
-                id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
-            To: "hey.you@domain.eu" <hey.you@domain.eu>,
-                    "another.guy@another.domain" <another.guy@another.domain>
-            Cc: =?UTF-8?B?QD59b3lsZSHJKJUHHHJHJJ==?= <hey@you.me>,
-                    =?UTF-8?B?Qjojiu8uLHhjlkhljwwjklQ=?= <zey@ple.fr>
-            Subject: Hello
-            Message-Id: <20120906233537.DD3B67981178@example.org>
-            Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
-            From: root@example.org (root)
-
-            test
-        """))
-
-        recipients = self.zeyple._get_recipients(message)
-        self.assertEqual(recipients, ['hey.you@domain.eu',
-            'another.guy@another.domain', 'hey@you.me', 'zey@ple.fr'])
-
     def test_process_message_with_simple_message(self):
         """Encrypts simple messages"""
 
-        cipher = self.zeyple.process_message(dedent("""\
+        emails = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             To: torvalds@linux-foundation.org
@@ -98,16 +76,16 @@ class ZeypleTest(unittest.TestCase):
             From: root@example.org (root)
 
             test
-        """))
+        """), ["torvalds@linux-foundation.org"])
 
-        self.assertIsNotNone(cipher['X-Zeyple'])
-        self.assertTrue(is_encrypted(cipher.get_payload()))
+        self.assertIsNotNone(emails[0]['X-Zeyple'])
+        self.assertTrue(is_encrypted(emails[0].get_payload()))
 
 
     def test_process_message_with_multipart_message(self):
         """Ignores multipart messages"""
 
-        plain = self.zeyple.process_message(dedent("""\
+        emails = self.zeyple.process_message(dedent("""\
             Return-Path: <torvalds@linux-foundation.org>
             Received: by example.org (Postfix, from userid 0)
                 id CE9876C78258; Sat,  8 Sep 2012 13:00:18 +0000 (UTC)
@@ -140,10 +118,10 @@ class ZeypleTest(unittest.TestCase):
             Yy90ZXN0JyB3d3ctZGF0YQo=
 
             --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--
-        """))
+        """), ["torvalds@linux-foundation.org"])
 
-        self.assertIsNotNone(plain['X-Zeyple'])
-        self.assertTrue(plain.is_multipart())
-        for part in plain.walk():
+        self.assertIsNotNone(emails[0]['X-Zeyple'])
+        self.assertTrue(emails[0].is_multipart())
+        for part in emails[0].walk():
             self.assertFalse(is_encrypted(part.as_string().encode('utf-8')))
 

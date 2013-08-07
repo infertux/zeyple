@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __title__ = 'Zeyple'
-__version__ = '0.2'
+__version__ = '0.3'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2012-2013 Cédric Félizard'
@@ -36,33 +36,33 @@ class Zeyple:
         os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
 
     # FIXME this method is too large, break it up
-    def process_message(self, string):
+    def process_message(self, message, recipients):
         """Encrypts the message with recipient keys"""
 
-        message = email.message_from_string(string)
+        message = email.message_from_string(message)
         logging.info("Processing outgoing message %s", message['Message-id'])
-
-        recipients = self._get_recipients(message)
 
         if not recipients:
             logging.warn("Cannot find any recipients, ignoring")
-        else:
-            logging.info("Recipients: %s", recipients)
+            return
 
-            key_ids = []
-            for recipient in recipients:
-                if self._config.has_option('aliases', recipient):
-                    alias = self._config.get('aliases', recipient)
-                    logging.info("%s is aliased as %s", recipient, alias)
-                    recipient = alias
+        key_ids = []
+        sent_messages = []
+        for recipient in recipients:
+            logging.info("Recipient: %s", recipient)
 
-                key_id = self._user_key(recipient)
-                if key_id is not None:
-                    key_ids.append(key_id)
+            if self._config.has_option('aliases', recipient):
+                alias = self._config.get('aliases', recipient)
+                logging.info("%s is aliased as %s", recipient, alias)
+                recipient = alias
 
-            logging.info("Key IDs: %s", key_ids)
+            key_id = self._user_key(recipient)
+            if key_id is not None:
+                key_ids.append(key_id)
 
-            if key_ids:
+            logging.info("Key ID: %s", key_id)
+
+            if key_id:
                 if message.is_multipart():
                     logging.warn("Message is multipart, ignoring")
                 else:
@@ -70,26 +70,27 @@ class Zeyple:
 
                     # replace message body with encrypted payload
                     message.set_payload(payload)
-
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
 
-        message.add_header(
-            'X-Zeyple', "processed by {0} v{1}".format(__title__, __version__))
+            message.add_header(
+                'X-Zeyple',
+                "processed by {0} v{1}".format(__title__, __version__)
+            )
 
-        return message
+            self._send_message(message, recipient)
+            sent_messages.append(message)
 
-    def send_message(self, message):
+        return sent_messages
+
+    def _send_message(self, message, recipient):
         """Sends the given message through the SMTP relay"""
-
         logging.info("Sending message %s", message['Message-id'])
 
         smtp = smtplib.SMTP(self._config.get('relay', 'host'),
                             self._config.get('relay', 'port'))
 
-        recipients = self._get_recipients(message)
-
-        smtp.sendmail(message['From'], recipients, message.as_string())
+        smtp.sendmail(message['From'], recipient, message.as_string())
         smtp.quit()
 
         logging.info("Message %s sent", message['Message-id'])
@@ -102,23 +103,14 @@ class Zeyple:
         if not self._config.sections():
             raise IOError('Cannot open config file.')
 
-    def _get_recipients(self, message):
-        """Extracts all recipients of the message"""
-
-        recipient_headers = message.get_all('to', []) + \
-            message.get_all('cc', [])
-        recipients = getaddresses(recipient_headers)
-
-        return [address for _name, address in recipients]
-
     def _user_key(self, email):
         """Returns the GPG key for the given email address"""
-
+        logging.info("Trying to encrypt for %s", email)
         gpg = gpgme.Context()
         keys = [key for key in gpg.keylist(email)]
 
         if keys:
-            key = keys.pop()  # XXX looks like keys[0] is the master key
+            key = keys.pop()  # NOTE: looks like keys[0] is the master key
             key_id = key.subkeys[0].keyid
             return key_id
 
@@ -139,16 +131,17 @@ class Zeyple:
         gpg = gpgme.Context()
         gpg.armor = True
 
-        recipients = [gpg.get_key(key_id) for key_id in key_ids]
+        recipient = [gpg.get_key(key_id) for key_id in key_ids]
 
-        gpg.encrypt(recipients, gpgme.ENCRYPT_ALWAYS_TRUST,
+        gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
                     plaintext, ciphertext)
 
         return ciphertext.getvalue()
 
 
 if __name__ == '__main__':
-    zeyple = Zeyple()
+    recipients = sys.argv[1:]
     message = sys.stdin.read()
-    cipher = zeyple.process_message(message)
-    zeyple.send_message(cipher)
+
+    zeyple = Zeyple()
+    zeyple.process_message(message, recipients)
