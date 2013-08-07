@@ -127,7 +127,7 @@ You will need the following development dependencies.
 
 * Packages:
   * Debian/Ubuntu: `apt-get install libgpgme11-dev`
-  * Fedora: `yum install gpgme-devel python-devel python3-devel`
+  * Fedora: `yum install gpgme-devel python-devel python3-devel python-pep8`
 * Python eggs: `pip install -r requirements.txt`
 
 # Testing
