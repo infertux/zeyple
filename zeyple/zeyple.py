@@ -28,8 +28,10 @@ class Zeyple:
         self._load_configuration()
 
         log_file = self._config.get('zeyple', 'log_file')
-        logging.basicConfig(filename=log_file, level=logging.DEBUG,
-                            format='%(asctime)s %(levelname)s %(message)s')
+        logging.basicConfig(
+            filename=log_file, level=logging.DEBUG,
+            format='%(asctime)s %(process)s %(levelname)s %(message)s'
+        )
         logging.info("Zeyple ready to encrypt outgoing emails")
 
         # tells gpgme.Context() where are the keys
