@@ -35,7 +35,6 @@ class Zeyple:
         # tells gpgme.Context() where are the keys
         os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
 
-    # FIXME this method is too large, break it up
     def process_message(self, message, recipients):
         """Encrypts the message with recipient keys"""
 
@@ -44,44 +43,45 @@ class Zeyple:
 
         if not recipients:
             logging.warn("Cannot find any recipients, ignoring")
-            return
 
-        key_ids = []
         sent_messages = []
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
-            if self._config.has_option('aliases', recipient):
-                alias = self._config.get('aliases', recipient)
-                logging.info("%s is aliased as %s", recipient, alias)
+            alias = self._find_alias(recipient)
+            if alias:
                 recipient = alias
 
             key_id = self._user_key(recipient)
-            if key_id is not None:
-                key_ids.append(key_id)
-
             logging.info("Key ID: %s", key_id)
-
             if key_id:
                 if message.is_multipart():
                     logging.warn("Message is multipart, ignoring")
                 else:
-                    payload = self._encrypt(message.get_payload(), key_ids)
+                    payload = self._encrypt(message.get_payload(), [key_id])
 
                     # replace message body with encrypted payload
                     message.set_payload(payload)
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
 
-            message.add_header(
-                'X-Zeyple',
-                "processed by {0} v{1}".format(__title__, __version__)
-            )
-
+            self._add_zeyple_header(message)
             self._send_message(message, recipient)
             sent_messages.append(message)
 
         return sent_messages
+
+    def _add_zeyple_header(self, message):
+        message.add_header(
+            'X-Zeyple',
+            "processed by {0} v{1}".format(__title__, __version__)
+        )
+
+    def _find_alias(self, recipient):
+        if self._config.has_option('aliases', recipient):
+            alias = self._config.get('aliases', recipient)
+            logging.info("%s is aliased as %s", recipient, alias)
+            return alias
 
     def _send_message(self, message, recipient):
         """Sends the given message through the SMTP relay"""
