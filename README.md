@@ -101,6 +101,11 @@ You need to be _root_ here - make sure you understand what you are doing.
 You are good to go!
 You can send you an email with `date | mail -s test root` and check it is encrypted.
 
+## GPG
+
+If you cloned the repository locally, you can make sure it has not been tampered with by importing
+my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail -1)`.
+
 # Disable/enable Zeyple
 
 Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/main.cf` then `postfix reload`.
