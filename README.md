@@ -15,6 +15,7 @@
   * [Bug Tracker]
   * [Changelog]
   * [Continuous Integration]
+  * Bitcoin donation to support Zeyple: _1ENzyeY3wNBhQypt85YHcCc6npVrQb5bJH_
 
 Although tested only with [Postfix][], Zeyple should integrate nicely with any MTA which provides a [filter][filter]/hook mechanism.
 What it does is pretty simple:
