@@ -101,7 +101,7 @@ class Zeyple:
         """Reads and parses the config file"""
 
         self._config = SafeConfigParser()
-        self._config.read(['/etc/zeyple/' + filename, filename])
+        self._config.read(['/etc/' + filename, filename])
         if not self._config.sections():
             raise IOError('Cannot open config file.')
 

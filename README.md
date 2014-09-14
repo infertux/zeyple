@@ -57,11 +57,11 @@ You need to be _root_ here - make sure you understand what you are doing.
     sudo -u zeyple gpg --homedir /etc/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld # repeat for each key
     ```
 
-1. Configure `/etc/zeyple/zeyple.conf` from the template `zeyple.conf.example`.
+1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.
 
     ```bash
-    cp zeyple.conf.example /etc/zeyple/zeyple.conf
-    vim /etc/zeyple/zeyple.conf
+    cp zeyple.conf.example /etc/zeyple.conf
+    vim /etc/zeyple.conf
     ```
 
     Default values should be fine in most cases.
