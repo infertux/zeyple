@@ -14,13 +14,6 @@ LINUS_ID = '79BE3E4300411886'
 def is_encrypted(string):
     return string.startswith(b'-----BEGIN PGP MESSAGE-----')
 
-# define missing methods in Python 2.6
-try:
-    getattr(unittest.TestCase, 'assertIsNone')
-except AttributeError:
-    unittest.TestCase.assertIsNone = lambda self, value: self.assertTrue(value is None)
-    unittest.TestCase.assertIsNotNone = lambda self, value: self.assertTrue(value is not None)
-
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
         shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
