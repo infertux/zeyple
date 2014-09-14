@@ -2,12 +2,9 @@
 log_file = /var/log/zeyple.log
 
 [gpg]
-home = /etc/zeyple/keys
+home = /var/lib/zeyple/keys
 
 [relay]
 host = localhost
 port = 10026
-
-[aliases]
-#root@myserver.com = gpgaddress@mail.org
 

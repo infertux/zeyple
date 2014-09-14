@@ -1,4 +1,8 @@
-## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v0.3...master))
+## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.0.0...master))
+
+  * TBD
+
+## v1.0.0, 2014-09-?? ([changes](https://github.com/infertux/zeyple/compare/v0.3...v1.0.0))
 
   * TBD
 
