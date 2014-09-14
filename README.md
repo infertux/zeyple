@@ -146,5 +146,5 @@ Many thanks to Harry Knitter for his feedback making Zeyple bullet-proof.
 
 # License
 
-AGPLv3
+AGPLv3+
 
