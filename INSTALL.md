@@ -1,8 +1,8 @@
 A few options are available to install Zeyple, feel free to use the one that suits you best.
 
 1. [Chef cookbook](https://github.com/infertux/chef-zeyple)
-1. [Third-party Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [1]
-1. By hand - follow instructions below: [1]
+1. [Third-party Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [1](#fn-1)
+1. By hand - follow instructions below: [1](#fn-1)
 
 ---
 
@@ -23,8 +23,8 @@ You need to be _root_ here - make sure you understand what you are doing.
 1. Import public keys for all potential recipients.
 
     ```bash
-    mkdir -p /etc/zeyple/keys && chmod 700 /etc/zeyple/keys && chown zeyple: /etc/zeyple/keys
-    sudo -u zeyple gpg --homedir /etc/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld # repeat for each key
+    mkdir -p /var/lib/zeyple/keys && chmod 700 /var/lib/zeyple/keys && chown zeyple: /var/lib/zeyple/keys
+    sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld # repeat for each key
     ```
 
 1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.
@@ -73,5 +73,5 @@ You can send you an email with `date | mail -s test root` and check it is encryp
 
 ---
 
-[1] _The Git repository is GPG signed - if you cloned the repository locally, you can make sure it has not been tampered with by importing my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail -1)`._
+<a name="fn-1">[1]</a> _The Git repository is GPG signed - if you cloned the repository locally, you can make sure it has not been tampered with by importing my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail -1)`._
 

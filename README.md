@@ -1,26 +1,17 @@
 # Zeyple Encrypts Your Precious Log Emails [![Build Status](https://travis-ci.org/infertux/zeyple.png?branch=master)](https://travis-ci.org/infertux/zeyple)
 
-  * [Source Code](https://github.com/infertux/zeyple "Source Code on Github")
-  * [Bug Tracker](https://github.com/infertux/zeyple/issues "Bug Tracker on Github")
-  * [Changelog](https://github.com/infertux/zeyple/blob/master/CHANGELOG.md "Project Changelog")
-  * [Continuous Integration](https://travis-ci.org/infertux/zeyple "Zeyple on Travis CI")
-  * [Website](http://labs.infertux.com/zeyple/ "Presentation site")
-  * Bitcoin donation to support Zeyple: _1ENzyeY3wNBhQypt85YHcCc6npVrQb5bJH_
-
 **Zeyple automatically encrypts outgoing emails with GPG:**
 
-1. Catches emails from your Postfix's queue
-1. Encrypts them if it's got the recipient's GPG public key
-1. Puts them back into the queue
+1. It catches emails from your Postfix's queue
+1. Then encrypts them if it's got the recipient's GPG public key
+1. Finally it puts them back into the queue
 
 <pre>
-     unencrypted email   ||        encrypted email
+     unencrypted email   ||   encrypted email
 sender --> Postfix --> Zeyple --> Postfix --> recipient(s)
 </pre>
 
-_Why should I care?_
-
-_If you are a sysadmin who receives emails from various monitoring softwares like Logwatch, Monit, Fail2ban, Smartd, Cron, whatever - it goes without saying that those emails contain lots of information about your servers.
+_Why should I care? If you are a sysadmin who receives emails from various monitoring softwares like Logwatch, Monit, Fail2ban, Smartd, Cron, whatever - it goes without saying that those emails contain lots of information about your servers.
 Information that may be intercepted by some malicious hacker sniffing SMTP traffic, your email provider, &lt;insert your (paranoid) reason here&gt;...
 Why would you take that risk - encrypt them all!_
 
@@ -68,6 +59,10 @@ Although tested only with [Postfix](http://www.postfix.org/), Zeyple should inte
 # Kudos
 
 Many thanks to Harry Knitter for his feedback making Zeyple bullet-proof.
+
+# Support
+
+Bitcoin donations to support Zeyple: [192TgFGjiRKCJtXAQAv1urnvQXGZV2wwBt](bitcoin:192TgFGjiRKCJtXAQAv1urnvQXGZV2wwBt?message=Zeyple) :)
 
 # License
 
