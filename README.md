@@ -1,111 +1,32 @@
 # Zeyple Encrypts Your Precious Log Emails [![Build Status](https://travis-ci.org/infertux/zeyple.png?branch=master)](https://travis-ci.org/infertux/zeyple)
 
-[Source Code]: https://github.com/infertux/zeyple "Source Code on Github"
-[Bug Tracker]: https://github.com/infertux/zeyple/issues "Bug Tracker on Github"
-[Changelog]: https://github.com/infertux/zeyple/blob/master/CHANGELOG.md "Project Changelog"
-[Continuous Integration]: https://travis-ci.org/infertux/zeyple "Zeyple on Travis-CI"
-[filter]: http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter"
-[Postfix]: http://www.postfix.org/ "Postfix website"
-[nosetests]: https://github.com/nose-devs/nose "nose"
-[virtualenv]: http://www.virtualenv.org "virtualenv"
-
-**Zeyple automatically encrypts outgoing emails with GPG.**
-
-  * [Source Code]
-  * [Bug Tracker]
-  * [Changelog]
-  * [Continuous Integration]
+  * [Source Code](https://github.com/infertux/zeyple "Source Code on Github")
+  * [Bug Tracker](https://github.com/infertux/zeyple/issues "Bug Tracker on Github")
+  * [Changelog](https://github.com/infertux/zeyple/blob/master/CHANGELOG.md "Project Changelog")
+  * [Continuous Integration](https://travis-ci.org/infertux/zeyple "Zeyple on Travis CI")
+  * [Website](http://labs.infertux.com/zeyple/ "Presentation site")
   * Bitcoin donation to support Zeyple: _1ENzyeY3wNBhQypt85YHcCc6npVrQb5bJH_
 
-Although tested only with [Postfix][], Zeyple should integrate nicely with any MTA which provides a [filter][filter]/hook mechanism.
-What it does is pretty simple:
+**Zeyple automatically encrypts outgoing emails with GPG:**
 
-1. Catches email from your MTA's queue
-1. Encrypts it if it has got the recipient's GPG public key
-1. Puts it back into the queue
+1. Catches emails from your Postfix's queue
+1. Encrypts them if it's got the recipient's GPG public key
+1. Puts them back into the queue
 
 <pre>
-  unencrypted email   |   encrypted email
-sender --> MTA --> Zeyple --> MTA --> recipient(s)
+     unencrypted email   ||        encrypted email
+sender --> Postfix --> Zeyple --> Postfix --> recipient(s)
 </pre>
 
 _Why should I care?_
 
-If you are a sysadmin who receives emails from various monitoring softwares like Logwatch, Monit, Fail2ban, Smartd, Cron, whatever - it goes without saying that those emails contain lots of information about your servers.
+_If you are a sysadmin who receives emails from various monitoring softwares like Logwatch, Monit, Fail2ban, Smartd, Cron, whatever - it goes without saying that those emails contain lots of information about your servers.
 Information that may be intercepted by some malicious hacker sniffing SMTP traffic, your email provider, &lt;insert your (paranoid) reason here&gt;...
-Why would you take that risk - encrypt them all!
+Why would you take that risk - encrypt them all!_
 
 # Install
-You need to be _root_ here - make sure you understand what you are doing.
 
-1. Install GnuPG and the Python wrapper for the GPGME library.
-
-    ```bash
-    apt-get install gnupg python-gpgme sudo
-    ```
-
-1. Since Zeyple is going to read and encrypt your emails, it is recommended to create a dedicated user account for this task (using the "postfix" user is very discouraged according to [the doc][filter]).
-
-    ```bash
-    adduser --system --no-create-home --disabled-login zeyple
-    ```
-
-1. Import public keys for all potential recipients.
-
-    ```bash
-    mkdir -p /etc/zeyple/keys && chmod 700 /etc/zeyple/keys && chown zeyple: /etc/zeyple/keys
-    sudo -u zeyple gpg --homedir /etc/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld # repeat for each key
-    ```
-
-1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.
-
-    ```bash
-    cp zeyple.conf.example /etc/zeyple.conf
-    vim /etc/zeyple.conf
-    ```
-
-    Default values should be fine in most cases.
-    You may want to define email aliases if you are using local aliases in your `/etc/aliases`.
-
-1. Plug it into Postfix.
-
-    ```bash
-    cat >> /etc/postfix/master.cf <<CONF
-    zeyple    unix  -       n       n       -       -       pipe
-      user=zeyple argv=/usr/local/bin/zeyple.py \${recipient}
-
-    localhost:10026 inet  n       -       n       -       10      smtpd
-      -o content_filter=
-      -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
-      -o smtpd_helo_restrictions=
-      -o smtpd_client_restrictions=
-      -o smtpd_sender_restrictions=
-      -o smtpd_recipient_restrictions=permit_mynetworks,reject
-      -o mynetworks=127.0.0.0/8
-      -o smtpd_authorized_xforward_hosts=127.0.0.0/8
-    CONF
-
-    cat >> /etc/postfix/main.cf <<CONF
-    content_filter = zeyple
-    CONF
-
-    cp zeyple.py /usr/local/bin/zeyple.py
-    chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
-
-    touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
-
-    postfix reload
-    ```
-
-    As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
-
-You are good to go!
-You can send you an email with `date | mail -s test root` and check it is encrypted.
-
-## GPG
-
-If you cloned the repository locally, you can make sure it has not been tampered with by importing
-my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail -1)`.
+See [INSTALL.md](INSTALL.md).
 
 # Disable/enable Zeyple
 
@@ -138,7 +59,11 @@ You will need the following development dependencies.
 
 # Testing
 
-`./test.sh` will run [nosetests][] under Python 2 and 3 thanks to [virtualenv][].
+`./test.sh` will run [nosetests](https://github.com/nose-devs/nose) under Python 2 and 3 thanks to [virtualenv](http://www.virtualenv.org).
+
+# Integration with other MTAs
+
+Although tested only with [Postfix](http://www.postfix.org/), Zeyple should integrate nicely with any MTA which provides a [filter](http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter")/hook mechanism.
 
 # Kudos
 
