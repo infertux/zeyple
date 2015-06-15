@@ -6,13 +6,14 @@ from mock import Mock
 import email
 import os
 import shutil
+import six
 from textwrap import dedent
 from zeyple import zeyple
 
 LINUS_ID = '79BE3E4300411886'
 
 def is_encrypted(string):
-    return string.startswith(b'-----BEGIN PGP MESSAGE-----')
+    return string.startswith(six.b('-----BEGIN PGP MESSAGE-----'))
 
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
@@ -72,7 +73,7 @@ class ZeypleTest(unittest.TestCase):
         """), ["torvalds@linux-foundation.org"])
 
         self.assertIsNotNone(emails[0]['X-Zeyple'])
-        self.assertTrue(is_encrypted(emails[0].get_payload()))
+        self.assertTrue(is_encrypted(emails[0].get_payload().encode('utf-8')))
 
 
     def test_process_message_with_multipart_message(self):
