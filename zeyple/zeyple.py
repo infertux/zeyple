@@ -11,7 +11,6 @@ import sys
 import os
 import logging
 import email
-from email.utils import getaddresses
 import smtplib
 import gpgme
 from io import BytesIO
