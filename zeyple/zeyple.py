@@ -74,10 +74,12 @@ class Zeyple:
         return sent_messages
 
     def _add_zeyple_header(self, message):
-        message.add_header(
-            'X-Zeyple',
-            "processed by {0} v{1}".format(__title__, __version__)
-        )
+        if self._config.has_option('zeyple', 'add_header') and \
+        self._config.getboolean('zeyple', 'add_header'):
+            message.add_header(
+                'X-Zeyple',
+                "processed by {0} v{1}".format(__title__, __version__)
+            )
 
     def _find_alias(self, recipient):
         if self._config.has_option('aliases', recipient):
