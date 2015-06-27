@@ -1,4 +1,4 @@
-## v0.3 to 1.0.0 (unreleased)
+## v0.3 to 1.0.0
 
 1. `mv /etc/zeyple/zeyple.conf /etc/zeyple.conf`
 1. `rmdir /etc/zeyple`
