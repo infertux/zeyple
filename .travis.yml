@@ -21,7 +21,3 @@ script:
   - nosetests
 after_script:
   - pylint zeyple -f colorized
-notifications:
-  email:
-    on_success: always
-    on_failure: always
