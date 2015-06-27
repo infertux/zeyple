@@ -63,12 +63,12 @@ class ZeypleTest(unittest.TestCase):
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             To: torvalds@linux-foundation.org
-            Subject: Hello
+            Subject: Hello with Unicode héüøœ©ßð®å¥¹²æ¿áßö«ç
             Message-Id: <20120906233537.DD3B67981178@example.org>
             Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             From: root@example.org (root)
 
-            test
+            test ðßïð
         """), ["torvalds@linux-foundation.org"])
 
         self.assertIsNotNone(emails[0]['X-Zeyple'])

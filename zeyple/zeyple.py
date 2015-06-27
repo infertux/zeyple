@@ -122,7 +122,7 @@ class Zeyple:
         """Encrypts the message with the given keys"""
 
         try:
-            message = message.decode('utf-8', 'backslashreplace')
+            message = message.decode('utf-8', 'replace')
         except AttributeError:
             pass
 
