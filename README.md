@@ -50,7 +50,15 @@ You will need the following development dependencies.
 
 ## Testing
 
-`./test.sh` will run [nosetests](https://github.com/nose-devs/nose) under Python 2 and 3 thanks to [virtualenv](http://www.virtualenv.org).
+`tox` will run [nosetests](https://github.com/nose-devs/nose) under everysupported version of Python thanks to [tox](https://bitbucket.org/hpk42/tox)
+
+To restrict the versions of python tested by `tox`, you can use:
+
+    tox -e <environment>
+
+For example:
+
+    tox -e py27,py34,pypy
 
 ## Integration with other MTAs
 
