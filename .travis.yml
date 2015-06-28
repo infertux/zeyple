@@ -19,4 +19,4 @@ install:
 script:
   - nosetests
 after_script:
-  - pylint zeyple -f colorized
+  - pylint zeyple -f colorized -r no
