@@ -1,15 +1,14 @@
 language: python
 python:
   - 2.7
-  - 3.2
   - 3.3
   - 3.4
+  - 3.5
   - pypy
   - pypy3
 matrix:
   allow_failures:
-    - python: 3.3
-    - python: 3.4
+    - python: 3.5
     - python: pypy
     - python: pypy3
 before_install:
