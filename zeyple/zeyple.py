@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__title__ = 'Zeyple'
-__version__ = '1.0.0'
-__author__ = 'Cédric Félizard'
-__license__ = 'AGPLv3+'
-__copyright__ = 'Copyright 2012-2015 Cédric Félizard'
-
 import sys
 import os
 import logging
@@ -18,6 +12,13 @@ try:
     from configparser import SafeConfigParser  # Python 3
 except ImportError:
     from ConfigParser import SafeConfigParser  # Python 2
+
+
+__title__ = 'Zeyple'
+__version__ = '1.0.0'
+__author__ = 'Cédric Félizard'
+__license__ = 'AGPLv3+'
+__copyright__ = 'Copyright 2012-2015 Cédric Félizard'
 
 
 class Zeyple:
@@ -74,7 +75,7 @@ class Zeyple:
 
     def _add_zeyple_header(self, message):
         if self._config.has_option('zeyple', 'add_header') and \
-        self._config.getboolean('zeyple', 'add_header'):
+           self._config.getboolean('zeyple', 'add_header'):
             message.add_header(
                 'X-Zeyple',
                 "processed by {0} v{1}".format(__title__, __version__)
