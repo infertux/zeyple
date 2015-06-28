@@ -25,7 +25,7 @@ class ZeypleTest(unittest.TestCase):
     def tearDown(self):
         os.remove('zeyple.conf')
 
-    def test__config(self):
+    def test_config(self):
         """Parses the configuration file properly"""
 
         self.assertEqual(
@@ -33,7 +33,7 @@ class ZeypleTest(unittest.TestCase):
            '/tmp/zeyple.log'
         )
 
-    def test__user_key(self):
+    def test_user_key(self):
         """Returns the right ID for the given email address"""
 
         self.assertIsNone(self.zeyple._user_key('non_existant@example.org'))
@@ -43,7 +43,7 @@ class ZeypleTest(unittest.TestCase):
             LINUS_ID
         )
 
-    def test__encrypt_with_plain_text(self):
+    def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
 
         encrypted = self.zeyple._encrypt(
@@ -51,7 +51,7 @@ class ZeypleTest(unittest.TestCase):
         )
         self.assertTrue(is_encrypted(encrypted))
 
-    def test__encrypt_with_unicode(self):
+    def test_encrypt_with_unicode(self):
         """Encrypts Unicode text"""
 
         encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
