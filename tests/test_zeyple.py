@@ -3,7 +3,6 @@
 
 import unittest
 from mock import Mock
-import email
 import os
 import shutil
 import six
