@@ -27,20 +27,16 @@ class ZeypleTest(unittest.TestCase):
     def test_config(self):
         """Parses the configuration file properly"""
 
-        self.assertEqual(
-           self.zeyple._config.get('zeyple', 'log_file'),
-           '/tmp/zeyple.log'
-        )
+        log_file = self.zeyple._config.get('zeyple', 'log_file')
+        assert log_file == '/tmp/zeyple.log'
 
     def test_user_key(self):
         """Returns the right ID for the given email address"""
 
-        self.assertIsNone(self.zeyple._user_key('non_existant@example.org'))
+        assert self.zeyple._user_key('non_existant@example.org') is None
 
-        self.assertEqual(
-            self.zeyple._user_key('torvalds@linux-foundation.org'),
-            LINUS_ID
-        )
+        user_key = self.zeyple._user_key('torvalds@linux-foundation.org')
+        assert user_key == LINUS_ID
 
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
@@ -48,13 +44,13 @@ class ZeypleTest(unittest.TestCase):
         encrypted = self.zeyple._encrypt(
             'The key is under the carpet.', [LINUS_ID]
         )
-        self.assertTrue(is_encrypted(encrypted))
+        assert is_encrypted(encrypted)
 
     def test_encrypt_with_unicode(self):
         """Encrypts Unicode text"""
 
         encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
-        self.assertTrue(is_encrypted(encrypted))
+        assert is_encrypted(encrypted)
 
     def test_process_message_with_simple_message(self):
         """Encrypts simple messages"""
@@ -71,8 +67,8 @@ class ZeypleTest(unittest.TestCase):
             test ðßïð
         """), ["torvalds@linux-foundation.org"])
 
-        self.assertIsNotNone(emails[0]['X-Zeyple'])
-        self.assertTrue(is_encrypted(emails[0].get_payload().encode('utf-8')))
+        assert emails[0]['X-Zeyple'] is not None
+        assert is_encrypted(emails[0].get_payload().encode('utf-8'))
 
 
     def test_process_message_with_multipart_message(self):
@@ -113,8 +109,8 @@ class ZeypleTest(unittest.TestCase):
             --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--
         """), ["torvalds@linux-foundation.org"])
 
-        self.assertIsNotNone(emails[0]['X-Zeyple'])
-        self.assertTrue(emails[0].is_multipart())
+        assert emails[0]['X-Zeyple'] is not None
+        assert emails[0].is_multipart() is not None
         for part in emails[0].walk():
-            self.assertFalse(is_encrypted(part.as_string().encode('utf-8')))
+            assert not is_encrypted(part.as_string().encode('utf-8'))
 
