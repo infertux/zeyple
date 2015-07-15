@@ -70,7 +70,6 @@ class ZeypleTest(unittest.TestCase):
         assert emails[0]['X-Zeyple'] is not None
         assert is_encrypted(emails[0].get_payload().encode('utf-8'))
 
-
     def test_process_message_with_multipart_message(self):
         """Ignores multipart messages"""
 
