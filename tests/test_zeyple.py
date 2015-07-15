@@ -28,7 +28,7 @@ class ZeypleTest(unittest.TestCase):
         """Parses the configuration file properly"""
 
         self.assertEqual(
-            self.zeyple._config.get('zeyple', 'log_file'),
+           self.zeyple._config.get('zeyple', 'log_file'),
            '/tmp/zeyple.log'
         )
 
