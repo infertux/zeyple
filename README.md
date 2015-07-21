@@ -15,9 +15,9 @@ _Why should I care? If you are a sysadmin who receives emails from various monit
 Information that may be intercepted by some malicious hacker sniffing SMTP traffic, your email provider, &lt;insert your (paranoid) reason here&gt;...
 Why would you take that risk - encrypt them all!_
 
-## Install
+## Install & upgrade
 
-See [INSTALL.md](INSTALL.md).
+See [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
 
 ## Disable/enable Zeyple
 
