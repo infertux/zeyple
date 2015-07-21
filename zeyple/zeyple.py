@@ -50,10 +50,6 @@ class Zeyple:
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
-            alias = self._find_alias(recipient)
-            if alias:
-                recipient = alias
-
             key_id = self._user_key(recipient)
             logging.info("Key ID: %s", key_id)
             if key_id:
@@ -80,12 +76,6 @@ class Zeyple:
                 'X-Zeyple',
                 "processed by {0} v{1}".format(__title__, __version__)
             )
-
-    def _find_alias(self, recipient):
-        if self._config.has_option('aliases', recipient):
-            alias = self._config.get('aliases', recipient)
-            logging.info("%s is aliased as %s", recipient, alias)
-            return alias
 
     def _send_message(self, message, recipient):
         """Sends the given message through the SMTP relay"""
