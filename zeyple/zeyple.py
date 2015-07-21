@@ -37,41 +37,83 @@ class Zeyple:
         # tells gpgme.Context() where are the keys
         os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
 
-    def process_message(self, message, recipients):
+    def process_message(self, message_data, recipients):
         """Encrypts the message with recipient keys"""
 
-        message = email.message_from_string(message)
+        message = email.message_from_string(message_data)
         logging.info("Processing outgoing message %s", message['Message-id'])
 
         if not recipients:
             logging.warn("Cannot find any recipients, ignoring")
 
         sent_messages = []
-        for recipient in recipients:
-            logging.info("Recipient: %s", recipient)
 
+        # resolve any aliases
+        resolved_recipients = []
+        for recipient in recipients:
             alias = self._find_alias(recipient)
             if alias:
                 recipient = alias
+            resolved_recipients.append(recipient)
+        recipients = resolved_recipients
 
-            key_id = self._user_key(recipient)
-            logging.info("Key ID: %s", key_id)
-            if key_id:
-                if message.is_multipart():
-                    logging.warn("Message is multipart, ignoring")
+        #
+        # need to take care of a few things here
+        # main cases
+        #  1. single recipient with corresponding pgp key
+        #     - really a subcase of 3
+        #  2. single recipient without pgp key
+        #     - really a subcase of 4
+        #  3. multiple recipients, all with pgp keys
+        #  4. multiple recipients, some with and some without
+        #  5. message is multi-part.. we just never encrypt
+        #     - this really needs to be fixed asap
+        #
+
+        clear_recipients = []
+        pgp_recipients = []
+        key_ids = []
+
+        if message.is_multipart():
+            logging.warn("Message is multipart, no encrypt. NEEDS FIXING")
+            clear_recipients = recipients 
+        else:
+            for recipient in recipients:
+                logging.info("Checking recipient: %s", recipient)
+                key_id = self._user_key(recipient)
+                if key_id:
+                    logging.info("Found key ID: %s", key_id)
+                    key_ids.append(key_id)
+                    pgp_recipients.append(recipient)
                 else:
-                    payload = self._encrypt(message.get_payload(), [key_id])
+                    logging.warn("No key for %s, msg will be sent unencrypted" % (recipient))
+                    clear_recipients.append(recipient) 
 
-                    # replace message body with encrypted payload
-                    message.set_payload(payload)
-            else:
-                logging.warn("No keys found, message will be sent unencrypted")
-
+        # send clear emails
+        if len(clear_recipients) > 0:
+            logging.warn("Sending clear email to %u recipients" % (len(clear_recipients)))
+            # use the existing message that was created at the top
+            # of this function
             self._add_zeyple_header(message)
-            self._send_message(message, recipient)
+            self._send_message(message, clear_recipients)
             sent_messages.append(message)
 
+        # send encrypted emails
+        if len(pgp_recipients) > 0:
+            logging.warn("Sending encrypted email to %u recipients" % (len(pgp_recipients)))
+            # create a new message for pgp encryption
+            pgp_message = email.message_from_string(message_data)
+            payload = self._encrypt(pgp_message.get_payload(), key_ids)
+
+            # replace message body with encrypted payload
+            pgp_message.set_payload(payload)
+
+            self._add_zeyple_header(pgp_message)
+            self._send_message(pgp_message, pgp_recipients)
+            sent_messages.append(pgp_message)
+
         return sent_messages
+
 
     def _add_zeyple_header(self, message):
         if self._config.has_option('zeyple', 'add_header') and \
@@ -87,14 +129,15 @@ class Zeyple:
             logging.info("%s is aliased as %s", recipient, alias)
             return alias
 
-    def _send_message(self, message, recipient):
+    def _send_message(self, message, recipients):
         """Sends the given message through the SMTP relay"""
-        logging.info("Sending message %s", message['Message-id'])
+        logging.info("Sending message %s to %s",
+                message['Message-id'], str(recipients))
 
         smtp = smtplib.SMTP(self._config.get('relay', 'host'),
                             self._config.get('relay', 'port'))
 
-        smtp.sendmail(message['From'], recipient, message.as_string())
+        smtp.sendmail(message['From'], recipients, message.as_string())
         smtp.quit()
 
         logging.info("Message %s sent", message['Message-id'])
