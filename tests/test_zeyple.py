@@ -109,7 +109,7 @@ class ZeypleTest(unittest.TestCase):
         """), ["torvalds@linux-foundation.org"])
 
         assert emails[0]['X-Zeyple'] is not None
-        assert emails[0].is_multipart() is not None
+        assert emails[0].is_multipart()
         for part in emails[0].walk():
             assert not is_encrypted(part.as_string().encode('utf-8'))
 
