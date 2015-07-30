@@ -34,8 +34,22 @@ class Zeyple:
         )
         logging.info("Zeyple ready to encrypt outgoing emails")
 
-        # tells gpgme.Context() where are the keys
-        os.environ['GNUPGHOME'] = self.config.get('gpg', 'home')
+    @property
+    def gpg(self):
+        protocol = gpgme.PROTOCOL_OpenPGP
+
+        if self.config.has_option('gpg', 'executable'):
+            executable = self.config.get('gpg', 'executable')
+        else:
+            executable = None  # Default value
+
+        home_dir = self.config.get('gpg', 'home')
+
+        ctx = gpgme.Context()
+        ctx.set_engine_info(protocol, executable, home_dir)
+        ctx.armor = True
+
+        return ctx
 
     def process_message(self, message, recipients):
         """Encrypts the message with recipient keys"""
@@ -101,8 +115,7 @@ class Zeyple:
     def _user_key(self, email):
         """Returns the GPG key for the given email address"""
         logging.info("Trying to encrypt for %s", email)
-        gpg = gpgme.Context()
-        keys = [key for key in gpg.keylist(email)]
+        keys = [key for key in self.gpg.keylist(email)]
 
         if keys:
             key = keys.pop()  # NOTE: looks like keys[0] is the master key
@@ -123,13 +136,12 @@ class Zeyple:
         plaintext = BytesIO(message)
         ciphertext = BytesIO()
 
-        gpg = gpgme.Context()
-        gpg.armor = True
+        self.gpg.armor = True
 
-        recipient = [gpg.get_key(key_id) for key_id in key_ids]
+        recipient = [self.gpg.get_key(key_id) for key_id in key_ids]
 
-        gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
-                    plaintext, ciphertext)
+        self.gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
+                         plaintext, ciphertext)
 
         return ciphertext.getvalue()
 
