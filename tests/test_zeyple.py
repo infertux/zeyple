@@ -19,7 +19,7 @@ class ZeypleTest(unittest.TestCase):
         shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
         os.system("gpg --recv-keys %s 2> /dev/null" % LINUS_ID)
         self.zeyple = zeyple.Zeyple()
-        self.zeyple._send_message = Mock() # don't try to send emails
+        self.zeyple._send_message = Mock()  # don't try to send emails
 
     def tearDown(self):
         os.remove('zeyple.conf')
