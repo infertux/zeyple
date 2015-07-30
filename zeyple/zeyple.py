@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
 import logging
 import email
 import email.mime.multipart
@@ -113,7 +114,10 @@ class Zeyple:
         """Reads and parses the config file"""
 
         config = SafeConfigParser()
-        config.read(['/etc/' + filename, filename])
+        config.read([
+            os.path.join('/etc/', filename),
+            filename,
+        ])
         if not config.sections():
             raise IOError('Cannot open config file.')
         return config
