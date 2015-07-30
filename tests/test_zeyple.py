@@ -24,12 +24,6 @@ class ZeypleTest(unittest.TestCase):
     def tearDown(self):
         os.remove('zeyple.conf')
 
-    def test_config(self):
-        """Parses the configuration file properly"""
-
-        log_file = self.zeyple.config.get('zeyple', 'log_file')
-        assert log_file == '/tmp/zeyple.log'
-
     def test_user_key(self):
         """Returns the right ID for the given email address"""
 
