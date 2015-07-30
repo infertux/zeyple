@@ -27,7 +27,7 @@ class ZeypleTest(unittest.TestCase):
     def test_config(self):
         """Parses the configuration file properly"""
 
-        log_file = self.zeyple._config.get('zeyple', 'log_file')
+        log_file = self.zeyple.config.get('zeyple', 'log_file')
         assert log_file == '/tmp/zeyple.log'
 
     def test_user_key(self):

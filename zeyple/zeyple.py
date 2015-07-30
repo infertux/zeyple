@@ -25,9 +25,9 @@ class Zeyple:
     """Zeyple Encrypts Your Precious Log Emails"""
 
     def __init__(self):
-        self._load_configuration()
+        self.config = self.load_configuration()
 
-        log_file = self._config.get('zeyple', 'log_file')
+        log_file = self.config.get('zeyple', 'log_file')
         logging.basicConfig(
             filename=log_file, level=logging.DEBUG,
             format='%(asctime)s %(process)s %(levelname)s %(message)s'
@@ -35,7 +35,7 @@ class Zeyple:
         logging.info("Zeyple ready to encrypt outgoing emails")
 
         # tells gpgme.Context() where are the keys
-        os.environ['GNUPGHOME'] = self._config.get('gpg', 'home')
+        os.environ['GNUPGHOME'] = self.config.get('gpg', 'home')
 
     def process_message(self, message, recipients):
         """Encrypts the message with recipient keys"""
@@ -70,8 +70,8 @@ class Zeyple:
         return sent_messages
 
     def _add_zeyple_header(self, message):
-        if self._config.has_option('zeyple', 'add_header') and \
-           self._config.getboolean('zeyple', 'add_header'):
+        if self.config.has_option('zeyple', 'add_header') and \
+           self.config.getboolean('zeyple', 'add_header'):
             message.add_header(
                 'X-Zeyple',
                 "processed by {0} v{1}".format(__title__, __version__)
@@ -81,21 +81,22 @@ class Zeyple:
         """Sends the given message through the SMTP relay"""
         logging.info("Sending message %s", message['Message-id'])
 
-        smtp = smtplib.SMTP(self._config.get('relay', 'host'),
-                            self._config.get('relay', 'port'))
+        smtp = smtplib.SMTP(self.config.get('relay', 'host'),
+                            self.config.get('relay', 'port'))
 
         smtp.sendmail(message['From'], recipient, message.as_string())
         smtp.quit()
 
         logging.info("Message %s sent", message['Message-id'])
 
-    def _load_configuration(self, filename='zeyple.conf'):
+    def load_configuration(self, filename='zeyple.conf'):
         """Reads and parses the config file"""
 
-        self._config = SafeConfigParser()
-        self._config.read(['/etc/' + filename, filename])
-        if not self._config.sections():
+        config = SafeConfigParser()
+        config.read(['/etc/' + filename, filename])
+        if not config.sections():
             raise IOError('Cannot open config file.')
+        return config
 
     def _user_key(self, email):
         """Returns the GPG key for the given email address"""
