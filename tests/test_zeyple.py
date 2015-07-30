@@ -41,7 +41,7 @@ class ZeypleTest(unittest.TestCase):
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
 
-        encrypted = self.zeyple._encrypt(
+        encrypted = self.zeyple.encrypt(
             'The key is under the carpet.', [LINUS_ID]
         )
         assert is_encrypted(encrypted)
@@ -49,7 +49,7 @@ class ZeypleTest(unittest.TestCase):
     def test_encrypt_with_unicode(self):
         """Encrypts Unicode text"""
 
-        encrypted = self.zeyple._encrypt('héhé', [LINUS_ID])
+        encrypted = self.zeyple.encrypt('héhé', [LINUS_ID])
         assert is_encrypted(encrypted)
 
     def test_process_message_with_simple_message(self):

@@ -56,7 +56,7 @@ class Zeyple:
                 if message.is_multipart():
                     logging.warn("Message is multipart, ignoring")
                 else:
-                    payload = self._encrypt(message.get_payload(), [key_id])
+                    payload = self.encrypt(message.get_payload(), [key_id])
 
                     # replace message body with encrypted payload
                     message.set_payload(payload)
@@ -110,7 +110,7 @@ class Zeyple:
 
         return None
 
-    def _encrypt(self, message, key_ids):
+    def encrypt(self, message, key_ids):
         """Encrypts the message with the given keys"""
 
         try:
