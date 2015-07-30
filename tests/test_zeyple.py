@@ -48,7 +48,7 @@ class ZeypleTest(unittest.TestCase):
         os.mkdir(self.homedir, 0700)
         subprocess.check_call(
             ['gpg', '--homedir', self.homedir, '--import', KEYS_FNAME],
-            #stderr=open('/dev/null'),
+            stderr=open('/dev/null'),
         )
 
         self.zeyple = zeyple.Zeyple(self.conffile)
@@ -56,6 +56,14 @@ class ZeypleTest(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
+
+    def decrypt(self, data):
+        gpg = subprocess.Popen(
+            ['gpg', '--homedir', self.homedir, '--decrypt'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
+        return gpg.communicate(data.encode('ascii'))[0]
 
     def test_user_key(self):
         """Returns the right ID for the given email address"""
@@ -138,3 +146,27 @@ class ZeypleTest(unittest.TestCase):
         assert emails[0]['X-Zeyple'] is not None
         assert not emails[0].is_multipart()  # GPG encrypt the multipart
         assert is_encrypted(emails[0].get_payload().encode('utf-8'))
+
+    def test_process_message_with_multiple_recipients(self):
+        """Encrypt a message with multiple recipients"""
+
+        content = "Content"
+
+        emails = self.zeyple.process_message(dedent("""\
+            Received: by example.org (Postfix, from userid 0)
+                id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            To: """ + ', '.join([TEST1_EMAIL, TEST2_EMAIL]) + """
+            Subject: もしもし with Unicode
+            Message-Id: <20120906233537.DD3B67981178@example.org>
+            Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            From: root@example.org (root)
+
+            """ + content + """
+        """), [TEST1_EMAIL, TEST2_EMAIL])
+
+        assert len(emails) == 2  # It had two recipients
+
+        for m in emails:
+            assert m['X-Zeyple'] is not None
+            payload = self.decrypt(m.get_payload()).strip()
+            assert payload == six.b(content)
