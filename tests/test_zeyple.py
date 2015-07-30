@@ -4,8 +4,11 @@
 import unittest
 from mock import Mock
 import os
+import subprocess
 import shutil
 import six
+from six.moves.configparser import ConfigParser
+import tempfile
 from textwrap import dedent
 from zeyple import zeyple
 
@@ -16,13 +19,39 @@ def is_encrypted(string):
 
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
-        shutil.copyfile('tests/zeyple.conf', 'zeyple.conf')
-        os.system("gpg --recv-keys %s 2> /dev/null" % LINUS_ID)
-        self.zeyple = zeyple.Zeyple()
+        self.tmpdir = tempfile.mkdtemp()
+
+        self.conffile = os.path.join(self.tmpdir, 'zeyple.conf')
+        self.homedir = os.path.join(self.tmpdir, 'gpg')
+        self.logfile = os.path.join(self.tmpdir, 'zeyple.log')
+
+        config = ConfigParser()
+
+        config.add_section('zeyple')
+        config.set('zeyple', 'log_file', self.logfile)
+        config.set('zeyple', 'add_header', 'true')
+
+        config.add_section('gpg')
+        config.set('gpg', 'home', self.homedir)
+
+        config.add_section('relay')
+        config.set('relay', 'host', 'example.net')
+        config.set('relay', 'port', '2525')
+
+        with open(self.conffile, 'w') as fp:
+            config.write(fp)
+
+        os.mkdir(self.homedir, 0700)
+        subprocess.check_call(['gpg', '--homedir', self.homedir,
+                               '--keyserver', 'pgp.mit.edu',
+                               '--recv-keys', LINUS_ID],
+                              stderr=open('/dev/null'))
+
+        self.zeyple = zeyple.Zeyple(self.conffile)
         self.zeyple._send_message = Mock()  # don't try to send emails
 
     def tearDown(self):
-        os.remove('zeyple.conf')
+        shutil.rmtree(self.tmpdir)
 
     def test_user_key(self):
         """Returns the right ID for the given email address"""

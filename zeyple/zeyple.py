@@ -25,8 +25,8 @@ __copyright__ = 'Copyright 2012-2015 Cédric Félizard'
 class Zeyple:
     """Zeyple Encrypts Your Precious Log Emails"""
 
-    def __init__(self):
-        self.config = self.load_configuration()
+    def __init__(self, config_fname='zeyple.conf'):
+        self.config = self.load_configuration(config_fname)
 
         log_file = self.config.get('zeyple', 'log_file')
         logging.basicConfig(
@@ -110,13 +110,13 @@ class Zeyple:
 
         logging.info("Message %s sent", message['Message-id'])
 
-    def load_configuration(self, filename='zeyple.conf'):
+    def load_configuration(self, fname):
         """Reads and parses the config file"""
 
         config = SafeConfigParser()
         config.read([
-            os.path.join('/etc/', filename),
-            filename,
+            os.path.join('/etc/', fname),
+            fname,
         ])
         if not config.sections():
             raise IOError('Cannot open config file.')
