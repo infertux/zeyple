@@ -41,7 +41,7 @@ class ZeypleTest(unittest.TestCase):
         with open(self.conffile, 'w') as fp:
             config.write(fp)
 
-        os.mkdir(self.homedir, 0700)
+        os.mkdir(self.homedir, 0o700)
         subprocess.check_call(['gpg', '--homedir', self.homedir,
                                '--keyserver', 'pgp.mit.edu',
                                '--recv-keys', LINUS_ID],
