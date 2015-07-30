@@ -12,7 +12,11 @@ import tempfile
 from textwrap import dedent
 from zeyple import zeyple
 
-LINUS_ID = '79BE3E4300411886'
+KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
+TEST1_ID = 'D6513C04E24C1F83'
+TEST1_EMAIL = 'test1@zeyple.example.com'
+TEST2_ID = '0422F1C597FB1687'
+TEST2_EMAIL = 'test2@zeyple.example.com'
 
 def is_encrypted(string):
     return string.startswith(six.b('-----BEGIN PGP MESSAGE-----'))
@@ -42,10 +46,10 @@ class ZeypleTest(unittest.TestCase):
             config.write(fp)
 
         os.mkdir(self.homedir, 0o700)
-        subprocess.check_call(['gpg', '--homedir', self.homedir,
-                               '--keyserver', 'pgp.mit.edu',
-                               '--recv-keys', LINUS_ID],
-                              stderr=open('/dev/null'))
+        subprocess.check_call(
+            ['gpg', '--homedir', self.homedir, '--import', KEYS_FNAME],
+            stderr=open('/dev/null'),
+        )
 
         self.zeyple = zeyple.Zeyple(self.conffile)
         self.zeyple._send_message = Mock()  # don't try to send emails
@@ -53,26 +57,34 @@ class ZeypleTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmpdir)
 
+    def decrypt(self, data):
+        gpg = subprocess.Popen(
+            ['gpg', '--homedir', self.homedir, '--decrypt'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
+        return gpg.communicate(data.encode('ascii'))[0]
+
     def test_user_key(self):
         """Returns the right ID for the given email address"""
 
         assert self.zeyple._user_key('non_existant@example.org') is None
 
-        user_key = self.zeyple._user_key('torvalds@linux-foundation.org')
-        assert user_key == LINUS_ID
+        user_key = self.zeyple._user_key(TEST1_EMAIL)
+        assert user_key == TEST1_ID
 
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
 
         encrypted = self.zeyple.encrypt(
-            'The key is under the carpet.', [LINUS_ID]
+            'The key is under the carpet.', [TEST1_ID]
         )
         assert is_encrypted(encrypted)
 
     def test_encrypt_with_unicode(self):
         """Encrypts Unicode text"""
 
-        encrypted = self.zeyple.encrypt('héhé', [LINUS_ID])
+        encrypted = self.zeyple.encrypt('héhé', [TEST1_ID])
         assert is_encrypted(encrypted)
 
     def test_process_message_with_simple_message(self):
@@ -81,14 +93,14 @@ class ZeypleTest(unittest.TestCase):
         emails = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
-            To: torvalds@linux-foundation.org
+            To: """ + TEST1_EMAIL + """
             Subject: Hello with Unicode héüøœ©ßð®å¥¹²æ¿áßö«ç
             Message-Id: <20120906233537.DD3B67981178@example.org>
             Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             From: root@example.org (root)
 
             test ðßïð
-        """), ["torvalds@linux-foundation.org"])
+        """), [TEST1_EMAIL])
 
         assert emails[0]['X-Zeyple'] is not None
         assert is_encrypted(emails[0].get_payload().encode('utf-8'))
@@ -101,7 +113,7 @@ class ZeypleTest(unittest.TestCase):
             Received: by example.org (Postfix, from userid 0)
                 id CE9876C78258; Sat,  8 Sep 2012 13:00:18 +0000 (UTC)
             Date: Sat, 08 Sep 2012 13:00:18 +0000
-            To: torvalds@linux-foundation.org
+            To: """ + TEST1_EMAIL + """
             Subject: test
             User-Agent: Heirloom mailx 12.4 7/29/08
             MIME-Version: 1.0
@@ -129,8 +141,32 @@ class ZeypleTest(unittest.TestCase):
             Yy90ZXN0JyB3d3ctZGF0YQo=
 
             --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--
-        """), ["torvalds@linux-foundation.org"])
+        """), [TEST1_EMAIL])
 
         assert emails[0]['X-Zeyple'] is not None
         assert not emails[0].is_multipart()  # GPG encrypt the multipart
         assert is_encrypted(emails[0].get_payload().encode('utf-8'))
+
+    def test_process_message_with_multiple_recipients(self):
+        """Encrypt a message with multiple recipients"""
+
+        content = "Content"
+
+        emails = self.zeyple.process_message(dedent("""\
+            Received: by example.org (Postfix, from userid 0)
+                id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            To: """ + ', '.join([TEST1_EMAIL, TEST2_EMAIL]) + """
+            Subject: もしもし with Unicode
+            Message-Id: <20120906233537.DD3B67981178@example.org>
+            Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            From: root@example.org (root)
+
+            """ + content + """
+        """), [TEST1_EMAIL, TEST2_EMAIL])
+
+        assert len(emails) == 2  # It had two recipients
+
+        for m in emails:
+            assert m['X-Zeyple'] is not None
+            payload = self.decrypt(m.get_payload()).strip()
+            assert payload == six.b(content)
