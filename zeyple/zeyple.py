@@ -113,13 +113,13 @@ class Zeyple:
 
         logging.info("Message %s sent", message['Message-id'])
 
-    def load_configuration(self, fname):
+    def load_configuration(self, filename):
         """Reads and parses the config file"""
 
         config = SafeConfigParser()
         config.read([
-            os.path.join('/etc/', fname),
-            fname,
+            os.path.join('/etc/', filename),
+            filename,
         ])
         if not config.sections():
             raise IOError('Cannot open config file.')
