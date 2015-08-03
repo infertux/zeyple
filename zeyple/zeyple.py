@@ -6,6 +6,8 @@ import os
 import logging
 import email
 import email.mime.multipart
+import email.mime.application
+import email.encoders
 import smtplib
 import gpgme
 import copy
@@ -89,7 +91,6 @@ class Zeyple:
         sent_messages = []
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
-            out_message = copy.copy(in_message)
 
             key_id = self._user_key(recipient)
             logging.info("Key ID: %s", key_id)
@@ -105,8 +106,24 @@ class Zeyple:
                     payload = get_binary_payload(in_message)
 
                 encrypted_payload = self.encrypt(payload, [key_id])
-                # replace message body with encrypted payload
-                out_message.set_payload(encrypted_payload)
+
+                version = self.get_version_part()
+                encrypted = self.get_encrypted_part(encrypted_payload)
+
+                out_message = copy.copy(in_message)
+                out_message.preamble = "This is an OpenPGP/MIME encrypted " \
+                                       "message (RFC 4880 and 3156)"
+
+                if 'Content-Type' not in out_message:
+                    out_message['Content-Type'] = 'multipart/encrypted'
+                else:
+                    out_message.replace_header(
+                        'Content-Type',
+                        'multipart/encrypted',
+                    )
+                out_message.set_param('protocol', 'application/pgp-encrypted')
+                out_message.set_payload([version, encrypted])
+
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
 
@@ -115,6 +132,33 @@ class Zeyple:
             sent_messages.append(out_message)
 
         return sent_messages
+
+    def get_version_part(self):
+        ret = email.mime.application.MIMEApplication(
+            'Version: 1\n',
+            'pgp-encrypted',
+            email.encoders.encode_noop,
+        )
+        ret.add_header(
+            'Content-Description',
+            "PGP/MIME version identification",
+        )
+        return ret
+
+    def get_encrypted_part(self, payload):
+        ret = email.mime.application.MIMEApplication(
+            payload,
+            'octet-stream',
+            email.encoders.encode_noop,
+            name="encrypted.asc",
+        )
+        ret.add_header('Content-Description', "OpenPGP encrypted message")
+        ret.add_header(
+            'Content-Disposition',
+            'inline',
+            filename='encrypted.asc',
+        )
+        return ret
 
     def _add_zeyple_header(self, message):
         if self.config.has_option('zeyple', 'add_header') and \
