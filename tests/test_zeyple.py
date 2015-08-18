@@ -107,23 +107,10 @@ class ZeypleTest(unittest.TestCase):
     def test_process_message_with_multipart_message(self):
         """Ignores multipart messages"""
 
-        emails = self.zeyple.process_message(dedent("""\
-            Return-Path: <torvalds@linux-foundation.org>
-            Received: by example.org (Postfix, from userid 0)
-                id CE9876C78258; Sat,  8 Sep 2012 13:00:18 +0000 (UTC)
-            Date: Sat, 08 Sep 2012 13:00:18 +0000
-            To: """ + TEST1_EMAIL + """
-            Subject: test
-            User-Agent: Heirloom mailx 12.4 7/29/08
-            MIME-Version: 1.0
-            Content-Type: multipart/mixed;
-             boundary="=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h"
-            Message-Id: <20120908130018.CE9876C78258@example.org>
-            From: root@example.org (root)
-
+        message = dedent("""\
             This is a multi-part message in MIME format.
 
-            --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h
+            --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--
             Content-Type: text/plain; charset=us-ascii
             Content-Transfer-Encoding: 7bit
             Content-Disposition: inline
@@ -138,13 +125,32 @@ class ZeypleTest(unittest.TestCase):
 
             c3UgLWMgJ3RyYWNkIC0taG9zdG5hbWUgMTI3LjAuMC4xIC0tcG9ydCA4MDAwIC92YXIvdHJh
             Yy90ZXN0JyB3d3ctZGF0YQo=
+            --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--""")
 
-            --=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h--
-        """).encode('ascii'), [TEST1_EMAIL])
+        email = self.zeyple.process_message(dedent("""\
+            Return-Path: <torvalds@linux-foundation.org>
+            Received: by example.org (Postfix, from userid 0)
+                id CE9876C78258; Sat,  8 Sep 2012 13:00:18 +0000 (UTC)
+            Date: Sat, 08 Sep 2012 13:00:18 +0000
+            To: """ + TEST1_EMAIL + """
+            Subject: test
+            User-Agent: Heirloom mailx 12.4 7/29/08
+            MIME-Version: 1.0
+            Content-Type: multipart/mixed;
+             boundary="=_504b4162.Gyt30puFsMOHWjpCATT1XRbWoYI1iR/sT4UX78zEEMJbxu+h"
+            Message-Id: <20120908130018.CE9876C78258@example.org>
+            From: root@example.org (root)
 
-        assert emails[0]['X-Zeyple'] is not None
-        assert not emails[0].is_multipart()  # GPG encrypt the multipart
-        assert self.decrypt(emails[0].get_payload().encode('ascii'))
+        """ + message).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email['X-Zeyple'] is not None
+        assert email.is_multipart()
+        plain_payload = email.get_payload()
+        encrypted_envelope = plain_payload[1]
+        assert encrypted_envelope["Content-Type"] == 'application/octet-stream; name="encrypted.asc"'
+        encrypted_payload = encrypted_envelope.get_payload()
+        decrypted_payload = self.decrypt(encrypted_payload).strip()
+        assert decrypted_payload == message
 
     def test_process_message_with_multiple_recipients(self):
         """Encrypt a message with multiple recipients"""
