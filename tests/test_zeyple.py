@@ -169,8 +169,6 @@ class ZeypleTest(unittest.TestCase):
     def test_process_message_with_multiple_recipients(self):
         """Encrypt a message with multiple recipients"""
 
-        content = "Content"
-
         emails = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
@@ -180,11 +178,6 @@ class ZeypleTest(unittest.TestCase):
             Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             From: root@example.org (root)
 
-            """ + content).encode('ascii'), [TEST1_EMAIL, TEST2_EMAIL])
+            hello""").encode('ascii'), [TEST1_EMAIL, TEST2_EMAIL])
 
-        assert len(emails) == 2  # It had two recipients
-
-        for m in emails:
-            assert m['X-Zeyple'] is not None
-            payload = self.decrypt(m.get_payload().encode('ascii'))
-            assert payload == six.b(content)
+        assert len(emails) == 2  # it has two recipients
