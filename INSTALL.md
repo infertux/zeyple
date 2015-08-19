@@ -1,3 +1,5 @@
+# Install
+
 A few options are available to install Zeyple, feel free to use the one that suits you best.
 
 1. [Chef cookbook](https://github.com/infertux/chef-zeyple)
@@ -74,4 +76,14 @@ You can send you an email with `date | mail -s test root` and check it is encryp
 ---
 
 <a name="fn-1">[1]</a> _The Git repository is GPG signed - if you cloned the repository locally, you can make sure it has not been tampered with by importing my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail -1)`._
+
+# Uninstall
+
+Manually remove the added lines in `/etc/postfix/{main,master}.cf` then
+
+```bash
+rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /var/lib/zeyple /var/log/zeyple.log
+userdel zeyple
+postfix reload
+```
 

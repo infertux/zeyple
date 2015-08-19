@@ -23,44 +23,23 @@ See [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
 
 Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/main.cf` then `postfix reload`.
 
-## Uninstall
-
-Manually remove the added lines in `/etc/postfix/{main,master}.cf` then
-
-```bash
-rm -rfv /etc/zeyple /usr/local/bin/zeyple.py /var/log/zeyple.log
-userdel zeyple
-postfix reload
-```
-
 ## Key management
 
-* List of keys: `sudo -u zeyple gpg --homedir /etc/zeyple/keys --list-key`
-* Update imported keys: `sudo -u zeyple gpg --homedir /etc/zeyple/keys --keyserver hkp://keys.gnupg.net --refresh-keys`
-* Import a new key: `sudo -u zeyple gpg --homedir /etc/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld`
-
-## Dev install
-
-You will need the following development dependencies.
-
-* Packages:
-  * Debian/Ubuntu: `apt-get install libgpgme11-dev`
-  * Fedora: `yum install gpgme-devel python-devel python3-devel python-pep8`
-* Python eggs: `pip install -r requirements.txt`
-
-## Testing
-
-`tox` will run [nosetests](https://github.com/nose-devs/nose) under every supported version of Python thanks to [tox](https://bitbucket.org/hpk42/tox).
-
-To restrict the versions of Python tested by `tox`, you can use `tox -e py27,py34,pypy` for example.
+* List of keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --list-keys`
+* Update imported keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --refresh-keys`
+* Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld`
 
 ## Integration with other MTAs
 
 Although tested only with [Postfix](http://www.postfix.org/), Zeyple should integrate nicely with any MTA which provides a [filter](http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter")/hook mechanism. Please let me know if you experiment with this.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Kudos
 
-Many thanks to [Harry Knitter](http://www.linux-magazine.com/Issues/2013/153/Email-Encryption-with-Zeyple) for his feedback to help make Zeyple bullet-proof.
+Many thanks to [Harry Knitter](http://www.linux-magazine.com/Issues/2013/153/Email-Encryption-with-Zeyple) for his feedback to help make Zeyple more robust.
 
 ## Support
 
