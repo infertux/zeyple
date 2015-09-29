@@ -86,8 +86,11 @@ class Zeyple:
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
+            out_message = copy.copy(in_message)
+
             key_id = self._user_key(recipient)
             logging.info("Key ID: %s", key_id)
+
             if key_id:
                 if in_message.is_multipart():
                     # get the body (after the first \n\n)
@@ -122,7 +125,6 @@ class Zeyple:
                 version = self.get_version_part()
                 encrypted = self.get_encrypted_part(encrypted_payload)
 
-                out_message = copy.copy(in_message)
                 out_message.preamble = "This is an OpenPGP/MIME encrypted " \
                                        "message (RFC 4880 and 3156)"
 
@@ -133,6 +135,7 @@ class Zeyple:
                         'Content-Type',
                         'multipart/encrypted',
                     )
+
                 out_message.set_param('protocol', 'application/pgp-encrypted')
                 out_message.set_payload([version, encrypted])
 
