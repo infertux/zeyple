@@ -149,6 +149,7 @@ class Zeyple:
             # prepend the Content-Type including the boundary
             content_type = "Content-Type: " + in_message["Content-Type"]
             payload = content_type + "\n\n" + payload
+            payload = payload.encode('ascii')
 
         else:
             message = email.message.Message()

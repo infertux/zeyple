@@ -73,8 +73,8 @@ class ZeypleTest(unittest.TestCase):
         encrypted_envelope = plain_payload[1]
         assert encrypted_envelope["Content-Type"] == 'application/octet-stream; name="encrypted.asc"'
 
-        encrypted_payload = encrypted_envelope.get_payload()
-        decrypted_envelope = self.decrypt(encrypted_payload).strip()
+        encrypted_payload = encrypted_envelope.get_payload().encode('ascii')
+        decrypted_envelope = self.decrypt(encrypted_payload).strip().decode('ascii')
 
         boundary = re.match(r'.+boundary="([^"]+)"', decrypted_envelope, re.MULTILINE | re.DOTALL).group(1)
         # replace auto-generated boundary with one we know
