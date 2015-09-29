@@ -100,13 +100,13 @@ class ZeypleTest(unittest.TestCase):
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
         content = 'The key is under the carpet.'.encode('ascii')
-        encrypted = self.zeyple.encrypt(content, [TEST1_ID])
+        encrypted = self.zeyple._encrypt_payload(content, [TEST1_ID])
         assert self.decrypt(encrypted) == content
 
     def test_encrypt_binary_data(self):
         """Encrypt binary data. (Simulate encrypting non ascii characters"""
         content = b'\xff\x80'
-        encrypted = self.zeyple.encrypt(content, [TEST1_ID])
+        encrypted = self.zeyple._encrypt_payload(content, [TEST1_ID])
         assert self.decrypt(encrypted) == content
 
     def test_process_message_with_simple_message(self):
