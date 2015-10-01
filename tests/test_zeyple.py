@@ -114,6 +114,8 @@ class ZeypleTest(unittest.TestCase):
 
         mime_message = dedent("""\
             --BOUNDARY
+            MIME-Version: 1.0
+            Content-Type: text/plain; charset="utf-8"
 
             test
             --BOUNDARY--""")

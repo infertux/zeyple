@@ -107,6 +107,10 @@ class Zeyple:
                 logging.warn("No keys found, message will be sent unencrypted")
                 out_message = copy.copy(in_message)
 
+            # Delete Content-Transfer-Encoding if present to default to "7bit"
+            # otherwise Thunderbird seems to hang in some cases.
+            del out_message["Content-Transfer-Encoding"]
+
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
             sent_messages.append(out_message)
@@ -155,9 +159,17 @@ class Zeyple:
             message = email.message.Message()
             message.set_payload(in_message.get_payload())
 
-            # XXX: do we need to be explicit about the Content-Type if
-            # not text/plain?
-            # message.set_type("text/plain")
+            # XXX: can it be something else than text/plain here?
+            message.set_type("text/plain")
+            message.set_param("charset", "utf-8")
+
+            # if Content-Transfer-Encoding is present in parent message, copy
+            # it to cipher payload
+            if in_message["Content-Transfer-Encoding"]:
+                message.add_header(
+                  "Content-Transfer-Encoding",
+                  in_message["Content-Transfer-Encoding"]
+                )
 
             mixed = email.mime.multipart.MIMEMultipart(
                 'mixed',
