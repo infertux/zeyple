@@ -1,0 +1,1 @@
+checkmodule -Mmo zeyple.mod zeyple.te && semodule_package -m zeyple.mod -o zeyple.pp && (semodule -vr zeyple || true) && semodule -vi zeyple.pp

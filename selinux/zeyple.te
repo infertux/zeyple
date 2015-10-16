@@ -1,0 +1,17 @@
+
+module zeyple 1.0;
+
+require {
+	type postfix_pipe_t;
+	type gpg_exec_t;
+	type var_lib_t;
+	type var_log_t;
+	class dir { write remove_name add_name };
+	class file { getattr open read lock create execute execute_no_trans write append unlink };
+}
+
+allow postfix_pipe_t gpg_exec_t:file { open read execute execute_no_trans };
+allow postfix_pipe_t var_lib_t:dir { write remove_name add_name };
+allow postfix_pipe_t var_lib_t:file { getattr open read lock create write unlink };
+allow postfix_pipe_t var_log_t:file { getattr open append };
+
