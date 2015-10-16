@@ -35,7 +35,7 @@ def as_binary_string(email):
 
 
 __title__ = 'Zeyple'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
 __copyright__ = 'Copyright 2012-2015 Cédric Félizard'
