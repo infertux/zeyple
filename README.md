@@ -37,7 +37,6 @@ Although tested only with [Postfix](http://www.postfix.org/), Zeyple should inte
 
 A fully-setup test-environment is available to easily test your modifications.
 [Vagrant](https://www.vagrantup.com/) and a compatible virtualization environment ([VirtualBox](https://www.virtualbox.org/) for example) are required.
-
 Visit [zeyple-vagrant](https://github.com/Nithanim/zeyple-vagrant) for download and more information.
 
 ## Contributing
