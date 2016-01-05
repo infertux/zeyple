@@ -68,6 +68,8 @@ You need to be _root_ here - make sure you understand what you are doing.
     postfix reload
     ```
 
+    Beware the line `user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}` must NOT have a backslash preceding the dollar sign.
+
     As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
 
 You are good to go!
