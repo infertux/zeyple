@@ -1,0 +1,29 @@
+#!/bin/bash
+
+SOURCE=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+create_package() {
+TYPE="$1"
+fpm -f -s dir -t $TYPE -n zeyple \
+--prefix="/usr/local/bin" \
+--vendor "infertux" \
+--maintainer "infertux" \
+--version "$(date +%Y%m%d)~git~$(git -C $SOURCE rev-parse --short HEAD)" \
+--after-install $SOURCE/after-install.sh \
+--before-remove $SOURCE/before-remove.sh \
+--depends gnupg \
+--depends python-gpgme \
+--depends sudo \
+zeyple/zeyple.py \
+zeyple/zeyple.conf.example
+}
+
+which fpm > /dev/null
+
+if [ $? -eq 0 ]; then
+  git pull
+  create_package deb
+else
+  echo "fpm not found in PATH"
+  exit 1
+fi
