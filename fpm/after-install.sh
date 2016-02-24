@@ -1,13 +1,4 @@
-cp /usr/local/bin/zeyple.conf.example /etc/
-
-adduser --system --no-create-home --disabled-login zeyple
-
-mkdir -p /var/lib/zeyple/keys
-
-chmod 700 /var/lib/zeyple/keys
-
-chown zeyple: /var/lib/zeyple/keys
-
+add_postfix_master_config() {
 cat >> /etc/postfix/master.cf <<CONF
 zeyple    unix  -       n       n       -       -       pipe
   user=zeyple argv=/usr/local/bin/zeyple.py \${recipient}
@@ -22,14 +13,30 @@ localhost:10026 inet  n       -       n       -       10      smtpd
   -o mynetworks=127.0.0.0/8
   -o smtpd_authorized_xforward_hosts=127.0.0.0/8
 CONF
+}
 
+add_postfix_main_config() {
 cat >> /etc/postfix/main.cf <<CONF
 content_filter = zeyple
 CONF
+}
+
+cp /usr/local/bin/zeyple.conf.example /etc/
+
+adduser --system --no-create-home --disabled-login zeyple
+
+mkdir -p /var/lib/zeyple/keys
+
+chmod 700 /var/lib/zeyple/keys
+
+chown zeyple: /var/lib/zeyple/keys
 
 cp zeyple.py /usr/local/bin/zeyple.py
 chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
 
 touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
+
+grep zeyple /etc/postfix/master.cf > /dev/null || add_postfix_master_config
+grep zeyple /etc/postfix/main.cf > /dev/null || add_postfix_main_config
 
 postfix reload

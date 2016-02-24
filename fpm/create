@@ -14,8 +14,9 @@ fpm -f -s dir -t $TYPE -n zeyple \
 --depends gnupg \
 --depends python-gpgme \
 --depends sudo \
-zeyple/zeyple.py \
-zeyple/zeyple.conf.example
+-C zeyple \
+zeyple.py \
+zeyple.conf.example
 }
 
 which fpm > /dev/null
