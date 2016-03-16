@@ -1,7 +1,7 @@
 import email
 from textwrap import dedent
 
-from zeyple.handler import encrypt_message
+from zeyple.email import encrypt_message
 
 
 # FIXME: This is copy/pasted from test_gpg.py. But I don't want to create test/__init__.py
