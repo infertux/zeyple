@@ -1,8 +1,8 @@
-## 1.0.0 to 1.1.0
+## v1.0.0 to v1.1.0
 
 1. No breaking changes
 
-## v0.3 to 1.0.0
+## v0.3 to v1.0.0
 
 1. `mv /etc/zeyple/zeyple.conf /etc/zeyple.conf`
 1. `rmdir /etc/zeyple`
