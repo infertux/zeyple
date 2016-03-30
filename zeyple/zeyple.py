@@ -103,13 +103,13 @@ class Zeyple:
 
             if key_id:
                 out_message = self._encrypt_message(in_message, key_id)
+
+                # Delete Content-Transfer-Encoding if present to default to
+                # "7bit" otherwise Thunderbird seems to hang in some cases.
+                del out_message["Content-Transfer-Encoding"]
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
                 out_message = copy.copy(in_message)
-
-            # Delete Content-Transfer-Encoding if present to default to "7bit"
-            # otherwise Thunderbird seems to hang in some cases.
-            del out_message["Content-Transfer-Encoding"]
 
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
