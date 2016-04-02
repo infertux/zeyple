@@ -1,6 +1,8 @@
 import email
 from textwrap import dedent
 
+import pytest
+
 from zeyple.email import encrypt_message
 
 
@@ -10,8 +12,8 @@ def decrypt(gpg, private_key, data):
     return gpg.run(['--decrypt'], input=data)
 
 
-def test_encrypt_simple_email(gpg, key):
-    message_str = dedent("""\
+@pytest.mark.parametrize('message_str,decrypted_payload', [
+    (dedent("""\
         Received: by example.org (Postfix, from userid0)
             id DD3B67981178, 6 Sep 2012 23:35:37 +0000 (UTC)
         To: {}
@@ -20,8 +22,21 @@ def test_encrypt_simple_email(gpg, key):
         Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
         From: root@example.org
 
-        Hello""".format(key.email)
-    )
+        Hello"""), "Hello"),
+    pytest.mark.xfail((dedent(u"""\
+        Received: by example.org (Postfix, from userid 0)
+            id 915BC10045; Sun, 20 Oct 2013 04:03:51 +0200 (CEST)
+        To: {}
+        Subject: Yo
+        Message-Id: <20131020020351.915BC10045@example.org>
+        From: root@example.org
+        Content-Transfer-Encoding: 8bit
+        Content-Type: text/plain; charset=utf-8
+
+        \N{SNOWMAN}""").encode('utf-8'), u"\N{SNOWMAN}")),
+])
+def test_encrypt_simple_email(gpg, key, message_str, decrypted_payload):
+    message_str = message_str.format(key.email)
 
     gpg.add_key(key.public)
     encrypted_message_str = encrypt_message(gpg, [key.email], message_str)
@@ -29,10 +44,10 @@ def test_encrypt_simple_email(gpg, key):
     encrypted_message = email.message_from_string(encrypted_message_str)
 
     payload = encrypted_message.get_payload()
-    assert payload != "Hello"
+    assert payload != decrypted_payload
 
     decrypted = decrypt(gpg, key.private, payload)
-    assert decrypted == "Hello"
+    assert decrypted == decrypted_payload
 
 
 def test_encrypt_multipart_email(gpg, key):
