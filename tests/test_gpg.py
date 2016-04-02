@@ -12,7 +12,7 @@ def test_add_key(gpg, key):
 def test_encrypt_key(gpg, key):
     gpg.add_key(key.public)
     data = "Hello World!"
-    encrypted = gpg.encrypt(key.email, "Hello World!")
+    encrypted = gpg.encrypt(key.email, data)
 
     decrypted = decrypt(gpg, key.private, encrypted)
     assert data == decrypted
