@@ -13,18 +13,18 @@ def copy_message_headers(message):
     return result
 
 
-def encrypt_message(gpg, recipient, message_str):
+def encrypt_message(gpg, recipients, message_str):
     message = email.message_from_string(message_str)
     # FIXME: This should be logged not asserted
     assert not message.defects
     if message.is_multipart():
-        result = encrypt_multipart_message(gpg, recipient, message)
+        result = encrypt_multipart_message(gpg, recipients, message)
     else:
-        result = encrypt_simple_message(gpg, recipient, message)
+        result = encrypt_simple_message(gpg, recipients, message)
     return result.as_string()
 
 
-def encrypt_multipart_message(gpg, recipient, message):
+def encrypt_multipart_message(gpg, recipients, message):
     assert message.get_content_maintype() == "multipart"
 
     subtype = message.get_content_subtype()
@@ -36,7 +36,7 @@ def encrypt_multipart_message(gpg, recipient, message):
     content.preamble = message.preamble
     content.epilogue = message.epilogue
 
-    encrypted_content = gpg.encrypt(recipient, content.as_string())
+    encrypted_content = gpg.encrypt(recipients, content.as_string())
 
     version = email.mime.nonmultipart.MIMENonMultipart("application", "pgp-encrypted")
     version.add_header("Content-Disposition", "attachement")
@@ -55,11 +55,11 @@ def encrypt_multipart_message(gpg, recipient, message):
     return result
 
 
-def encrypt_simple_message(gpg, recipient, message):
+def encrypt_simple_message(gpg, recipients, message):
     result = copy_message_headers(message)
 
     payload = message.get_payload()
-    encrypted_payload = gpg.encrypt(recipient, payload)
+    encrypted_payload = gpg.encrypt(recipients, payload)
 
     result.set_payload(encrypted_payload)
 

@@ -24,7 +24,7 @@ def test_encrypt_simple_email(gpg, key):
     )
 
     gpg.add_key(key.public)
-    encrypted_message_str = encrypt_message(gpg, key.email, message_str)
+    encrypted_message_str = encrypt_message(gpg, [key.email], message_str)
 
     encrypted_message = email.message_from_string(encrypted_message_str)
 
@@ -69,7 +69,7 @@ def test_encrypt_multipart_email(gpg, key):
         Epilogue""")
 
     gpg.add_key(key.public)
-    encrypted_message_str = encrypt_message(gpg, key.email, message_str)
+    encrypted_message_str = encrypt_message(gpg, [key.email], message_str)
 
     encrypted_message = email.message_from_string(encrypted_message_str)
     assert encrypted_message.get_content_maintype() == "multipart"

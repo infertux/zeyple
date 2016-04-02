@@ -115,10 +115,14 @@ class GPG(object):
             all_uids = key.uids + uids
             yield key._replace(uids=all_uids)
 
-    def encrypt(self, recipient, data):
-        output = self.run(
-            # TODO: Remove --trust-model always
-            ['--armor', '--trust-model', 'always', '--encrypt', '--recipient', recipient,],
-            input=data,
-        )
+    def encrypt(self, recipients, data):
+        if len(recipients) == 0:
+            raise ValueError("No recipient")
+
+        # TODO: Remove --trust-model always
+        args = ['--armor', '--trust-model', 'always', '--encrypt']
+        for r in recipients:
+            args.extend(['--recipient', r])
+
+        output = self.run(args, input=data)
         return output
