@@ -9,7 +9,8 @@ import pytest
 from zeyple.gpg import GPG
 
 TEST_TMP_DIRECTORY = os.path.join(os.path.dirname(__file__), 'tmp')
-KEY_DIRECTORY = os.path.join(os.path.dirname(__file__), 'keys')
+DATA_DIRECTORY = os.path.join(os.path.dirname(__file__), 'data')
+KEY_DIRECTORY = os.path.join(DATA_DIRECTORY, 'keys')
 
 
 @pytest.yield_fixture
