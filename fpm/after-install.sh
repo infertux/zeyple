@@ -1,7 +1,7 @@
 add_postfix_master_config() {
-cat >> /etc/postfix/master.cf <<CONF
+cat >> /etc/postfix/master.cf <<'CONF'
 zeyple    unix  -       n       n       -       -       pipe
-  user=zeyple argv=/usr/local/bin/zeyple.py \${recipient}
+  user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
 
 localhost:10026 inet  n       -       n       -       10      smtpd
   -o content_filter=
@@ -16,7 +16,7 @@ CONF
 }
 
 add_postfix_main_config() {
-cat >> /etc/postfix/main.cf <<CONF
+cat >> /etc/postfix/main.cf <<'CONF'
 content_filter = zeyple
 CONF
 }

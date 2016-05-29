@@ -41,9 +41,9 @@ You need to be _root_ here - make sure you understand what you are doing.
 1. Plug it into Postfix.
 
     ```bash
-    cat >> /etc/postfix/master.cf <<CONF
+    cat >> /etc/postfix/master.cf <<'CONF'
     zeyple    unix  -       n       n       -       -       pipe
-      user=zeyple argv=/usr/local/bin/zeyple.py \${recipient}
+      user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
 
     localhost:10026 inet  n       -       n       -       10      smtpd
       -o content_filter=
@@ -56,7 +56,7 @@ You need to be _root_ here - make sure you understand what you are doing.
       -o smtpd_authorized_xforward_hosts=127.0.0.0/8
     CONF
 
-    cat >> /etc/postfix/main.cf <<CONF
+    cat >> /etc/postfix/main.cf <<'CONF'
     content_filter = zeyple
     CONF
 
@@ -67,8 +67,6 @@ You need to be _root_ here - make sure you understand what you are doing.
 
     postfix reload
     ```
-
-    Beware the line `user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}` must NOT have a backslash preceding the dollar sign.
 
     As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
 
