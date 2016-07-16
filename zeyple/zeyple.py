@@ -12,6 +12,12 @@ import smtplib
 import gpgme
 import copy
 from io import BytesIO
+import dns.resolver
+myResolver = dns.resolver.Resolver()
+myResolver.nameservers = ['127.0.0.1', '8.8.8.8', '8.8.4.4']
+import urllib
+import gnupg
+from pprint import pprint
 try:
     from configparser import SafeConfigParser  # Python 3
 except ImportError:
@@ -83,6 +89,78 @@ class Zeyple:
 
         return ctx
 
+    def _validate_dnssec(self, domain):
+        # if force_dnssec is enabled go ahead
+        if self.config.has_option('zeyple', 'force_dnssec') and \
+            self.config.getboolean('zeyple', 'force_dnssec'):
+
+            dnssec_check = urllib.urlopen("http://portfolio.sidnlabs.nl:8080/check/" + domain).read().split(',')
+            if dnssec_check[2] == "secure":
+                logging.info("DNSSec: " + domain + " is secure")
+                return True
+            else:
+                logging.warn("DNSSec: " + domain + " is insecure")
+                return False
+        else:
+            return True
+
+    def _retrieve_pka_key(self, recipient):
+        username,domainname = recipient.split("@")
+
+        # if use_pka is is enabled go ahead
+        if self.config.has_option('zeyple', 'use_pka') and \
+            self.config.getboolean('zeyple', 'use_pka'):
+
+            username,domainname = recipient.split("@")
+            qname = "%s._pka.%s"%(username,domainname)
+
+            # if _validate_dnssec returns false (dnssec invalid) return false
+            if not (self._validate_dnssec(domainname)):
+                return False
+            else:
+                try:
+                    answer=myResolver.query(qname, "TXT")
+                    for rdata in answer:
+                        for txt_string in rdata.strings:
+                            temp_pka=(txt_string.replace(';','=')).lower()
+                            pka=temp_pka.split("=")
+                            for n,i in enumerate(pka):
+                                # PKA fingerprint
+                                   if pka[n] == "fpr":
+                                       pka_fpr = (pka[n+1]).lower()
+                                   if pka[n] == "uri":
+                                       logging.info("PKA: " + "['" + qname + "'] returned ['" + pka[n+1] + "']")
+                                       sock = urllib.urlopen(pka[n+1])
+                                       key_data=sock.read()
+                                       sock.close()
+                                       # gnupg library
+                                       gpg = gnupg.GPG(gnupghome=self.config.get('gpg', 'home'))
+                                       import_result = gpg.import_keys(key_data)
+
+                                       # Double check PKA and key fingerprint. python-gnupg > 0.3.7 support gpg.scan_keys method to retrieve fingerprint before import
+                                       fingerprint = []
+                                       key_fpr = (import_result.fingerprints[0]).lower()
+
+                                       if pka_fpr == key_fpr:
+                                           # logging.info("PKA: fingerprint ['" + pka_fpr + "'] = Key fingerprint ['" + key_fpr + "']")
+                                           logging.info("PKA: PKA and Key fingerprint match. Key for ['" + recipient + "'] imported")
+                                           return True
+                                       else:
+                                           # logging.warn("PKA: fingerprint ['" + pka_fpr + "'] != Key fingerprint ['" + key_fpr + "']")
+                                           logging.warn("PKA: and Key fingerprint MISMATCH. Key not imported!")
+                                           gpg.delete_keys(key_fpt)
+                                           return False
+
+                except dns.resolver.NXDOMAIN:
+                    logging.info("PKA: " + recipient + " ['No PKA published']")
+                    return False
+                except dns.resolver.Timeout:
+                    logging.info("PKA: " + recipient + " ['Timeout']")
+                    return False
+                except:
+                    logging.info("PKA: " + recipient + " ['Unhandled exception']")
+                    return False
+
     def process_message(self, message_data, recipients):
         """Encrypts the message with recipient keys"""
         assert isinstance(message_data, binary_string)
@@ -90,6 +168,21 @@ class Zeyple:
         in_message = message_from_binary(message_data)
         logging.info(
             "Processing outgoing message %s", in_message['Message-id'])
+
+        if in_message.get_content_maintype() == 'text':
+            payload=str(in_message.get_payload(decode=True))
+        else:
+            payload=str(in_message.get_payload()[0].get_payload(decode=True))
+
+        if "-----BEGIN PGP MESSAGE-----" in payload or "multipart/encrypted" in in_message["Content-Type"]:
+            logging.info("Message already encrypted.")
+            self._add_zeyple_header(in_message)
+            in_message.add_header(
+                'X-Zeyple',
+                "Message already encrypted"
+            )
+            self._send_message(in_message, recipients)
+            return None
 
         if not recipients:
             logging.warn("Cannot find any recipients, ignoring")
@@ -108,8 +201,8 @@ class Zeyple:
                 # "7bit" otherwise Thunderbird seems to hang in some cases.
                 del out_message["Content-Transfer-Encoding"]
             else:
-                logging.warn("No keys found, message will be sent unencrypted")
-                out_message = copy.copy(in_message)
+                    logging.warn("No keys found, message will be sent unencrypted")
+                    out_message = copy.copy(in_message)
 
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
