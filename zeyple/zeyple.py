@@ -9,13 +9,15 @@ import email.mime.multipart
 import email.mime.application
 import email.encoders
 import smtplib
-import gpgme
 import copy
 from io import BytesIO
+
 try:
     from configparser import SafeConfigParser  # Python 3
 except ImportError:
     from ConfigParser import SafeConfigParser  # Python 2
+
+import gpgme
 
 # Boiler plate to avoid dependency on six
 # BBB: Python 2.7 support
@@ -156,7 +158,6 @@ class Zeyple:
     def _encrypt_message(self, in_message, key_id):
         if in_message.is_multipart():
             # get the body (after the first \n\n)
-            # TODO: there must be a cleaner way to get that
             payload = in_message.as_string().split("\n\n", 1)[1].strip()
 
             # prepend the Content-Type including the boundary
@@ -172,13 +173,13 @@ class Zeyple:
             payload = in_message.get_payload()
             payload = encode_string(payload)
 
-            qp = email.charset.Charset('ascii')
-            qp.body_encoding = email.charset.QP
+            quoted_printable = email.charset.Charset('ascii')
+            quoted_printable.body_encoding = email.charset.QP
 
             message = email.mime.nonmultipart.MIMENonMultipart(
-              'text', 'plain', charset='utf-8'
+                'text', 'plain', charset='utf-8'
             )
-            message.set_payload(payload, charset=qp)
+            message.set_payload(payload, charset=quoted_printable)
 
             mixed = email.mime.multipart.MIMEMultipart(
                 'mixed',
