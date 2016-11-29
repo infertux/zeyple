@@ -74,7 +74,7 @@ class ZeypleTest(unittest.TestCase):
         assert encrypted_envelope["Content-Type"] == 'application/octet-stream; name="encrypted.asc"'
 
         encrypted_payload = encrypted_envelope.get_payload().encode('utf-8')
-        decrypted_envelope = self.decrypt(encrypted_payload).strip().decode('utf-8')
+        decrypted_envelope = self.decrypt(encrypted_payload).decode('utf-8').strip()
 
         boundary = re.match(r'.+boundary="([^"]+)"', decrypted_envelope, re.MULTILINE | re.DOTALL).group(1)
         # replace auto-generated boundary with one we know
@@ -115,7 +115,8 @@ class ZeypleTest(unittest.TestCase):
         mime_message = dedent("""\
             --BOUNDARY
             MIME-Version: 1.0
-            Content-Type: text/plain; charset="utf-8"
+            Content-Type: text/plain; charset="us-ascii"
+            Content-Transfer-Encoding: quoted-printable
 
             test
             --BOUNDARY--""")
@@ -139,9 +140,10 @@ class ZeypleTest(unittest.TestCase):
         mime_message = dedent("""\
             --BOUNDARY
             MIME-Version: 1.0
-            Content-Type: text/plain; charset="utf-8"
+            Content-Type: text/plain; charset="us-ascii"
+            Content-Transfer-Encoding: quoted-printable
 
-            """ + '\xc3\xa4 \xc3\xb6 \xc3\xbc' + """
+            =C3=83=C2=A4 =C3=83=C2=B6 =C3=83=C2=BC
             --BOUNDARY--""")
 
         email = self.zeyple.process_message(dedent("""\
@@ -152,6 +154,8 @@ class ZeypleTest(unittest.TestCase):
             Message-Id: <20120906233537.DD3B67981178@example.org>
             Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
             From: root@example.org (root)
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
 
             Ã¤ Ã¶ Ã¼""").encode('utf-8'), [TEST1_EMAIL])[0]
 
