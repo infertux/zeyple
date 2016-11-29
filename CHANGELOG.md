@@ -1,6 +1,15 @@
-## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.1.0...master))
+## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.0...master))
 
   * TBD
+
+## v1.2.0, 2016-11-29 ([changes](https://github.com/infertux/zeyple/compare/v1.1.0...v1.2.0))
+
+  * [BUGFIX]  Fix crash with utf-8 emails (#22 & #24)
+  * [BUGFIX]  Fix encoding of German umlauts and other unicode characters
+  * [MISC]    Add FPM script to create .deb package (#27)
+  * [MISC]    Drop support for Python 3.4 and add support for 3.5
+  * [TWEAK]   Improve install and upgrade scripts
+  * [MISC]    Upgrade dev dependencies
 
 ## v1.1.0, 2015-10-16 ([changes](https://github.com/infertux/zeyple/compare/v1.0.0...v1.1.0))
 
