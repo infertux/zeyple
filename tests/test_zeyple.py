@@ -73,8 +73,8 @@ class ZeypleTest(unittest.TestCase):
         encrypted_envelope = plain_payload[1]
         assert encrypted_envelope["Content-Type"] == 'application/octet-stream; name="encrypted.asc"'
 
-        encrypted_payload = encrypted_envelope.get_payload().encode('ascii')
-        decrypted_envelope = self.decrypt(encrypted_payload).strip().decode('ascii')
+        encrypted_payload = encrypted_envelope.get_payload().encode('utf-8')
+        decrypted_envelope = self.decrypt(encrypted_payload).strip().decode('utf-8')
 
         boundary = re.match(r'.+boundary="([^"]+)"', decrypted_envelope, re.MULTILINE | re.DOTALL).group(1)
         # replace auto-generated boundary with one we know
@@ -104,8 +104,8 @@ class ZeypleTest(unittest.TestCase):
         assert self.decrypt(encrypted) == content
 
     def test_encrypt_binary_data(self):
-        """Encrypt binary data. (Simulate encrypting non ascii characters"""
-        content = b'\xff\x80'
+        """Encrypts utf-8 characters"""
+        content = b'\xc3\xa4 \xc3\xb6 \xc3\xbc'
         encrypted = self.zeyple._encrypt_payload(content, [TEST1_ID])
         assert self.decrypt(encrypted) == content
 
@@ -130,6 +130,30 @@ class ZeypleTest(unittest.TestCase):
             From: root@example.org (root)
 
             test""").encode('ascii'), [TEST1_EMAIL])[0]
+
+        self.assertValidMimeMessage(email, mime_message)
+
+    def test_process_message_with_unicode_message(self):
+        """Encrypts unicode messages"""
+
+        mime_message = dedent("""\
+            --BOUNDARY
+            MIME-Version: 1.0
+            Content-Type: text/plain; charset="utf-8"
+
+            """ + '\xc3\xa4 \xc3\xb6 \xc3\xbc' + """
+            --BOUNDARY--""")
+
+        email = self.zeyple.process_message(dedent("""\
+            Received: by example.org (Postfix, from userid 0)
+                id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            To: """ + TEST1_EMAIL + """
+            Subject: Hello
+            Message-Id: <20120906233537.DD3B67981178@example.org>
+            Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+            From: root@example.org (root)
+
+            Ã¤ Ã¶ Ã¼""").encode('utf-8'), [TEST1_EMAIL])[0]
 
         self.assertValidMimeMessage(email, mime_message)
 
@@ -188,3 +212,12 @@ class ZeypleTest(unittest.TestCase):
             hello""").encode('ascii'), [TEST1_EMAIL, TEST2_EMAIL])
 
         assert len(emails) == 2  # it has two recipients
+
+    def test_process_message_with_complex_message(self):
+        """Encrypts complex messages"""
+
+        filename = os.path.join(os.path.dirname(__file__), 'test.eml')
+        with open(filename, 'r') as test_file:
+            contents = test_file.read()
+
+        self.zeyple.process_message(contents, [TEST1_EMAIL]) # should not raise

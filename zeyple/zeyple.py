@@ -144,6 +144,12 @@ class Zeyple:
         )
         return ret
 
+    def _get_message_template(self):
+        message = email.message.Message()
+        message.set_type("text/plain")
+        message.set_param("charset", "utf-8")
+        return message
+
     def _encrypt_message(self, in_message, key_id):
         if in_message.is_multipart():
             # get the body (after the first \n\n)
@@ -153,15 +159,24 @@ class Zeyple:
             # prepend the Content-Type including the boundary
             content_type = "Content-Type: " + in_message["Content-Type"]
             payload = content_type + "\n\n" + payload
-            payload = payload.encode('ascii')
+
+            message = self._get_message_template()
+
+            if message["Content-Transfer-Encoding"]:
+                message.replace_header(
+                    "Content-Transfer-Encoding", "quoted-printable"
+                )
+            else:
+                message.add_header(
+                    "Content-Transfer-Encoding", "quoted-printable"
+                )
+
+            message.set_payload(payload)
+
+            payload = message.get_payload()
 
         else:
-            message = email.message.Message()
-            message.set_payload(in_message.get_payload())
-
-            # XXX: can it be something else than text/plain here?
-            message.set_type("text/plain")
-            message.set_param("charset", "utf-8")
+            message = self._get_message_template()
 
             # if Content-Transfer-Encoding is present in parent message, copy
             # it to cipher payload
@@ -170,6 +185,8 @@ class Zeyple:
                   "Content-Transfer-Encoding",
                   in_message["Content-Transfer-Encoding"]
                 )
+
+            message.set_payload(in_message.get_payload())
 
             mixed = email.mime.multipart.MIMEMultipart(
                 'mixed',

@@ -1,0 +1,228 @@
+X-Apparently-To: abcdefghijklmnop@yahoo.de; Mon, 12 Sep 2016 17:01:57 +0000
+Return-Path: <bounce+ba8113.4e4d1b-discord=nithanim.me@mailgun.discordapp.com>
+Received-SPF: softfail (transitioning domain of mailgun.discordapp.com does not designate 93.157.51.109 as permitted sender)
+X-YMailISG: V1AV4h4WLDuIMbulyvLzejBcR3xEXd.W4g8ItaCDgTpyaUce
+ jcjcTSDywdS8QQaREW02GMjxJmkAvtuELdh5080X07x8JIeOuSO_ElllrLl6
+ BUcMwP5U9Ss8qkz5z94QQU1ZCBgmFi4D4Zimmp8alK5BT0M41yumq6Z__vxz
+ h16br8X6OLHb4xiXz25H1j7YHVCwUoabq8Yv_QfObdnidRtAskkXDczjPvER
+ o6B_muzG02KwOfgGKtsq5tVD8QhZRoNoYPlsH8FvuV176gaJLMGj37q8QNgD
+ BhdOD29kLKNxyoZsJpWjqf5bl_0B2tAzF_ARln3ieg9VUAETevlZhz6ZsEr_
+ mk7ESNHDcXJ4m70BqcCU0cjsEf1GFSnI6LBpRilc.z.m6A63u0gLdu5nNZ8u
+ QKKcW5kRoQTNiZ.vZ8GLI3e.PJnD7pOLOy4WDsKbjdKQTUlgtXU8.zRbTven
+ atpLqaz_JAyDv_JqLdOGpTHraRqDzyHfVk3bgOVyWNa0yAnf.VWPVl9b45mE
+ FKGLnlGbWOur4aXBvluoWRY_qbPUjmfp.Kj1LTo0Bxpsva0C.Ljnd0GlBKHY
+ bujNDmTUjT.PZ9fQjy2zDDv4Kx4hMO5IjBKvEYjIKqJ62JC49h.hcoPdVbCl
+ 7Phbanp0v11E2X2wUaYHK21p.DGhfMCOowrnIRVURCuzYa7M5q4J0jVlPDrz
+ nO8OHCGVWs3Ye5KTOG9MLYney4sXP4BmyHvjzXevGmJwiSb33MnwpRQuHIL_
+ m7QFA780WO3IQisiqKxxZByottsBfcIsahXxVulgUOmi7Yc56bzt75q6pani
+ JLiVsLlH4khS4ARVDvqj3wGvQmiZBdTAzfW..v1oJTyC3xe1tFYWjG3bCU5j
+ 75f9_Xv6eEVPvhvcOp32Hy_3QaZXY5GJufQzkjpmHuPO0xJ2rM.HgbjrF72o
+ uq5bb8TWeNxxlA79khdtxUNYgxwRgVRCLHX3tOSL2lF76q7_N8S8CFIhRFxM
+ EfHnvDv.o7vbb4u8gSQUfOPMsGanSu0Vtb4EgTj.KR9SWCUcw4bWrBLQImph
+ b0QiGkYSR4QDEyL2qpxwJ84fYwW16369AJMtPstehVrzHJCNDRHa_vmQ0i2b
+ IHIdTSys8mDNcgsJSz9zobFWEVU_xfKvLokw1Kz4qCh0VanTmXQg1.63PFUE
+ Bz4IWoN8NhUh27a0XVduE3g3Jf869l1yhB1czmzzjlAxlRm7BldtVVSSNuiU
+ W9JhX9JzUKzbIO9GKkbciYOAVkzrHTVCg2CABy3Ty8rzoeDTd_NHcBgmAsXb
+ XiKygjidgf_pWh2zsoyZjyfY25f0jp2Q8qWFvykkNln4xUMvniwG8fIuCdwv
+ vf9qMODqcUUPBF5PvF_xAyEkCkB.XiOW3Gx6_mFR_NfMBsCTsy4s5H.3baiG
+ gHzhYDDKBhIszInOCn6yKxVt4PHXwjV1M9Kkc.G8g12RF3w2zXjPkfUSRL.0
+ b_l9DjyIuqKCAhMUVWfRsknfnpDYQSvRCfgF7tXMy2olgM6tahblPa5wA1Zs
+ hD_4lXIhLEqNd_94zfWuzfC4lhkwEckYSQ_SA1gGn7HDNXyOHrTLvc1hevTI
+ qqV_IoY.knH2cSRmMbWZhUbJaBwWpsXhpiaPqOIdunVL4eXJiZOsQnQIaJnA
+ 9aZN_uu7HlL9U2bWCyeKE8oCmZdJCmenR0417nM0M5gANEDQXYGGHgYYxPfL
+ 1xBYba9nuT9kLkyNTM.k_KEV
+X-Originating-IP: [93.157.51.109]
+Authentication-Results: mta1160.mail.ir2.yahoo.com  from=mailgun.discordapp.com; domainkeys=pass (ok);  from=mailgun.discordapp.com; dkim=pass (ok)
+Received: from 127.0.0.1  (EHLO mail.nithanim.me) (93.157.51.109)
+  by mta1160.mail.ir2.yahoo.com with SMTP; Mon, 12 Sep 2016 17:01:57 +0000
+Received: from mail4.static.discordapp.com (mail4.static.discordapp.com [104.130.123.193])
+	by mail.nithanim.me (Postfix) with ESMTP id D27F536A00A
+	for <discord@nithanim.me>; Mon, 12 Sep 2016 17:01:56 +0000 (UTC)
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mailgun.discordapp.com;
+ q=dns/txt; s=k1; t=1473699715; h=Message-Id: Date: To: From: Subject:
+ Mime-Version: Content-Type: Sender;
+ bh=RWKW8HOiWxrYu7F7GBn/Sd0biYqpmhUr9oXamT82noc=; b=dmIKsoSkKtIbn/cP+OazoNc3h5vvup4WteCJSEEPUxR54OSgcDR7XoWcUdhPayPnbtdKOEqI
+ dRI5m3ogONRnwai7G5klhP+lyMm9YJNdy9Vwn6xLOkXBpS00+BcoFIsI4DU8GdkEgn27+8B5
+ H2sOAHrgeh1rcVvcZgpEX93BCq4=
+DomainKey-Signature: a=rsa-sha1; c=nofws; d=mailgun.discordapp.com;
+ s=k1; q=dns; h=Sender: Content-Type: Mime-Version: Subject: From: To:
+ Date: Message-Id;
+ b=ugx8XkyCZHh3OSrUaovSv9lxf6yuN813nGfH4O4KEO4rjuPPMRGkbpmS6Enz+M0uKLPVi2
+ Pq7hp15s4/TRmP8xICJynyXqo75u2Gn9I5d7KRBLu1QXgQWEoRtzoe7K4uPBNQocNmM3Ln/f
+ WKdYxA/7cbKeEFN/VcrqizyERS9gk=
+Sender: support=discordapp.com@mailgun.discordapp.com
+X-Mailgun-Sending-Ip: 104.130.123.193
+X-Mailgun-Sid: WyI1NWQyNiIsICJkaXNjb3JkQG5pdGhhbmltLm1lIiwgIjRlNGQxYiJd
+Received: from [127.0.0.1] (118.6.196.104.bc.googleusercontent.com
+ [104.196.6.118]) by mxa.mailgun.org with ESMTP id
+ 57d6df81.7f9f90658ed0-in1; Mon, 12 Sep 2016 17:01:53 -0000 (UTC)
+Content-Type: multipart/mixed; boundary="===============0760586063321723792=="
+Mime-Version: 1.0
+Subject: Verify Email
+From: Discord <support@discordapp.com>
+To: discord@nithanim.me
+Date: Mon, 12 Sep 2016 17:01:52 +0000
+Message-Id: <20160912170152.328.87051@localhost>
+Content-Length: 13572
+
+--===============0760586063321723792==
+Content-Type: multipart/alternative; boundary="===============4703563855924240276=="
+Mime-Version: 1.0
+
+--===============4703563855924240276==
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+Hey Nithanim,
+
+Wowwee! Thanks for registering and account with Discord! You’re the coolest person in all the land (and I’ve met a lot of really cool people).
+
+Before we get started, we’ll need to verify your account. To do so, follow the link below:
+
+https://discordapp.com/verify?token=eyJpZCI6MTMyOTI1MDQzOTgxMjg3NhkljsgoWZjsHkI6ImRpc2NvcmRAbml0aGFuaW0ubWUifQ.CrhxAA.LfjsTgjke58-QPtkn2DLFFK_OsQ&source=text
+
+Thanks,
+Discord Team
+--===============4703563855924240276==
+Content-Type: text/html; charset="utf-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+  #outlook a { padding: 0; }
+  .ReadMsgBody { width: 100%; }
+  .ExternalClass { width: 100%; }
+  .ExternalClass * { line-height:100%; }
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { border-collapse:collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+  p { display: block; margin: 13px 0; }
+</style>
+<!--[if !mso]><!-->
+<style type="text/css">
+  @media only screen and (max-width:480px) {
+    @-ms-viewport { width:320px; }
+    @viewport { width:320px; }
+  }
+</style>
+<!--<![endif]-->
+<!--[if mso]>
+<xml>
+  <o:OfficeDocumentSettings>
+    <o:AllowPNG/>
+    <o:PixelsPerInch>96</o:PixelsPerInch>
+  </o:OfficeDocumentSettings>
+</xml>
+<![endif]-->
+<style type="text/css">
+  @media only screen and (min-width:480px) {
+    .mj-column-per-100, * [aria-labelledby="mj-column-per-100"] { width:100%!important; }
+  }
+</style>
+</head>
+<body style="background: #F9F9F9;">
+  <div style="background-color:#F9F9F9;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]-->
+  <style type="text/css">
+    html, body, * {
+      -webkit-text-size-adjust: none;
+      text-size-adjust: none;
+    }
+    a {
+      color:#1EB0F4;
+      text-decoration:none;
+    }
+    a:hover {
+      text-decoration:underline;
+    }
+  </style>
+<div style="margin:0 auto;max-width:640px;background:transparent;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:transparent;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:40px 0px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;padding:0px;" align="center"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-spacing:0px;" align="center" border="0"><tbody><tr><td style="width:138px;"><a href="https://discordapp.com/" target="_blank"><img alt="" title="" height="38px" src="https://cdn.discordapp.com/email_assets/2ec94ed90b8e95d764f2a1c96f33139e.png" style="border:none;border-radius:;display:block;outline:none;text-decoration:none;width:100%;height:38px;" width="138"></a></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]-->
+      <!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]--><div style="max-width:640px;margin:0 auto;box-shadow:0px 1px 5px rgba(0,0,0,0.1);border-radius:4px;overflow:hidden"><div style="margin:0 auto;max-width:640px;background:#ffffff;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:#ffffff;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:30px 40px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;padding:0px 0px 12px;" align="left"><div style="cursor:auto;color:#4F545C;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:20px;font-weight:normal;line-height:24px;">
+            Hey, <span style="font-weight: bold;">Nithanim</span><span style="font-size: 12px;color:#b9bfc6">#4524</span>
+          </div></td></tr><tr><td style="word-break:break-word;font-size:0px;padding:0px 0px 20px;" align="left"><div style="cursor:auto;color:#737F8D;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:16px;line-height:24px;">
+            Wowwee! Thanks for registering an account with Discord!
+            You’re the coolest person in all the land (and I’ve met a lot of really cool people).
+          </div></td></tr><tr><td style="word-break:break-word;font-size:0px;padding:0px;" align="left"><div style="cursor:auto;color:#737F8D;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:16px;line-height:24px;">
+            Before we get started, we’ll need to verify your account.
+            To do so, click on the comically large button below or <a href="https://discordapp.com/verify?token=eyJpZCI6MTMyOTI1MDQzOTgxMjg3NDI0LCJlbWFpbCI6ImRpc2NvcmRAbml0aGFuaW0ubWUifQ.CrhxAA.vKFuCgZ2aZ8-QPtkn2DLFFK_OsQ&amp;source=link">click this link</a>.
+          </div></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]-->
+      <!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]--><div style="margin:0 auto;max-width:640px;background:#ffffff;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:#ffffff;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:0px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;padding:0px 0px 50px;" align="center"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;border-spacing:0px;" align="center" border="0"><tbody><tr><td style="width:640px;"><a href="https://discordapp.com/verify?token=eyJpZCI6MTMyOTI1MDQzOTgxMjg3NDI0LCJlbWFpbCI6ImRpc2NvcmRAbml0aGFuaW0ubWUifQ.CrhxAA.vKFuCgZ2aZ8-QPtkn2DLFFK_OsQ&amp;source=button" target="_blank"><img alt="" title="" height="auto" src="https://cdn.discordapp.com/email_assets/8f24311664717eda5ad976e563779084.png" style="border:none;border-radius:;display:block;outline:none;text-decoration:none;width:100%;height:auto;" width="640"></a></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]-->
+      <!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]--></div><div style="margin:0 auto;max-width:640px;background:transparent;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:transparent;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:0px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;"><div style="font-size:1px;line-height:12px;">&nbsp;</div></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]-->
+      <!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]--><div style="margin:0 auto;max-width:640px;background:#ffffff;box-shadow:0px 1px 5px rgba(0,0,0,0.1);border-radius:4px;overflow:hidden;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:#ffffff;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:0px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;padding:20px 20px 0px 40px;" align="left"><div style="cursor:auto;color:#43B581;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:14px;font-weight:bold;line-height:16px;">FUN FACT #4</div></td></tr><tr><td style="word-break:break-word;font-size:0px;padding:5px 20px 20px 40px;" align="left"><div style="cursor:auto;color:#737F8D;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:14px;line-height:22px;">
+      The Discord logo is named Clyde.
+    </div></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]-->
+      <!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0" width="640" align="center" style="width:640px;">
+        <tr>
+          <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+      <![endif]--><div style="margin:0 auto;max-width:640px;background:transparent;"><table cellpadding="0" cellspacing="0" style="font-size:0px;width:100%;background:transparent;" align="center" border="0"><tbody><tr><td style="text-align:center;vertical-align:top;font-size:0px;padding:20px 0px;"><!--[if mso | IE]>
+      <table border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;width:640px;">
+      <![endif]--><div aria-labelledby="mj-column-per-100" class="mj-column-per-100" style="vertical-align:top;display:inline-block;font-size:13px;text-align:left;width:100%;"><table cellpadding="0" cellspacing="0" width="100%" border="0"><tbody><tr><td style="word-break:break-word;font-size:0px;padding:0px;" align="center"><div style="cursor:auto;color:#99AAB5;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:12px;line-height:24px;">
+      Sent by Discord • <a href="https://blog.discordapp.com/" style="color:#1EB0F4;text-decoration:none;">check our blog</a> • <a href="https://twitter.com/discordapp" style="color:#1EB0F4;text-decoration:none;">@discordapp</a>
+    </div></td></tr><tr><td style="word-break:break-word;font-size:0px;padding:0px;" align="center"><div style="cursor:auto;color:#99AAB5;font-family:Whitney, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif;font-size:12px;line-height:24px;">
+      401 California Dr, Burlingame, CA 94010
+    </div></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
+      </td></tr></table>
+      <![endif]--></div>
+<img width="1px" height="1px" alt="" src="http://email.mailgun.discordapp.com/o/eJwNyzEOgCAMAMDXyEjaSlsYeAwCBhKVBPx_9PYr0VVX8DA9EqBAQEIFZLI7eesVGDcH18jpamO9pkUUDV5UlE8Rp0zkQQh4z0HSyWRmLH3lMcsfn_629PTb3vUDpI0dDA"></body>
+</html>
+--===============4703563855924240276==--
+
+--===============0760586063321723792==--
