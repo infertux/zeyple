@@ -143,7 +143,7 @@ class ZeypleTest(unittest.TestCase):
             Content-Type: text/plain; charset="us-ascii"
             Content-Transfer-Encoding: quoted-printable
 
-            =C3=83=C2=A4 =C3=83=C2=B6 =C3=83=C2=BC
+            =C3=A4 =C3=B6 =C3=BC
             --BOUNDARY--""")
 
         email = self.zeyple.process_message(dedent("""\
@@ -157,7 +157,7 @@ class ZeypleTest(unittest.TestCase):
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
 
-            Ã¤ Ã¶ Ã¼""").encode('utf-8'), [TEST1_EMAIL])[0]
+            ä ö ü""").encode('utf-8'), [TEST1_EMAIL])[0]
 
         self.assertValidMimeMessage(email, mime_message)
 

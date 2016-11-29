@@ -17,14 +17,16 @@ try:
 except ImportError:
     from ConfigParser import SafeConfigParser  # Python 2
 
-# Boiler plate to avoid dependency from six
+# Boiler plate to avoid dependency on six
 # BBB: Python 2.7 support
 PY3K = sys.version_info > (3, 0)
-binary_string = bytes if PY3K else str
-if PY3K:
-    message_from_binary = email.message_from_bytes
-else:
-    message_from_binary = email.message_from_string
+
+
+def message_from_binary(message):
+    if PY3K:
+        return email.message_from_bytes(message)
+    else:
+        return email.message_from_string(message)
 
 
 def as_binary_string(email):
@@ -32,6 +34,13 @@ def as_binary_string(email):
         return email.as_bytes()
     else:
         return email.as_string()
+
+
+def encode_string(string):
+    if isinstance(string, bytes):
+        return string
+    else:
+        return string.encode('utf-8')
 
 
 __title__ = 'Zeyple'
@@ -85,7 +94,7 @@ class Zeyple:
 
     def process_message(self, message_data, recipients):
         """Encrypts the message with recipient keys"""
-        assert isinstance(message_data, binary_string)
+        message_data = encode_string(message_data)
 
         in_message = message_from_binary(message_data)
         logging.info(
@@ -161,6 +170,7 @@ class Zeyple:
 
         else:
             payload = in_message.get_payload()
+            payload = encode_string(payload)
 
             qp = email.charset.Charset('ascii')
             qp.body_encoding = email.charset.QP
@@ -205,7 +215,7 @@ class Zeyple:
 
     def _encrypt_payload(self, payload, key_ids):
         """Encrypts the payload with the given keys"""
-        assert isinstance(payload, binary_string)
+        payload = encode_string(payload)
 
         plaintext = BytesIO(payload)
         ciphertext = BytesIO()
