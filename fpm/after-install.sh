@@ -1,5 +1,6 @@
 add_postfix_master_config() {
 cat >> /etc/postfix/master.cf <<'CONF'
+###BEGIN-ZEYPLE
 zeyple    unix  -       n       n       -       -       pipe
   user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
 
@@ -12,6 +13,7 @@ localhost:10026 inet  n       -       n       -       10      smtpd
   -o smtpd_recipient_restrictions=permit_mynetworks,reject
   -o mynetworks=127.0.0.0/8
   -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+###END-ZEYPLE
 CONF
 }
 
