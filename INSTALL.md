@@ -52,8 +52,8 @@ You need to be _root_ here - make sure you understand what you are doing.
       -o smtpd_client_restrictions=
       -o smtpd_sender_restrictions=
       -o smtpd_recipient_restrictions=permit_mynetworks,reject
-      -o mynetworks=127.0.0.0/8
-      -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+      -o mynetworks=127.0.0.0/8,[::1]/128
+      -o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128
     CONF
 
     cat >> /etc/postfix/main.cf <<'CONF'
