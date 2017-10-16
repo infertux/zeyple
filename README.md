@@ -8,8 +8,10 @@
 1. Then encrypts them if it's got the recipient's GPG public key
 1. Finally it puts them back into the queue
 
+    ```
     unencrypted email   ||   encrypted email
     sender --> Postfix --> Zeyple --> Postfix --> recipient(s)
+    ```
 
 
 _Why should I care? If you are a sysadmin who receives emails from various
