@@ -15,17 +15,22 @@ You need to be _root_ here - make sure you understand what you are doing.
 
 1. Install GnuPG and the Python wrapper for the GPGME library.
 
+    ```
     apt-get install gnupg python-gpgme sudo
+    ```
 
 1. Since Zeyple is going to read and encrypt your emails, it is recommended to
    create a dedicated user account for this task (using the "postfix" user is
    very discouraged according to [the
    doc](http://www.postfix.org/FILTER_README.html).
 
+    ```
     adduser --system --no-create-home --disabled-login zeyple
+    ```
 
 1. Import public keys for all potential recipients.
 
+    ```
     mkdir -p /var/lib/zeyple/keys
     chmod 700 /var/lib/zeyple/keys
     chown zeyple /var/lib/zeyple/keys
@@ -34,10 +39,13 @@ You need to be _root_ here - make sure you understand what you are doing.
     sudo -u zeyple gpg --homedir /var/lib/zeyple/keys \
       --keyserver hkp://keys.gnupg.net \
       --search you@domain.tld
+    ```
 
 1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.
 
+    ```
     cp zeyple.conf.example /etc/zeyple.conf
+    ```
 
     Adjust the file for your needs. Default values should be fine in most cases.
 
