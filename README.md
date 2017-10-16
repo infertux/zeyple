@@ -9,7 +9,7 @@
 1. Finally it puts them back into the queue
 
     ```
-    unencrypted email   ||   encrypted email
+         unencrypted email   ||   encrypted email
     sender --> Postfix --> Zeyple --> Postfix --> recipient(s)
     ```
 
