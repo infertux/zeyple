@@ -15,27 +15,31 @@ You need to be _root_ here - make sure you understand what you are doing.
 
 1. Install GnuPG and the Python wrapper for the GPGME library.
 
-    ```bash apt-get install gnupg python-gpgme sudo ```
+    apt-get install gnupg python-gpgme sudo
 
 1. Since Zeyple is going to read and encrypt your emails, it is recommended to
    create a dedicated user account for this task (using the "postfix" user is
    very discouraged according to [the
    doc](http://www.postfix.org/FILTER_README.html).
 
-    ```bash adduser --system --no-create-home --disabled-login zeyple ```
+    adduser --system --no-create-home --disabled-login zeyple
 
 1. Import public keys for all potential recipients.
 
-    ```bash mkdir -p /var/lib/zeyple/keys && chmod 700 /var/lib/zeyple/keys &&
-    chown zeyple: /var/lib/zeyple/keys sudo -u zeyple gpg --homedir
-    /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search
-    you@domain.tld # repeat for each key ```
+    mkdir -p /var/lib/zeyple/keys
+    chmod 700 /var/lib/zeyple/keys
+    chown zeyple /var/lib/zeyple/keys
+
+    # repeat this for each key / e-mail address
+    sudo -u zeyple gpg --homedir /var/lib/zeyple/keys \
+      --keyserver hkp://keys.gnupg.net \
+      --search you@domain.tld
 
 1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.
 
-    ```bash cp zeyple.conf.example /etc/zeyple.conf vim /etc/zeyple.conf ```
+    cp zeyple.conf.example /etc/zeyple.conf
 
-    Default values should be fine in most cases.
+    Adjust the file for your needs. Default values should be fine in most cases.
 
 1. Plug it into Postfix.
 
@@ -85,5 +89,6 @@ my key with `gpg --recv-keys 09A98A9B` then running `git tag -v $(git tag | tail
 
 Manually remove the added lines in `/etc/postfix/{main,master}.cf` then
 
-```bash rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /var/lib/zeyple
-/var/log/zeyple.log userdel zeyple postfix reload ```
+    rm -rf /etc/zeyple.conf /usr/local/bin/zeyple.py /var/lib/zeyple /var/log/zeyple.log
+    userdel zeyple
+    postfix reload
