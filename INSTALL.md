@@ -4,9 +4,9 @@ A few options are available to install Zeyple, feel free to use the one that
 suits you best.
 
 1. [Chef cookbook](https://github.com/infertux/chef-zeyple)
-1. [Third-party Bash
-   script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh)
-   [[1]](#fn-1)
+1. [Bash script (3rd party)](
+	 https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [[1]](#fn-1)
+1. [ansible role (3rd party)](https://galaxy.ansible.com/mimacom/zeyple/)
 1. By hand - follow instructions below: [[1]](#fn-1)
 
 ---
@@ -39,26 +39,34 @@ You need to be _root_ here - make sure you understand what you are doing.
 
 1. Plug it into Postfix.
 
-    ```bash cat >> /etc/postfix/master.cf <<'CONF' zeyple    unix  -       n
-    n       -       -       pipe user=zeyple argv=/usr/local/bin/zeyple.py
-    ${recipient}
 
-    localhost:10026 inet  n       -       n       -       10      smtpd -o
-    content_filter= -o
-    receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
-    -o smtpd_helo_restrictions= -o smtpd_client_restrictions= -o
-    smtpd_sender_restrictions= -o
-    smtpd_recipient_restrictions=permit_mynetworks,reject -o
-    mynetworks=127.0.0.0/8 -o smtpd_authorized_xforward_hosts=127.0.0.0/8 CONF
+    ```bash
+    cat >> /etc/postfix/master.cf <<'CONF'
+    zeyple    unix  -       n       n       -       -       pipe
+      user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
 
-    cat >> /etc/postfix/main.cf <<'CONF' content_filter = zeyple CONF
+    localhost:10026 inet  n       -       n       -       10      smtpd
+      -o content_filter=
+      -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
+      -o smtpd_helo_restrictions=
+      -o smtpd_client_restrictions=
+      -o smtpd_sender_restrictions=
+      -o smtpd_recipient_restrictions=permit_mynetworks,reject
+      -o mynetworks=127.0.0.0/8
+      -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+    CONF
 
-    cp zeyple.py /usr/local/bin/zeyple.py chmod 744 /usr/local/bin/zeyple.py &&
-    chown zeyple: /usr/local/bin/zeyple.py
+    cat >> /etc/postfix/main.cf <<'CONF'
+    content_filter = zeyple
+    CONF
+
+    cp zeyple.py /usr/local/bin/zeyple.py
+    chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
 
     touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 
-    postfix reload ```
+    postfix reload
+    ```
 
     As a side note, `localhost:10026` is used to reinject email into the queue
     bypassing the _zeyple_ `content_filter`.
@@ -79,4 +87,3 @@ Manually remove the added lines in `/etc/postfix/{main,master}.cf` then
 
 ```bash rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /var/lib/zeyple
 /var/log/zeyple.log userdel zeyple postfix reload ```
-
