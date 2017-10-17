@@ -170,7 +170,9 @@ class Zeyple:
             payload = message.get_payload()
 
         else:
-            payload = in_message.get_payload()
+            # get and decode payload according to the
+            # Content-Transfer-Encoding header
+            payload = in_message.get_payload(decode=True)
             payload = encode_string(payload)
 
             quoted_printable = email.charset.Charset('ascii')
