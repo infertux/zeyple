@@ -1,6 +1,12 @@
-## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.0...master))
+## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.1...master))
 
   * TBD
+
+## v1.2.1, 2017-10-18 ([changes](https://github.com/infertux/zeyple/compare/v1.2.0...v1.2.1))
+
+  * [BUGFIX]  Honour "quoted-printable" encoding (#39)
+  * [TWEAK]   Improve FPM remove script to delete Zeyple config
+  * [MISC]    Drop support for Python 3.5 and add support for 3.6
 
 ## v1.2.0, 2016-11-29 ([changes](https://github.com/infertux/zeyple/compare/v1.1.0...v1.2.0))
 
