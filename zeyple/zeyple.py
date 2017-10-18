@@ -49,7 +49,7 @@ __title__ = 'Zeyple'
 __version__ = '1.2.0'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
-__copyright__ = 'Copyright 2012-2016 Cédric Félizard'
+__copyright__ = 'Copyright 2012-2017 Cédric Félizard'
 
 
 class Zeyple:

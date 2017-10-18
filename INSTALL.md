@@ -2,9 +2,9 @@
 
 A few options are available to install Zeyple, feel free to use the one that suits you best.
 
-1. [Chef cookbook](https://github.com/infertux/chef-zeyple)
-1. [Third-party Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [[1]](#fn-1)
-1. [ansible role (3rd party)](https://galaxy.ansible.com/mimacom/zeyple/)
+1. [Chef cookbook](https://supermarket.chef.io/cookbooks/zeyple)
+1. [Ansible role](https://galaxy.ansible.com/mimacom/zeyple/)
+1. [Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [[1]](#fn-1)
 1. By hand - follow instructions below: [[1]](#fn-1)
 
 ---
