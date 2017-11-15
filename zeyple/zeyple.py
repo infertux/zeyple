@@ -235,12 +235,14 @@ class Zeyple:
     def _user_key(self, email):
         """Returns the GPG key for the given email address"""
         logging.info("Trying to encrypt for %s", email)
-        keys = [key for key in self.gpg.keylist(email)]
 
-        if keys:
-            key = keys.pop()  # NOTE: looks like keys[0] is the master key
-            key_id = key.subkeys[0].keyid
-            return key_id
+        # Explicit matching of email and uid.email necessary.
+        # Otherwise gpg.keylist will return a list of keys
+        # for searches like "n"
+        for key in self.gpg.keylist(email):
+            for uid in key.uids:
+                if uid.email == email:
+                    return key.subkeys[0].keyid
 
         return None
 
