@@ -138,6 +138,7 @@ class Zeyple:
             'Content-Description',
             "PGP/MIME version identification",
         )
+        del ret['MIME-Version']
         return ret
 
     def _get_encrypted_part(self, payload):
@@ -153,6 +154,7 @@ class Zeyple:
             'inline',
             filename='encrypted.asc',
         )
+        del ret['MIME-Version']
         return ret
 
     def _encrypt_message(self, in_message, key_id):
@@ -170,18 +172,21 @@ class Zeyple:
             payload = message.get_payload()
 
         else:
-            # get and decode payload according to the
-            # Content-Transfer-Encoding header
-            payload = in_message.get_payload(decode=True)
-            payload = encode_string(payload)
-
-            quoted_printable = email.charset.Charset('ascii')
-            quoted_printable.body_encoding = email.charset.QP
+            payload = in_message.get_payload()
+            maintype = in_message.get_content_maintype()
+            subtype = in_message.get_content_subtype()
+            charset = in_message.get_content_charset()
+            encoding = in_message["Content-Transfer-Encoding"]
 
             message = email.mime.nonmultipart.MIMENonMultipart(
-                'text', 'plain', charset='utf-8'
+                maintype, subtype, charset=charset
             )
-            message.set_payload(payload, charset=quoted_printable)
+            if encoding:
+                message.add_header("Content-Transfer-Encoding", encoding)
+
+            message.set_payload(payload)
+
+            del message['MIME-Version']
 
             mixed = email.mime.multipart.MIMEMultipart(
                 'mixed',
