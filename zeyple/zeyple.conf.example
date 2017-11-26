@@ -1,5 +1,7 @@
 [zeyple]
 log_file = /var/log/zeyple.log
+hide_subject = False
+hidden_subject_replacement = Zeyple encrypted message
 
 [gpg]
 home = /var/lib/zeyple/keys
@@ -7,4 +9,3 @@ home = /var/lib/zeyple/keys
 [relay]
 host = localhost
 port = 10026
-

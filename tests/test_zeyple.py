@@ -35,6 +35,8 @@ class ZeypleTest(unittest.TestCase):
         config.add_section('zeyple')
         config.set('zeyple', 'log_file', self.logfile)
         config.set('zeyple', 'add_header', 'true')
+        config.set('zeyple', 'hide_subject', 'true')
+        config.set('zeyple', 'hidden_subject_replacement', 'Encrypted')
 
         config.add_section('gpg')
         config.set('gpg', 'home', self.homedir)
@@ -56,7 +58,10 @@ class ZeypleTest(unittest.TestCase):
         self.zeyple._send_message = Mock()  # don't try to send emails
 
     def tearDown(self):
-        shutil.rmtree(self.tmpdir)
+        try:
+            shutil.rmtree(self.tmpdir)
+        except OSError:
+            pass
 
     def decrypt(self, data):
         gpg = subprocess.Popen(
@@ -118,6 +123,8 @@ class ZeypleTest(unittest.TestCase):
             Content-Type: text/plain; charset="us-ascii"
             Content-Transfer-Encoding: quoted-printable
 
+            Original subject: Hello
+
             test
             --BOUNDARY--""")
 
@@ -132,6 +139,8 @@ class ZeypleTest(unittest.TestCase):
 
             test""").encode('ascii'), [TEST1_EMAIL])[0]
 
+        assert email.get('Subject') == self.zeyple.config.get('zeyple', 'hidden_subject_replacement')
+
         self.assertValidMimeMessage(email, mime_message)
 
     def test_process_message_with_unicode_message(self):
@@ -142,6 +151,8 @@ class ZeypleTest(unittest.TestCase):
             MIME-Version: 1.0
             Content-Type: text/plain; charset="us-ascii"
             Content-Transfer-Encoding: quoted-printable
+
+            Original subject: Hello
 
             =C3=A4 =C3=B6 =C3=BC
             --BOUNDARY--""")
@@ -158,6 +169,8 @@ class ZeypleTest(unittest.TestCase):
             Content-Transfer-Encoding: 8bit
 
             ä ö ü""").encode('utf-8'), [TEST1_EMAIL])[0]
+
+        assert email.get('Subject') == self.zeyple.config.get('zeyple', 'hidden_subject_replacement')
 
         self.assertValidMimeMessage(email, mime_message)
 
@@ -198,6 +211,8 @@ class ZeypleTest(unittest.TestCase):
             From: root@example.org (root)
 
         """) + mime_message).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email.get('Subject') == self.zeyple.config.get('zeyple', 'hidden_subject_replacement')
 
         self.assertValidMimeMessage(email, mime_message)
 
