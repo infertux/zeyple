@@ -45,6 +45,13 @@ def encode_string(string):
         return string.encode('utf-8')
 
 
+def decode_string(string):
+    if isinstance(string, str):
+        return string
+    else:
+        return string.decode('utf-8')
+
+
 __title__ = 'Zeyple'
 __version__ = '1.2.1'
 __author__ = 'Cédric Félizard'
@@ -173,6 +180,15 @@ class Zeyple:
             # get and decode payload according to the
             # Content-Transfer-Encoding header
             payload = in_message.get_payload(decode=True)
+
+            # preserve original subject when it is hidden later on
+            if self.config.has_option('zeyple', 'hide_subject') and \
+               self.config.getboolean('zeyple', 'hide_subject') and \
+               in_message.get('Subject') is not None:
+                    payload = ('Original subject: ' +
+                               in_message.get('Subject') + "\n\n" +
+                               decode_string(payload))
+
             payload = encode_string(payload)
 
             quoted_printable = email.charset.Charset('ascii')
@@ -202,6 +218,18 @@ class Zeyple:
         out_message = copy.copy(in_message)
         out_message.preamble = "This is an OpenPGP/MIME encrypted " \
                                "message (RFC 4880 and 3156)"
+
+        # replace subject with defined alternative
+        if self.config.has_option('zeyple', 'hide_subject') and \
+           self.config.getboolean('zeyple', 'hide_subject'):
+            replacement = 'Zeyple encrypted message'
+
+            if self.config.has_option('zeyple', 'hidden_subject_replacement'):
+                replacement = self.config.get(
+                    'zeyple',
+                    'hidden_subject_replacement'
+                )
+            out_message.replace_header('Subject', replacement)
 
         if 'Content-Type' not in out_message:
             out_message['Content-Type'] = 'multipart/encrypted'
