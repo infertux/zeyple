@@ -1,5 +1,5 @@
 language: python
-python:
+python: # XXX: keep in sync with tox.ini
   - 2.7
   - 3.4
   - 3.6
