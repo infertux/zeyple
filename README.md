@@ -33,6 +33,10 @@ Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/
 
 Although tested only with [Postfix](http://www.postfix.org/), Zeyple should integrate nicely with any MTA which provides a [filter](http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter")/hook mechanism. Please let me know if you experiment with this.
 
+## Docker
+
+A [Docker image](https://gitlab.com/nebulon42/zeyple-docker) is available for development purposes.
+
 ## Vagrant
 
 A fully-setup test-environment is available to easily test your modifications.
