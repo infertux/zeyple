@@ -169,19 +169,24 @@ class Zeyple:
             payload = message.get_payload()
 
         else:
-            payload = in_message.get_payload()
-            maintype = in_message.get_content_maintype()
-            subtype = in_message.get_content_subtype()
-            charset = in_message.get_content_charset()
-            encoding = in_message["Content-Transfer-Encoding"]
-
             message = email.mime.nonmultipart.MIMENonMultipart(
-                maintype, subtype, charset=charset
+                in_message.get_content_maintype(),
+                in_message.get_content_subtype()
             )
+
+            message.set_payload(in_message.get_payload())
+
+            # list of additional parameters in content-type
+            params = in_message.get_params()
+            if params:
+                # first item is the main/sub type so discard it
+                del params[0]
+                for param, value in params:
+                    message.set_param(param, value, "Content-Type", False)
+
+            encoding = in_message["Content-Transfer-Encoding"]
             if encoding:
                 message.add_header("Content-Transfer-Encoding", encoding)
-
-            message.set_payload(payload)
 
             del message['MIME-Version']
 
