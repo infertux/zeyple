@@ -114,7 +114,6 @@ class ZeypleTest(unittest.TestCase):
 
         mime_message = dedent("""\
             --BOUNDARY
-            MIME-Version: 1.0
             Content-Type: text/plain
 
             test
@@ -138,7 +137,6 @@ class ZeypleTest(unittest.TestCase):
 
         mime_message = dedent("""\
             --BOUNDARY
-            MIME-Version: 1.0
             Content-Type: text/plain; charset=utf-8
             Content-Transfer-Encoding: 8bit
 

@@ -173,8 +173,8 @@ class Zeyple:
                 in_message.get_content_maintype(),
                 in_message.get_content_subtype()
             )
-
-            message.set_payload(in_message.get_payload())
+            payload = encode_string(in_message.get_payload())
+            message.set_payload(payload)
 
             # list of additional parameters in content-type
             params = in_message.get_params()
