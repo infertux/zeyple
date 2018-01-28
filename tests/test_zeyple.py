@@ -114,9 +114,7 @@ class ZeypleTest(unittest.TestCase):
 
         mime_message = dedent("""\
             --BOUNDARY
-            MIME-Version: 1.0
-            Content-Type: text/plain; charset="us-ascii"
-            Content-Transfer-Encoding: quoted-printable
+            Content-Type: text/plain
 
             test
             --BOUNDARY--""")
@@ -139,11 +137,10 @@ class ZeypleTest(unittest.TestCase):
 
         mime_message = dedent("""\
             --BOUNDARY
-            MIME-Version: 1.0
-            Content-Type: text/plain; charset="us-ascii"
-            Content-Transfer-Encoding: quoted-printable
+            Content-Type: text/plain; charset=utf-8
+            Content-Transfer-Encoding: 8bit
 
-            =C3=A4 =C3=B6 =C3=BC
+            ä ö ü
             --BOUNDARY--""")
 
         email = self.zeyple.process_message(dedent("""\
