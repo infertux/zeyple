@@ -57,11 +57,6 @@ Many thanks to [Harry Knitter](http://www.linux-magazine.com/Issues/2013/153/Ema
 - http://blog.infertux.com/2015/10/25/announcing-zeyple/
 - http://labs.infertux.com/zeyple/
 
-## Support
-
-Bitcoin donations to support Zeyple: [192TgFGjiRKCJtXAQAv1urnvQXGZV2wwBt](bitcoin:192TgFGjiRKCJtXAQAv1urnvQXGZV2wwBt?message=Zeyple) :)
-
 ## License
 
 AGPLv3+
-

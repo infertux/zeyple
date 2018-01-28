@@ -1,6 +1,10 @@
-## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.1...master))
+## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...master))
 
   * TBD
+
+## v1.2.2, 2018-01-28 ([changes](https://github.com/infertux/zeyple/compare/v1.2.1...v1.2.2))
+
+  * [BUGFIX]  Copy content headers from original single part email (#44)
 
 ## v1.2.1, 2017-10-18 ([changes](https://github.com/infertux/zeyple/compare/v1.2.0...v1.2.1))
 
