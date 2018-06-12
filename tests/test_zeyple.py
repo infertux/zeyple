@@ -96,6 +96,8 @@ class ZeypleTest(unittest.TestCase):
 
         user_key = self.zeyple._user_key(TEST1_EMAIL)
         assert user_key == TEST1_ID
+        user_key = self.zeyple._user_key(TEST1_EMAIL.upper())
+        assert user_key == TEST1_ID
 
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""

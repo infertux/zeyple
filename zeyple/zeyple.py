@@ -248,7 +248,7 @@ class Zeyple:
         # for searches like "n"
         for key in self.gpg.keylist(email):
             for uid in key.uids:
-                if uid.email == email:
+                if uid.email.lower() == email.lower():
                     return key.subkeys[0].keyid
 
         return None
