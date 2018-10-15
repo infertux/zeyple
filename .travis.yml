@@ -1,19 +1,8 @@
-language: python
-python: # XXX: keep in sync with tox.ini
-  - 2.7
-  - 3.6
-  - pypy
-  - pypy3
-matrix:
-  allow_failures:
-    - python: pypy
-    - python: pypy3
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libgpgme11-dev pylint
+language: go
+go:
+  - "1.x"
 install:
-  - pip install -r requirements.txt
-script:
-  - PYTHONPATH=. py.test
-after_script:
-  - pylint zeyple -f colorized -r no
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep ensure -v
+  - curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $GOPATH/bin v1.10.2
+  - golangci-lint --version

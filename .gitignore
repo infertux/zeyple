@@ -1,7 +1,2 @@
-*.swp
-*.pyc
-__pycache__/
-/.coverage
-/.tox
-/htmlcov/
-*.deb
+/vendor/
+/zeyple
