@@ -1,5 +1,19 @@
 [zeyple]
 log_file = /var/log/zeyple.log
+#log_file = /dev/stdout
+
+action_when_key_missing = import|send_plain|blackhole
+force_encryption = false
+
+# Automatically try to import recipient key if missing
+auto_import_recipient_key = false
+
+# What Zeyple should do with the email if an error happens during processing
+action_upon_failure = skip|send_plain|send_error_template
+
+# Sign outgoing emails with this key
+signing_key = 0x1234
+
 
 [gpg]
 home = /var/lib/zeyple/keys

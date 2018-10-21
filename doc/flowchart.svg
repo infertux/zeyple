@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created by diasvg.py -->
+<svg width="49.387cm" height="39.715cm" viewBox="0.258 -0.100 49.645 39.615"
+ xmlns="http://www.w3.org/2000/svg"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="5.836,-0.050 8.992,-0.050 8.264,1.950 5.108,1.950 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="5.836,-0.050 8.992,-0.050 8.264,1.950 5.108,1.950 "/>
+<text x="7.050" y="1.145"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+email</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="7.050,4.579 13.792,7.950 7.050,11.321 0.308,7.950 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,4.579 13.792,7.950 7.050,11.321 0.308,7.950 "/>
+<text x="7.050" y="7.345"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+recipient public key</text>
+<text x="7.050" y="8.145"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+present</text>
+<text x="7.050" y="8.945"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+in keyring?</text>
+<rect x="17.524" y="7.000" width="3.552" height="1.900" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="17.524" y="7.000" width="3.552" height="1.900" fill="none" stroke="#000000" stroke-width="0.100" />
+<text x="19.300" y="8.145"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+encrypt</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="32.500,9.016 37.368,11.450 32.500,13.884 27.632,11.450 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="32.500,9.016 37.368,11.450 32.500,13.884 27.632,11.450 "/>
+<text x="32.500" y="11.645"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+signing_key != nil</text>
+<rect x="38.439" y="10.502" width="2.422" height="1.900" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="38.439" y="10.502" width="2.422" height="1.900" fill="none" stroke="#000000" stroke-width="0.100" />
+<text x="39.650" y="11.647"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+sign</text>
+<rect x="40.210" y="35.902" width="5.280" height="1.900" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="40.210" y="35.902" width="5.280" height="1.900" fill="none" stroke="#00FF00" stroke-width="0.100" />
+<text x="42.850" y="37.047"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+send to relay</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="7.050,13.281 12.393,15.952 7.050,18.624 1.707,15.952 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,13.281 12.393,15.952 7.050,18.624 1.707,15.952 "/>
+<text x="7.050" y="16.147"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+auto_import == true</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="23.750,27.309 29.837,30.352 23.750,33.396 17.663,30.352 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,27.309 29.837,30.352 23.750,33.396 17.663,30.352 "/>
+<text x="23.750" y="30.547"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+force_encryption == true</text>
+<rect x="17.061" y="15.002" width="4.538" height="1.900" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="17.061" y="15.002" width="4.538" height="1.900" fill="none" stroke="#000000" stroke-width="0.100" />
+<text x="19.330" y="16.147"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+import key</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="23.750,18.537 28.681,21.002 23.750,23.468 18.819,21.002 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,18.537 28.681,21.002 23.750,23.468 18.819,21.002 "/>
+<text x="23.750" y="20.797"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+key imported</text>
+<text x="23.750" y="21.597"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+successfully?</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="39.650,13.891 44.398,16.265 39.650,18.639 34.902,16.265 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="39.650,13.891 44.398,16.265 39.650,18.639 34.902,16.265 "/>
+<text x="39.650" y="16.060"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+signed</text>
+<text x="39.650" y="16.860"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+succesfully?</text>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,33.396 23.750,34.774 32.394,34.774 32.394,34.853 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="32.394,35.228 32.144,34.728 32.394,34.853 32.644,34.728 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="32.394,35.228 32.144,34.728 32.394,34.853 32.644,34.728 "/>
+<rect x="8.899" y="29.015" width="4.302" height="2.700" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="8.899" y="29.015" width="4.302" height="2.700" fill="none" stroke="#FF0000" stroke-width="0.100" />
+<text x="11.050" y="30.160"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+bounce</text>
+<text x="11.050" y="30.960"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+to sender</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="11.079,33.470 16.439,35.355 11.079,37.240 5.718,35.355 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.079,33.470 16.439,35.355 11.079,37.240 5.718,35.355 "/>
+<text x="11.079" y="35.550"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+bounce_cc != nil</text>
+<rect x="16.791" y="36.865" width="8.117" height="2.700" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<rect x="16.791" y="36.865" width="8.117" height="2.700" fill="none" stroke="#FF0000" stroke-width="0.100" />
+<text x="20.850" y="38.010"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+bounce to</text>
+<text x="20.850" y="38.810"  fill="#000000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+CC address</text>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="16.439,35.355 16.439,35.465 20.850,35.465 20.850,36.378 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="20.850,36.753 20.600,36.253 20.850,36.378 21.100,36.253 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="20.850,36.753 20.600,36.253 20.850,36.378 21.100,36.253 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,18.674 7.050,25.000 23.750,25.000 23.750,26.822 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="23.750,27.197 23.500,26.697 23.750,26.822 24.000,26.697 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,27.197 23.500,26.697 23.750,26.822 24.000,26.697 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="28.681,21.002 28.681,13.500 19.300,13.500 19.300,9.437 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="19.300,9.062 19.550,9.562 19.300,9.437 19.050,9.562 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="19.300,9.062 19.550,9.562 19.300,9.437 19.050,9.562 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="32.500,13.884 32.500,19.365 39.688,19.365 39.688,26.128 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="39.688,26.503 39.438,26.003 39.688,26.128 39.938,26.003 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="39.688,26.503 39.438,26.003 39.688,26.128 39.938,26.003 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="17.663,30.352 15.182,30.352 15.182,30.365 13.688,30.365 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="13.313,30.365 13.813,30.115 13.688,30.365 13.813,30.615 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="13.313,30.365 13.813,30.115 13.688,30.365 13.813,30.615 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="21.076,7.950 21.076,7.865 32.500,7.865 32.500,8.529 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="32.500,8.904 32.250,8.404 32.500,8.529 32.750,8.404 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="32.500,8.904 32.250,8.404 32.500,8.529 32.750,8.404 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,23.468 23.750,24.265 23.750,24.265 23.750,26.822 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="23.750,27.197 23.500,26.697 23.750,26.822 24.000,26.697 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,27.197 23.500,26.697 23.750,26.822 24.000,26.697 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="21.599,15.952 21.599,15.965 23.750,15.965 23.750,18.050 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="23.750,18.425 23.500,17.925 23.750,18.050 24.000,17.925 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="23.750,18.425 23.500,17.925 23.750,18.050 24.000,17.925 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="12.393,15.952 14.852,15.952 14.852,15.952 16.574,15.952 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="16.949,15.952 16.449,16.202 16.574,15.952 16.449,15.702 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="16.949,15.952 16.449,16.202 16.574,15.952 16.449,15.702 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,11.321 7.050,12.665 7.050,12.665 7.050,12.794 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="7.050,13.169 6.800,12.669 7.050,12.794 7.300,12.669 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,13.169 6.800,12.669 7.050,12.794 7.300,12.669 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,2.000 7.050,2.990 7.050,2.990 7.050,4.092 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="7.050,4.467 6.800,3.967 7.050,4.092 7.300,3.967 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="7.050,4.467 6.800,3.967 7.050,4.092 7.300,3.967 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="13.792,7.950 16.633,7.950 16.633,7.950 17.037,7.950 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="17.412,7.950 16.912,8.200 17.037,7.950 16.912,7.700 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="17.412,7.950 16.912,8.200 17.037,7.950 16.912,7.700 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="39.688,30.215 39.688,32.877 42.850,32.877 42.850,35.366 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="42.850,35.741 42.600,35.241 42.850,35.366 43.100,35.241 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="42.850,35.741 42.600,35.241 42.850,35.366 43.100,35.241 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="39.650,18.639 39.650,19.702 39.688,19.702 39.688,27.928 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="39.688,28.303 39.438,27.803 39.688,27.928 39.938,27.803 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="39.688,28.303 39.438,27.803 39.688,27.928 39.938,27.803 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="39.650,12.402 39.650,12.997 39.650,12.997 39.650,13.404 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="39.650,13.779 39.400,13.279 39.650,13.404 39.900,13.279 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="39.650,13.779 39.400,13.279 39.650,13.404 39.900,13.279 "/>
+<text x="15.188" y="29.915"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<text x="7.443" y="12.235"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="7.393" y="20.085"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="24.293" y="24.335"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="32.900" y="14.650"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="40.143" y="19.585"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="24.298" y="34.210"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+NO</text>
+<text x="17.143" y="34.935"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<text x="14.143" y="7.635"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<text x="36.788" y="10.965"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<text x="13.793" y="15.435"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="37.710,26.665 42.939,26.665 41.665,30.165 36.436,30.165 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="37.710,26.665 42.939,26.665 41.665,30.165 36.436,30.165 "/>
+<text x="39.688" y="27.810"  fill="#0000FF" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+encrypted</text>
+<text x="39.688" y="28.610"  fill="#0000FF" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+unsigned</text>
+<text x="39.688" y="29.410"  fill="#0000FF" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+email</text>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="44.366,26.590 49.595,26.590 48.321,30.090 43.093,30.090 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="44.366,26.590 49.595,26.590 48.321,30.090 43.093,30.090 "/>
+<text x="46.344" y="27.735"  fill="#00FF00" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+encrypted</text>
+<text x="46.344" y="28.535"  fill="#00FF00" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+signed</text>
+<text x="46.344" y="29.335"  fill="#00FF00" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+email</text>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="44.398,16.265 44.398,16.315 46.981,16.315 46.981,26.103 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="46.981,26.478 46.731,25.978 46.981,26.103 47.231,25.978 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="46.981,26.478 46.731,25.978 46.981,26.103 47.231,25.978 "/>
+<polygon fill="#FFFFFF" stroke="none" stroke-width="0.100" points="30.011,33.590 36.050,33.590 34.776,37.090 28.738,37.090 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="30.011,33.590 36.050,33.590 34.776,37.090 28.738,37.090 "/>
+<text x="32.394" y="34.735"  fill="#FF0000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+unencrypted</text>
+<text x="32.394" y="35.535"  fill="#FF0000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+unsigned</text>
+<text x="32.394" y="36.335"  fill="#FF0000" text-anchor="middle" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+email</text>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="46.344,30.140 46.344,32.865 42.850,32.865 42.850,35.367 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="42.850,35.742 42.600,35.242 42.850,35.367 43.100,35.242 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="42.850,35.742 42.600,35.242 42.850,35.367 43.100,35.242 "/>
+<polyline fill="none" stroke="#000000" stroke-width="0.100"  points="35.443,35.340 37.801,35.340 37.801,36.852 39.673,36.852 "/>
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="40.048,36.852 39.548,37.102 39.673,36.852 39.548,36.602 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="40.048,36.852 39.548,37.102 39.673,36.852 39.548,36.602 "/>
+<line x1="37.368" y1="11.450" x2="37.952" y2="11.451" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="38.327,11.452 37.826,11.701 37.952,11.451 37.828,11.201 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="38.327,11.452 37.826,11.701 37.952,11.451 37.828,11.201 "/>
+<text x="27.280" y="19.735"  fill="#000000" text-anchor="start" font-size="0.80" font-family="sans" font-style="normal" font-weight="400">
+YES</text>
+<line x1="11.050" y1="31.715" x2="11.071" y2="32.984" stroke="#000000" stroke-width="0.100" />
+<polygon fill="#000000" stroke="none" stroke-width="0.100" points="11.077,33.359 10.819,32.863 11.071,32.984 11.319,32.855 "/>
+<polygon fill="none" stroke="#000000" stroke-width="0.100"  points="11.077,33.359 10.819,32.863 11.071,32.984 11.319,32.855 "/>
+</svg>

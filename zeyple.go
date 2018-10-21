@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Cédric Félizard
+// Copyright 2012-2018 Cédric Félizard
 
 package main
 
@@ -7,11 +7,12 @@ import (
 	// "compress/gzip"
 	"crypto"
 	"fmt"
+	"os"
+	"runtime"
+
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
-	"os"
-	"runtime"
 )
 
 // var cfg *config
@@ -27,11 +28,22 @@ func main() {
 }
 
 func zeypleMain() error {
-	config := &packet.Config{
+	//config, err := loadConfig("./zeyple.conf", "/etc/zeyple.conf")
+
+	// CLI:
+	// zeyple --help
+	// zeyple enable|disable # calls `postconf ...`
+	// zeyple key --list
+	//            --import email@example.net
+	//            --delete email@example.net
+	// zeyple encrypt recipient1@example.net recipient2@foo.bar < message
+	//
+
+	entityConfig := &packet.Config{
 		DefaultHash: crypto.SHA256,
 	}
 
-	entity, err := openpgp.NewEntity("name", "comment", "email@example.net", config)
+	entity, err := openpgp.NewEntity("name", "comment", "email@example.net", entityConfig)
 	if err != nil {
 		fmt.Printf("%v", err)
 	}
