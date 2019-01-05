@@ -266,7 +266,7 @@ class Zeyple:
         logging.info("Sending message %s", message['Message-id'])
 
         smtp = smtplib.SMTP(self.config.get('relay', 'host'),
-                            self.config.get('relay', 'port'))
+                            self.config.getint('relay', 'port'))
 
         smtp.sendmail(message['From'], recipient, message.as_string())
         smtp.quit()
