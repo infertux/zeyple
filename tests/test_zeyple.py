@@ -15,12 +15,15 @@ from six.moves.configparser import ConfigParser
 import tempfile
 from textwrap import dedent
 from zeyple import zeyple
+import gpgme
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
 TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
+TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
+TEST_EXPIRED_EMAIL = 'test_expired@zeyple.example.com'
 
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
@@ -102,6 +105,18 @@ class ZeypleTest(unittest.TestCase):
         content = 'The key is under the carpet.'.encode('ascii')
         encrypted = self.zeyple._encrypt_payload(content, [TEST1_ID])
         assert self.decrypt(encrypted) == content
+
+    def test_expired_key(self):
+        """Encrypts with expired key"""
+        content = 'The key is under the carpet.'.encode('ascii')
+        successful = None
+        try:
+            self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
+            successful = True
+        except gpgme.GpgmeError as error:
+            assert str(error) == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
+
+        assert successful is None
 
     def test_encrypt_binary_data(self):
         """Encrypts utf-8 characters"""
