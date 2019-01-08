@@ -22,3 +22,6 @@ You will need the following development dependencies.
 
 To restrict the versions of Python tested by `tox`, you can use `tox -e py27,py34,pypy` for example.
 
+### Inspec
+
+The [Chef cookbook](https://github.com/infertux/chef-zeyple/blob/master/test/integration/default/inspec/zeyple_spec.rb) performs [integration tests](https://travis-ci.org/infertux/chef-zeyple) using a fully fledged Vagrant VM with Postfix installed.

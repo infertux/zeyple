@@ -1,7 +1,7 @@
 language: python
 python: # XXX: keep in sync with tox.ini
   - 2.7
-  - 3.6
+  - 3.7
   - pypy
   - pypy3
 matrix:
