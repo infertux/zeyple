@@ -38,7 +38,7 @@ chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
 
 touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 
-grep zeyple /etc/postfix/master.cf > /dev/null || add_postfix_master_config
-grep zeyple /etc/postfix/main.cf > /dev/null || add_postfix_main_config
+grep -q zeyple /etc/postfix/master.cf || add_postfix_master_config
+grep -q zeyple /etc/postfix/main.cf || add_postfix_main_config
 
 postfix reload
