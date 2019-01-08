@@ -237,7 +237,8 @@ class Zeyple:
         for key in recipient:
             if key.expired:
                 raise gpgme.GpgmeError(
-                    "Key with user email %s is expired!".format(key.uids[0].email))
+                    "Key with user email %s "
+                    "is expired!".format(key.uids[0].email))
 
         self.gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
                          plaintext, ciphertext)
