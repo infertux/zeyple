@@ -115,6 +115,11 @@ class Zeyple:
             if key_id:
                 out_message = self._encrypt_message(in_message, key_id)
 
+            elif self.config.has_option('zeyple', 'force_encrypt') and \
+                    self.config.getboolean('zeyple', 'force_encrypt'):
+                logging.error("No keys found, message will not be sent!")
+                continue
+
             else:
                 logging.warn("No keys found, message will be sent unencrypted")
                 out_message = copy.copy(in_message)

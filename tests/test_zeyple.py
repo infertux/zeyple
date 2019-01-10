@@ -237,3 +237,20 @@ class ZeypleTest(unittest.TestCase):
             contents = test_file.read()
 
         self.zeyple.process_message(contents, [TEST1_EMAIL]) # should not raise
+
+    def test_force_encryption(self):
+        """Tries to encrypt without key"""
+        filename = os.path.join(os.path.dirname(__file__), 'test.eml')
+        with open(filename, 'r') as test_file:
+            contents = test_file.read()
+
+        # set force_encrypt
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+
+        sent_messages = self.zeyple.process_message(contents, ['unknown@zeyple.example.com'])
+        assert len(sent_messages) == 0
+
+        sent_messages = self.zeyple.process_message(contents, [TEST1_EMAIL])
+        assert len(sent_messages) == 1
+
+        self.zeyple.config.remove_option('zeyple', 'force_encrypt')
