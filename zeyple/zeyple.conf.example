@@ -1,5 +1,6 @@
 [zeyple]
 log_file = /var/log/zeyple.log
+force_encrypt = 1
 
 [gpg]
 home = /var/lib/zeyple/keys
