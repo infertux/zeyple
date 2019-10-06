@@ -14,8 +14,10 @@ You need to be _root_ here - make sure you understand what you are doing.
 1. Install GnuPG and the Python wrapper for the GPGME library.
 
     ```bash
-    apt-get install gnupg python-gpgme sudo
+    apt-get install gnupg python-gpg sudo
     ```
+
+    In case `python-gpg` is not available you can also still use `python-gpgme`.
 
 1. Since Zeyple is going to read and encrypt your emails, it is recommended to create a dedicated user account for this task (using the "postfix" user is very discouraged according to [the doc](http://www.postfix.org/FILTER_README.html).
 
@@ -87,4 +89,3 @@ rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /var/lib/zeyple /var/log/zeypl
 userdel zeyple
 postfix reload
 ```
-

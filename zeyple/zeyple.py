@@ -17,7 +17,12 @@ try:
 except ImportError:
     from ConfigParser import SafeConfigParser  # Python 2
 
-import gpgme
+legacy_gpg = False
+try:
+    import gpg
+except ImportError:
+    import gpgme
+    legacy_gpg = True
 
 # Boiler plate to avoid dependency on six
 # BBB: Python 2.7 support
@@ -79,7 +84,11 @@ class Zeyple:
 
     @property
     def gpg(self):
-        protocol = gpgme.PROTOCOL_OpenPGP
+        global legacy_gpg
+        if legacy_gpg:
+            protocol = gpgme.PROTOCOL_OpenPGP
+        else:
+            protocol = gpg.constants.PROTOCOL_OpenPGP
 
         if self.config.has_option('gpg', 'executable'):
             executable = self.config.get('gpg', 'executable')
@@ -88,7 +97,10 @@ class Zeyple:
 
         home_dir = self.config.get('gpg', 'home')
 
-        ctx = gpgme.Context()
+        if legacy_gpg:
+            ctx = gpgme.Context()
+        else:
+            ctx = gpg.Context()
         ctx.set_engine_info(protocol, executable, home_dir)
         ctx.armor = True
 
@@ -230,10 +242,8 @@ class Zeyple:
 
     def _encrypt_payload(self, payload, key_ids):
         """Encrypts the payload with the given keys"""
+        global legacy_gpg
         payload = encode_string(payload)
-
-        plaintext = BytesIO(payload)
-        ciphertext = BytesIO()
 
         self.gpg.armor = True
 
@@ -241,14 +251,32 @@ class Zeyple:
 
         for key in recipient:
             if key.expired:
-                raise gpgme.GpgmeError(
-                    "Key with user email %s "
-                    "is expired!".format(key.uids[0].email))
+                if legacy_gpg:
+                    raise gpgme.GpgmeError(
+                        "Key with user email %s "
+                        "is expired!".format(key.uids[0].email))
+                else:
+                    raise gpg.errors.GPGMEError(
+                        "Key with user email %s "
+                        "is expired!".format(key.uids[0].email))
 
-        self.gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
-                         plaintext, ciphertext)
+        if legacy_gpg:
+            plaintext = BytesIO(payload)
+            ciphertext = BytesIO()
 
-        return ciphertext.getvalue()
+            self.gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
+                          plaintext, ciphertext)
+
+            return ciphertext.getvalue()
+        else:
+            (ciphertext, encresult, signresult) = self.gpg.encrypt(
+                gpg.Data(string=payload),
+                recipients=recipient,
+                sign=False,
+                always_trust=True
+            )
+
+            return ciphertext
 
     def _user_key(self, email):
         """Returns the GPG key for the given email address"""
