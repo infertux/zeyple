@@ -4,18 +4,21 @@ set -euxo pipefail
 
 TYPE=${1:-deb}
 
-cd $(dirname $0)
+cd "$(dirname "$0")"
 
 fpm -f -s dir -t "$TYPE" -n zeyple \
     --prefix="/usr/local/bin" \
     --vendor "infertux" \
     --maintainer "infertux" \
-    --version "$(grep -E "^__version__ = '(.+)'$" zeyple/zeyple.py | cut -d\' -f2)" \
+    --version "$(grep -E "^__version__ = '(.+)'$" ../zeyple/zeyple.py | cut -d\' -f2)" \
     --after-install after-install.sh \
     --before-remove before-remove.sh \
     --depends gnupg \
-    --depends python-gpgme \
+    --depends "python-gpgme | python-gpg" \
+    --depends "python-gpgme | libgpgme-dev" \
+    --depends "python-gpgme | swig" \
     --depends sudo \
-    -C zeyple \
+    -C ../zeyple \
+    -p zeyple.deb \
     zeyple.py \
     zeyple.conf.example
