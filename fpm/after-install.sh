@@ -33,7 +33,6 @@ chmod 700 /var/lib/zeyple/keys
 
 chown zeyple: /var/lib/zeyple/keys
 
-cp zeyple.py /usr/local/bin/zeyple.py
 chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
 
 touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
@@ -42,3 +41,6 @@ grep -q zeyple /etc/postfix/master.cf || add_postfix_master_config
 grep -q zeyple /etc/postfix/main.cf || add_postfix_main_config
 
 postfix reload
+
+# Install python requirements
+pip install gpg || pip install pygpgme
