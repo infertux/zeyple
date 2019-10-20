@@ -15,8 +15,7 @@ dpkg -i ./fpm/zeyple.deb
 cp /usr/local/bin/zeyple.conf.example /etc/zeyple.conf
 
 # Import GPG key
-gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg
-chown -R zeyple: /var/lib/zeyple/keys
+sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg
 
 echo "This is a test message" | mail -s "Test" root@localhost
 
