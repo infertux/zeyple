@@ -41,6 +41,3 @@ grep -q zeyple /etc/postfix/master.cf || add_postfix_master_config
 grep -q zeyple /etc/postfix/main.cf || add_postfix_main_config
 
 postfix reload
-
-# Install python requirements
-pip install gpg || pip install pygpgme

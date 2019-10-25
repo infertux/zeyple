@@ -80,7 +80,7 @@ def encode_string(string):
 
 
 __title__ = 'Zeyple'
-__version__ = '1.2.2-tng2'
+__version__ = '1.2.2'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
 __copyright__ = 'Copyright 2012-2018 Cédric Félizard'
