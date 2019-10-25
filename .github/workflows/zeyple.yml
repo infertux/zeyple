@@ -18,7 +18,10 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ruby ruby-dev rubygems build-essential gnupg python-gpg libgpgme-dev swig
+          sudo apt-get install debconf-utils
+          sudo debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Local only'"
+          sudo debconf-set-selections <<< "postfix postfix/mailname string localhost"
+          sudo apt-get install -y mailutils ruby ruby-dev rubygems build-essential sudo gnupg python-gpg libgpgme-dev swig
           python -m pip install --upgrade pip
           pip install -r requirements_gpg.txt
           sudo gem install --no-ri --no-rdoc fpm
@@ -26,6 +29,8 @@ jobs:
         run: python -m pytest tests/
       - name: Build deb package
         run: ./fpm/create
+      - name: End to end test using deb package
+        run:  sudo bash -ex ./tests/e2e.sh 
       - name: Upload deb package
         uses: actions/upload-artifact@v1
         with:
