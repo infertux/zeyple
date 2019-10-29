@@ -13,9 +13,9 @@ import copy
 from io import BytesIO
 
 try:
-    from configparser import SafeConfigParser  # Python 3
+    from configparser import ConfigParser  # Python 3
 except ImportError:
-    from ConfigParser import SafeConfigParser  # Python 2
+    from ConfigParser import ConfigParser  # Python 2
 
 legacy_gpg = False
 try:
@@ -73,7 +73,7 @@ class Zeyple:
     def load_configuration(self, filename):
         """Reads and parses the config file"""
 
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.read([
             os.path.join('/etc/', filename),
             filename,
@@ -264,8 +264,10 @@ class Zeyple:
             plaintext = BytesIO(payload)
             ciphertext = BytesIO()
 
-            self.gpg.encrypt(recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
-                          plaintext, ciphertext)
+            self.gpg.encrypt(
+                recipient, gpgme.ENCRYPT_ALWAYS_TRUST,
+                plaintext, ciphertext
+            )
 
             return ciphertext.getvalue()
         else:
