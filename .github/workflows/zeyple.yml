@@ -3,18 +3,25 @@ name: Zeyple test and deb package build
 on:
   push:
     branches:
-      - master
+    - master
+  pull_request:
+    branches:
+    - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [2.7, 3.7]
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v1
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 2.7
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -24,13 +31,13 @@ jobs:
           sudo apt-get install -y mailutils ruby ruby-dev rubygems build-essential sudo gnupg python-gpg libgpgme-dev swig
           python -m pip install --upgrade pip
           pip install -r requirements_gpg.txt
-          sudo gem install --no-ri --no-rdoc fpm
+          sudo gem install --no-document fpm
       - name: Test
         run: python -m pytest tests/
       - name: Build deb package
         run: ./fpm/create
       - name: End to end test using deb package
-        run:  sudo bash -ex ./tests/e2e.sh 
+        run:  sudo bash -ex ./tests/e2e.sh
       - name: Upload deb package
         uses: actions/upload-artifact@v1
         with:
