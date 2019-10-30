@@ -351,3 +351,24 @@ class ZeypleTest(unittest.TestCase):
         sent_messages = zeyple.process_message(contents, ['unknown@zeyple.example.com'])
         assert len(sent_messages) == 1
         assert sent_messages[0]['Subject'] == 'Verify Email'
+
+    def test_custom_missing_key_message(self):
+        contents = get_test_email()
+        missing_key_message_file = os.path.join(self.tmpdir, 'missing_key_message')
+        subject = 'No key dude!'
+        body = 'xxxYYYzzz'
+
+        with open(missing_key_message_file, 'w') as out:
+            out.write(body + '\n')
+        zeyple = self.get_zeyple(
+            DEFAULT_CONFIG_TEMPLATE + dedent("""\
+            missing_key_notification_file = {0}
+            missing_key_notification_subject = {1}
+            """).format(missing_key_message_file, subject)
+        )
+
+        sent_messages = zeyple.process_message(contents, ['unknown@zeyple.example.com'])
+
+        assert len(sent_messages) == 1
+        assert sent_messages[0]['Subject'] == subject
+        assert body in sent_messages[0].get_payload()
