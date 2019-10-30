@@ -88,14 +88,16 @@ __copyright__ = 'Copyright 2012-2018 Cédric Félizard'
 
 def get_config_from_file_handle(handle):
     config = ConfigParser()
-    config.read_file(handle)
+    if sys.version_info >= (3, 2):
+        config.read_file(handle)
+    else:
+        config.readfp(handle)
     if not config.sections():
         raise IOError('Cannot open config file.')
 
     if config.has_option('zeyple', 'missing_key_notification_file'):
         file_name = config.get('zeyple', 'missing_key_notification_file')
         with open(file_name) as handle:
-            set
             config.missing_key_notification_body = handle.read()
     elif not config.has_option('zeyple', 'missing_key_notification_body'):
         config.missing_key_notification_body = \
