@@ -187,7 +187,9 @@ class Zeyple:
             return self._get_missing_key_message(in_message, recipient)
 
     def _get_missing_key_message(self, in_message, recipient):
-        out_message = MIMEText(self.config.missing_key_notification_body)
+        out_message = MIMEText(
+            self.config.missing_key_notification_body, 'plain', 'utf-8'
+        )
         if self.config.has_option(
             'zeyple', 'missing_key_notification_subject'
         ):

@@ -4,7 +4,8 @@ log_file = /var/log/zeyple.log
 ### File name containing the body a notification email to be sent
 ### when no key is found. There is a nice default, however you
 ### may wish to give the recipient more specific instruction
-### how to get his key on your system:
+### how to get his key on your system. The file must be encoded
+### in UTF-8:
 
 # missing_key_notification_file = /etc/zeyple.notify
 

@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import unittest
 from mock import Mock
 import os
+import sys
 import subprocess
 import shutil
 import re
@@ -356,10 +357,14 @@ class ZeypleTest(unittest.TestCase):
         contents = get_test_email()
         missing_key_message_file = os.path.join(self.tmpdir, 'missing_key_message')
         subject = 'No key dude!'
-        body = 'xxxYYYzzz'
+        body = 'xxxYYYzzzäöü'
 
-        with open(missing_key_message_file, 'w') as out:
-            out.write(body + '\n')
+        if sys.version_info >= (3, 0):
+            with open(missing_key_message_file, 'w', encoding='utf-8') as out:
+                out.write(body + '\n')
+        else:
+            with open(missing_key_message_file, 'w') as out:
+                out.write((body + '\n').encode('utf-8'))
         zeyple = self.get_zeyple(
             DEFAULT_CONFIG_TEMPLATE + dedent("""\
             missing_key_notification_file = {0}
@@ -371,4 +376,6 @@ class ZeypleTest(unittest.TestCase):
 
         assert len(sent_messages) == 1
         assert sent_messages[0]['Subject'] == subject
-        assert body in sent_messages[0].get_payload()
+        assert sent_messages[0]['Content-Type'] == 'text/plain; charset="utf-8"'
+        payload = sent_messages[0].get_payload(decode=True)
+        assert body in payload.decode('utf-8')
