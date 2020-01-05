@@ -10,6 +10,7 @@ import email.mime.application
 import email.encoders
 import smtplib
 import copy
+import re
 from io import BytesIO
 
 try:
@@ -289,6 +290,11 @@ class Zeyple:
             for uid in key.uids:
                 if uid.email == email:
                     return key.subkeys[0].keyid
+
+        # Strip sub addressing tag
+        submail = re.sub('(\+[^@]+)', '', email)
+        if submail != email:
+            return self._user_key(submail)
 
         return None
 

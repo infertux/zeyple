@@ -25,6 +25,7 @@ except ImportError:
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
+TEST1_EMAIL_SUBADDRESS = 'test1+tag@zeyple.example.com'
 TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
 TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
@@ -103,6 +104,9 @@ class ZeypleTest(unittest.TestCase):
         assert self.zeyple._user_key('non_existant@example.org') is None
 
         user_key = self.zeyple._user_key(TEST1_EMAIL)
+        assert user_key == TEST1_ID
+
+        user_key = self.zeyple._user_key(TEST1_EMAIL_SUBADDRESS)
         assert user_key == TEST1_ID
 
     def test_encrypt_with_plain_text(self):
