@@ -289,7 +289,11 @@ class Zeyple:
             for uid in key.uids:
                 if uid.email == email:
                     return key.subkeys[0].keyid
-
+        if self.config.has_option('keymap'):
+            for mail_map in self.config.items('keymap'):
+                if mail_map[0] == email:
+                    for key in self.gpg.keylist('0x' + mail_map[1]):
+                        return key.subkeys[0].keyid
         return None
 
     def _add_zeyple_header(self, message):

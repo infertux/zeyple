@@ -9,3 +9,5 @@ home = /var/lib/zeyple/keys
 host = localhost
 port = 10026
 
+[keymap]
+mail@example.com = AAAAAAAAAAAAAAAA
