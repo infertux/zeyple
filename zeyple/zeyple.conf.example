@@ -1,6 +1,17 @@
 [zeyple]
 log_file = /var/log/zeyple.log
-force_encrypt = 1
+
+### File name containing the body a notification email to be sent
+### when no key is found. There is a nice default, however you
+### may wish to give the recipient more specific instruction
+### how to get his key on your system. The file must be encoded
+### in UTF-8:
+
+# missing_key_notification_file = /etc/zeyple.notify
+
+### Subject for this email:
+
+# missing_key_notification_subject = Fix it!
 
 [gpg]
 home = /var/lib/zeyple/keys
@@ -9,3 +20,35 @@ home = /var/lib/zeyple/keys
 host = localhost
 port = 10026
 
+[missing_key_rules]
+### This rules define, what to do if the recipient has no key. The rules
+### have the format:
+###
+###    <regexp> = drop|notify|cleartext
+###
+### The recipient address will be matched against <regexp> using the Python
+### module 're'. The actions have this effect:
+###
+### - drop: Discards the message silently.
+### - notify: Send a notification to the recipient
+###
+### Examples:
+###
+### The toystory people never get important stuff and don't know how to use PGP:
+###
+###    .*\@toystory\.com$ = cleartext
+###
+### The new default - always notify:
+###
+###    . = notify
+###
+### The old behavior with "force_encrypt = 1" - in doubt drop the message:
+###
+###    . = drop
+###
+### The old behavior with "force_encrypt = 0" - sent messages without encryption
+### if we lack the key:
+###
+###    . = cleartext
+###
+### Order matters! First match wins - at least with Python 2.7+.
