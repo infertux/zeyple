@@ -105,6 +105,8 @@ class ZeypleTest(unittest.TestCase):
 
         user_key = self.zeyple._user_key(TEST1_EMAIL)
         assert user_key == TEST1_ID
+        user_key = self.zeyple._user_key(TEST1_EMAIL.upper())
+        assert user_key == TEST1_ID
 
         user_key = self.zeyple._user_key(TEST1_EMAIL_SUBADDRESS)
         assert user_key == TEST1_ID
