@@ -1,26 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# BBB: Python 2.7 support
-from __future__ import unicode_literals
-
-import unittest
-from mock import Mock
-import os
-import subprocess
-import shutil
-import re
 from six.moves.configparser import ConfigParser
-import tempfile
 from textwrap import dedent
+from unittest.mock import Mock
 from zeyple import zeyple
-
-legacy_gpg = False
-try:
-    import gpg
-except ImportError:
-    import gpgme
-    legacy_gpg = True
+import gpg
+import os
+import re
+import shutil
+import subprocess
+import tempfile
+import unittest
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
 TEST1_ID = 'D6513C04E24C1F83'
@@ -120,18 +111,11 @@ class ZeypleTest(unittest.TestCase):
         content = 'The key is under the carpet.'.encode('ascii')
         successful = None
 
-        if legacy_gpg:
-            try:
-                self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
-                successful = True
-            except gpgme.GpgmeError as error:
-                assert str(error) == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
-        else:
-            try:
-                self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
-                successful = True
-            except gpg.errors.GPGMEError as error:
-                assert error.error == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
+        try:
+            self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
+            successful = True
+        except gpg.errors.GPGMEError as error:
+            assert error.error == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
 
         assert successful is None
 

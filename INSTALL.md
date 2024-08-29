@@ -2,6 +2,7 @@
 
 A few options are available to install Zeyple, feel free to use the one that suits you best.
 
+1. [APT repository](https://deb.cyberbits.eu/zeyple/)
 1. [Chef cookbook](https://supermarket.chef.io/cookbooks/zeyple)
 1. [Ansible role](https://galaxy.ansible.com/mimacom/zeyple/)
 1. [Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [[1]](#fn-1)
@@ -11,13 +12,11 @@ A few options are available to install Zeyple, feel free to use the one that sui
 
 You need to be _root_ here - make sure you understand what you are doing.
 
-1. Install GnuPG and the Python wrapper for the GPGME library.
+1. Install GnuPG and the Python wrapper for the GPG library.
 
     ```bash
-    apt-get install gnupg python-gpg sudo
+    apt-get install gnupg python3-gpg sudo
     ```
-
-    In case `python-gpg` is not available you can also still use `python-gpgme`.
 
 1. Since Zeyple is going to read and encrypt your emails, it is recommended to create a dedicated user account for this task (using the "postfix" user is very discouraged according to [the doc](http://www.postfix.org/FILTER_README.html).
 

@@ -1,6 +1,10 @@
-## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...master))
+## Unreleased ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...master))
 
   * TBD
+
+## v2.0.0, 2024-08-?? ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...v2.0.0))
+
+  * [BUGFIX]  Drop Python 2 support, Python 3 is now required and development is resumed!
 
 ## v1.2.2, 2018-01-28 ([changes](https://github.com/infertux/zeyple/compare/v1.2.1...v1.2.2))
 

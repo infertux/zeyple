@@ -1,6 +1,8 @@
-#!/bin/bash -eux
+#!/bin/bash
 
-ZEYPLE_PATH=/usr/sbin/zeyple
+set -euxo pipefail
+
+ZEYPLE_PATH=${1:-/usr/sbin/zeyple}
 
 cd $(dirname $0)
 

@@ -14,9 +14,7 @@ fpm -f -s dir -t "$TYPE" -n zeyple \
     --after-install after-install.sh \
     --before-remove before-remove.sh \
     --depends gnupg \
-    --depends "python-gpgme | python-gpg" \
-    --depends "python-gpgme | libgpgme-dev" \
-    --depends "python-gpgme | swig" \
+    --depends python3-gpg \
     --depends sudo \
     -C ../zeyple \
     -p zeyple.deb \

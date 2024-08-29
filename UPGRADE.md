@@ -1,3 +1,7 @@
+## v1.2.0 to v2.0.0
+
+1. Python 3 is now required
+
 ## v1.1.0 to v1.2.0
 
 1. No breaking changes
