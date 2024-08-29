@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from six.moves.configparser import ConfigParser
+from configparser import ConfigParser
 from textwrap import dedent
 from unittest.mock import Mock
-from zeyple import zeyple
 import gpg
 import os
 import re
@@ -12,6 +11,8 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+
+from zeyple import zeyple
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
 TEST1_ID = 'D6513C04E24C1F83'
@@ -21,6 +22,7 @@ TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
 TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
 TEST_EXPIRED_EMAIL = 'test_expired@zeyple.example.com'
+
 
 class ZeypleTest(unittest.TestCase):
     def setUp(self):
@@ -71,18 +73,19 @@ class ZeypleTest(unittest.TestCase):
 
         plain_payload = cipher_message.get_payload()
         encrypted_envelope = plain_payload[1]
-        assert encrypted_envelope["Content-Type"] == 'application/octet-stream; name="encrypted.asc"'
+        assert (encrypted_envelope["Content-Type"] ==
+                'application/octet-stream; name="encrypted.asc"')
 
         encrypted_payload = encrypted_envelope.get_payload().encode('utf-8')
         decrypted_envelope = self.decrypt(encrypted_payload).decode('utf-8').strip()
 
-        boundary = re.match(r'.+boundary="([^"]+)"', decrypted_envelope, re.MULTILINE | re.DOTALL).group(1)
+        boundary = re.match(r'.+boundary="([^"]+)"',
+                            decrypted_envelope, re.MULTILINE | re.DOTALL).group(1)
         # replace auto-generated boundary with one we know
         mime_message = mime_message.replace("BOUNDARY", boundary)
 
         prefix = dedent("""\
-            Content-Type: multipart/mixed; boundary=\"""" + \
-            boundary + """\"
+            Content-Type: multipart/mixed; boundary=\"""" + boundary + """\"
 
             """)
         mime_message = prefix + mime_message
@@ -237,7 +240,7 @@ class ZeypleTest(unittest.TestCase):
         with open(filename, 'r') as test_file:
             contents = test_file.read()
 
-        self.zeyple.process_message(contents, [TEST1_EMAIL]) # should not raise
+        self.zeyple.process_message(contents, [TEST1_EMAIL])  # should not raise
 
     def test_force_encryption(self):
         """Tries to encrypt without key"""

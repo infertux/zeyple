@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
-from io import BytesIO
 import copy
 import email
 import email.encoders
@@ -14,14 +13,6 @@ import os
 import re
 import smtplib
 import sys
-
-
-def message_from_binary(message):
-    return email.message_from_bytes(message)
-
-
-def as_binary_string(email):
-    return email.as_bytes()
 
 
 def encode_string(string):
@@ -84,7 +75,7 @@ class Zeyple:
         """Encrypts the message with recipient keys"""
         message_data = encode_string(message_data)
 
-        in_message = message_from_binary(message_data)
+        in_message = email.message_from_bytes(message_data)
         logging.info(
             "Processing outgoing message %s", in_message['Message-id'])
 
@@ -190,7 +181,7 @@ class Zeyple:
             # remove superfluous header
             del mixed['MIME-Version']
 
-            payload = as_binary_string(mixed)
+            payload = mixed.as_bytes()
 
         encrypted_payload = self._encrypt_payload(payload, [key_id])
 
