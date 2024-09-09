@@ -1,4 +1,7 @@
-# ZEYPLE: Zeyple Encrypts Your Precious Log Emails [![Build Status](https://travis-ci.org/infertux/zeyple.png?branch=master)](https://travis-ci.org/infertux/zeyple)
+# ZEYPLE: Zeyple Encrypts Your Precious Log Emails
+
+[![Funding](https://img.shields.io/liberapay/patrons/infertux.svg?logo=liberapay)](https://liberapay.com/infertux/donate)
+[![Build Status](https://github.com/infertux/zeyple/actions/workflows/zeyple.yml/badge.svg)](https://github.com/infertux/zeyple/actions/workflows/zeyple.yml)
 
 **Zeyple automatically encrypts outgoing emails with GPG:**
 
