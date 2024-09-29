@@ -143,6 +143,7 @@ class Zeyple:
 
             # prepend the Content-Type including the boundary
             content_type = "Content-Type: " + in_message["Content-Type"]
+            # FIXME: also encrypt multipart messages
             payload = content_type + "\n\n" + payload
 
             message = email.message.Message()
@@ -180,6 +181,13 @@ class Zeyple:
 
             # remove superfluous header
             del mixed['MIME-Version']
+            mixed.set_param("protected-headers", "v1", "Content-Type")
+            mixed.add_header("From", in_message['From'])
+            mixed.add_header("To", in_message['To'])
+            mixed.add_header("Message-ID", in_message["Message-ID"])
+            mixed.add_header("Subject", in_message["Subject"])
+            del in_message["Subject"]
+            in_message["Subject"] = "..."
 
             payload = mixed.as_bytes()
 
