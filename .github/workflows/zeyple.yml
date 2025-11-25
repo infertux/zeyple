@@ -50,5 +50,5 @@ jobs:
       - name: Upload deb package
         uses: actions/upload-artifact@v5
         with:
-          name: zeyple.deb
+          name: zeyple-python-${{ matrix.python-version }}.deb
           path: ./fpm/zeyple.deb
