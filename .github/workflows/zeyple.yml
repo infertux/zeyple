@@ -2,11 +2,12 @@ name: Zeyple test and deb package build
 
 on:
   push:
-    branches:
-    - master
   pull_request:
-    branches:
-    - master
+  schedule:
+    - cron: "0 0 * * 0" # run weekly on Sundays
+
+permissions:
+  contents: read
 
 jobs:
   build:
