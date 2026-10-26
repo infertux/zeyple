@@ -8,6 +8,7 @@ import gpg
 import os
 import re
 import shutil
+import smtplib
 import subprocess
 import sys
 import tempfile
@@ -392,11 +393,32 @@ class ZeypleTest(unittest.TestCase):
         """Drops the message on error when force_encrypt is set"""
         self.zeyple.config.set('zeyple', 'force_encrypt', '1')
 
-        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST_EXPIRED_EMAIL])
 
         assert result.returncode == 0
         with open(self.logfile) as fp:
             assert 'dropping it as force_encrypt is set' in fp.read()
+
+    def test_defer_on_relay_error_with_force_encryption(self):
+        """Tells Postfix to retry later when the relay is unreachable, even with force_encrypt"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL
+        with open(self.logfile) as fp:
+            assert 'Postfix will retry later' in fp.read()
+
+    def test_is_temporary(self):
+        """Tells relay failures that retrying could fix from permanent errors"""
+        assert zeyple.is_temporary(ConnectionRefusedError())
+        assert zeyple.is_temporary(smtplib.SMTPServerDisconnected())
+        assert zeyple.is_temporary(smtplib.SMTPDataError(451, b'Try again later'))
+        assert zeyple.is_temporary(smtplib.SMTPRecipientsRefused({TEST1_EMAIL: (450, b'Busy')}))
+
+        assert not zeyple.is_temporary(smtplib.SMTPDataError(552, b'Message too big'))
+        assert not zeyple.is_temporary(smtplib.SMTPRecipientsRefused({TEST1_EMAIL: (550, b'No')}))
+        assert not zeyple.is_temporary(gpg.errors.GPGMEError('Key is expired!'))
 
     def test_defer_on_invalid_force_encryption(self):
         """Tells Postfix to retry later when force_encrypt is invalid"""

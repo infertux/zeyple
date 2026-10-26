@@ -5,7 +5,7 @@
   * [BUGFIX]  Run with `python3` since Debian and Ubuntu no longer ship a `python` binary
   * [BUGFIX]  Don't delete the config, keys and log when the .deb package is upgraded
   * [BUGFIX]  Show the email address in the expired key error
-  * [BUGFIX]  Never let Postfix bounce emails unencrypted when Zeyple fails: Postfix retries them later, or they are dropped if `force_encrypt` is set (#20)
+  * [BUGFIX]  Never let Postfix bounce emails unencrypted when Zeyple fails: Postfix retries them later, or they are dropped if `force_encrypt` is set and the relay isn't just temporarily unavailable (#20)
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [BUGFIX]  Read the relay port from the config as an integer (#57)
   * [FEATURE] Look up the key without the sub-address tag, e.g. `you+tag@domain.tld` (#68)

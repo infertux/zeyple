@@ -327,6 +327,19 @@ class Zeyple:
         logging.info("Message %s sent", message['Message-id'])
 
 
+def is_temporary(error):
+    """Returns whether the relay failed in a way that retrying later could fix"""
+    if isinstance(error, smtplib.SMTPRecipientsRefused):
+        codes = [code for code, _ in error.recipients.values()]
+    elif isinstance(error, smtplib.SMTPResponseException):
+        codes = [error.smtp_code]
+    else:
+        # the relay can't be reached (smtplib errors are OSErrors too)
+        return isinstance(error, OSError)
+
+    return all(400 <= code < 500 for code in codes)
+
+
 def main():
     recipients = sys.argv[1:]
 
@@ -337,9 +350,11 @@ def main():
     try:
         zeyple = Zeyple()
         zeyple.process_message(message, recipients)
-    except Exception:
-        # Never let Postfix bounce the message as the bounce would contain it unencrypted
-        if zeyple and zeyple.force_encrypt:
+    except Exception as error:
+        # Never let Postfix bounce the message as the bounce would contain it unencrypted.
+        # Retrying could still end in a bounce, so with force_encrypt only retry when the
+        # relay is temporarily unavailable.
+        if zeyple and zeyple.force_encrypt and not is_temporary(error):
             logging.exception("Cannot process message, dropping it as force_encrypt is set")
             return 0
 
