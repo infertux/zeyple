@@ -302,21 +302,56 @@ class ZeypleTest(unittest.TestCase):
         assert email.get_payload()[1].get_payload() == \
             encrypted.get_payload()[1].get_payload()
 
+    def test_process_message_with_mislabeled_encrypted_message(self):
+        """Encrypts messages which claim to be PGP/MIME but aren't encrypted"""
+        message = SIMPLE_MESSAGE.rstrip('\n') + dedent("""
+            MIME-Version: 1.0
+            Content-Type: multipart/encrypted; protocol="application/pgp-encrypted";
+             boundary="BOUNDARY"
+
+            --BOUNDARY
+            Content-Type: application/pgp-encrypted
+
+            Version: 1
+
+            --BOUNDARY
+            Content-Type: application/octet-stream
+
+            The key is under the carpet.
+            --BOUNDARY--
+            """)
+
+        email = self.zeyple.process_message(message.encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+        assert 'under the carpet' not in email.as_string()
+
     def test_process_message_with_inline_encrypted_message(self):
         """Doesn't encrypt inline PGP messages again"""
-        body = dedent("""\
-            -----BEGIN PGP MESSAGE-----
-
-            hF4DQx0D2+KPKYcSAQdAmXHJb2SfL6a3sbfW5t6kz9pnRdXjU0sXZ4bW8lK0Mg8w
-            =ZZZZ
-            -----END PGP MESSAGE-----
-            """)
+        body = self.zeyple._encrypt_payload(b'test', [TEST1_ID]).decode('ascii')
 
         email = self.zeyple.process_message(
             (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
 
         assert not email.is_multipart()
         assert email.get_payload() == body
+
+    def test_process_message_with_fake_inline_encrypted_message(self):
+        """Encrypts plain text merely wrapped in PGP markers"""
+        for text in ['The key is under the carpet.',
+                     'VGhlIGtleSBpcyB1bmRlciB0aGUgY2FycGV0Lg==']:  # the same in base64
+            body = dedent("""\
+                -----BEGIN PGP MESSAGE-----
+
+                {0}
+                -----END PGP MESSAGE-----
+                """).format(text)
+
+            email = self.zeyple.process_message(
+                (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+            assert email.get_content_type() == 'multipart/encrypted'
+            assert text not in email.as_string()
 
     def test_process_message_quoting_encrypted_block(self):
         """Encrypts messages which merely contain an inline PGP block"""

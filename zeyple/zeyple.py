@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
+import base64
+import binascii
 import copy
 import email
 import email.encoders
@@ -125,15 +127,46 @@ class Zeyple:
     def _is_encrypted(self, message):
         """Returns whether the whole message is already encrypted with PGP"""
         if message.get_content_type() == 'multipart/encrypted':
-            return True
+            # PGP/MIME (RFC 3156): a version part then the encrypted data
+            parts = message.get_payload() if message.is_multipart() else []
+            protocol = str(message.get_param('protocol', '')).lower()
+            return protocol == 'application/pgp-encrypted' and len(parts) == 2 and \
+                parts[0].get_content_type() == 'application/pgp-encrypted' and \
+                self._is_pgp_message(parts[1].get_payload(decode=True))
 
         if message.is_multipart():
             return False
 
         # inline PGP: the body must be nothing but an encrypted block
-        payload = (message.get_payload(decode=True) or b'').strip()
-        return payload.startswith(b'-----BEGIN PGP MESSAGE-----') and \
-            payload.endswith(b'-----END PGP MESSAGE-----')
+        return self._is_pgp_message(message.get_payload(decode=True))
+
+    def _is_pgp_message(self, data):
+        """Returns whether data is an ASCII-armored OpenPGP encrypted message"""
+        lines = [line.strip() for line in (data or b'').strip().splitlines()]
+        if len(lines) < 3 or b'' not in lines or \
+           lines[0] != b'-----BEGIN PGP MESSAGE-----' or \
+           lines[-1] != b'-----END PGP MESSAGE-----':
+            return False
+
+        # skip the armor headers, which end with a blank line, and the checksum
+        body = lines[lines.index(b'') + 1:-1]
+        if body and body[-1].startswith(b'='):
+            body = body[:-1]
+
+        try:
+            packets = base64.b64decode(b''.join(body), validate=True)
+        except binascii.Error:
+            return False
+
+        # the data must start with a public-key or symmetric-key encrypted
+        # session key packet, so text merely wrapped in PGP markers doesn't count
+        if not packets or not packets[0] & 0x80:
+            return False
+        if packets[0] & 0x40:  # new packet format
+            tag = packets[0] & 0x3f
+        else:
+            tag = (packets[0] >> 2) & 0x0f
+        return tag in (1, 3)
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(
