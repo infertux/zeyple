@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
@@ -7,6 +7,7 @@ import email
 import email.encoders
 import email.mime.application
 import email.mime.multipart
+import email.mime.nonmultipart
 import gpg
 import logging
 import os
@@ -26,7 +27,7 @@ __title__ = 'Zeyple'
 __version__ = '2.0.0'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
-__copyright__ = 'Copyright 2012-2024 Cédric Félizard'
+__copyright__ = 'Copyright 2012-2026 Cédric Félizard'
 
 
 class Zeyple:
@@ -80,7 +81,7 @@ class Zeyple:
             "Processing outgoing message %s", in_message['Message-id'])
 
         if not recipients:
-            logging.warn("Cannot find any recipients, ignoring")
+            logging.warning("Cannot find any recipients, ignoring")
 
         sent_messages = []
         for recipient in recipients:
@@ -98,7 +99,7 @@ class Zeyple:
                 continue
 
             else:
-                logging.warn("No keys found, message will be sent unencrypted")
+                logging.warning("No keys found, message will be sent unencrypted")
                 out_message = copy.copy(in_message)
 
             self._add_zeyple_header(out_message)
@@ -209,14 +210,12 @@ class Zeyple:
         """Encrypts the payload with the given keys"""
         payload = encode_string(payload)
 
-        self.gpg.armor = True
-
         recipient = [self.gpg.get_key(key_id) for key_id in key_ids]
 
         for key in recipient:
             if key.expired:
                 raise gpg.errors.GPGMEError(
-                    "Key with user email %s "
+                    "Key with user email {0} "
                     "is expired!".format(key.uids[0].email))
 
         (ciphertext, encresult, signresult) = self.gpg.encrypt(

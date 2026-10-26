@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
@@ -118,7 +118,8 @@ class ZeypleTest(unittest.TestCase):
             self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
             successful = True
         except gpg.errors.GPGMEError as error:
-            assert error.error == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
+            assert error.error == 'Key with user email {0} is expired!'.format(
+                TEST_EXPIRED_EMAIL)
 
         assert successful is None
 
