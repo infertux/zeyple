@@ -41,6 +41,10 @@ class Zeyple:
             filename=log_file, level=logging.DEBUG,
             format='%(asctime)s %(process)s %(levelname)s %(message)s'
         )
+
+        # raise now rather than when handling an error if the value is invalid
+        self.force_encrypt
+
         logging.info("Zeyple ready to encrypt outgoing emails")
 
     def load_configuration(self, filename):

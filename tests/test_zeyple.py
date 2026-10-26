@@ -362,3 +362,11 @@ class ZeypleTest(unittest.TestCase):
         assert result.returncode == 0
         with open(self.logfile) as fp:
             assert 'dropping it as force_encrypt is set' in fp.read()
+
+    def test_defer_on_invalid_force_encryption(self):
+        """Tells Postfix to retry later when force_encrypt is invalid"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', 'maybe')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL
