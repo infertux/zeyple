@@ -62,6 +62,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie) and Ubuntu 24
 
     cat >> /etc/postfix/main.cf <<'CONF'
     content_filter = zeyple
+    zeyple_destination_recipient_limit = 1
     CONF
 
     cp zeyple.py /usr/local/bin/zeyple.py
@@ -73,6 +74,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie) and Ubuntu 24
     ```
 
     As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
+    `zeyple_destination_recipient_limit = 1` makes Postfix run Zeyple once per recipient, so an error for one recipient doesn't affect the others.
 
 You are good to go!
 You can send you an email with `date | mail -s test root` and check it is encrypted.

@@ -6,6 +6,7 @@
   * [BUGFIX]  Don't delete the config, keys and log when the .deb package is upgraded
   * [BUGFIX]  Show the email address in the expired key error
   * [BUGFIX]  Never let Postfix bounce emails unencrypted when Zeyple fails: Postfix retries them later, or they are dropped if `force_encrypt` is set and the relay isn't just temporarily unavailable (#20)
+  * [BUGFIX]  Run Zeyple once per recipient (`zeyple_destination_recipient_limit = 1`) so an error for one recipient doesn't affect the others
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [BUGFIX]  Read the relay port from the config as an integer (#57)
   * [FEATURE] Look up the key without the sub-address tag, e.g. `you+tag@domain.tld` (#68)

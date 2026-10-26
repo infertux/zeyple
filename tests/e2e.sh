@@ -33,6 +33,7 @@ postfix start || postfix reload
 # Install zeyple using deb packages from previous step
 apt-get install -y ./fpm/zeyple.deb
 cp /usr/local/bin/zeyple.conf.example /etc/zeyple.conf
+test "$(postconf -h zeyple_destination_recipient_limit)" = 1
 
 # Import GPG key
 sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg

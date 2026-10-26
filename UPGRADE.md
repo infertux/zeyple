@@ -4,6 +4,8 @@
 1. If you installed the .deb package, back up `/etc/zeyple.conf` and `/var/lib/zeyple/keys` before upgrading it.
    The 1.x package removes them when it is upgraded, so restore them afterwards.
    This is fixed from 2.0.0 onwards.
+1. Add `zeyple_destination_recipient_limit = 1` to `/etc/postfix/main.cf` and run `postfix reload`, so Postfix runs Zeyple once per recipient.
+   The .deb package does it for you.
 
 ## v1.1.0 to v1.2.0
 
