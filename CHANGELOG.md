@@ -11,6 +11,7 @@
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [BUGFIX]  Read the relay port from the config as an integer (#57)
   * [FEATURE] Look up the key without the sub-address tag, e.g. `you+tag@domain.tld` (#68)
+  * [BUGFIX]  Find the key when the recipient address and the key's user ID differ in case (#51)
   * [FEATURE] Add `force_encrypt` option to never send emails unencrypted (#59)
   * [TWEAK]   Raise an error when the recipient key is expired (#58)
   * [TWEAK]   Use the official GPGME Python bindings (`python3-gpg`) instead of python-gpgme (#61)
