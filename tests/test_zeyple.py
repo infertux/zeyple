@@ -16,6 +16,7 @@ import unittest
 from zeyple import zeyple
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
+KEYS_NO_NAME_FNAME = os.path.join(os.path.dirname(__file__), 'keys_no_name.gpg')
 ZEYPLE_SCRIPT = os.path.join(os.path.dirname(__file__), '..', 'zeyple', 'zeyple.py')
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
@@ -24,6 +25,10 @@ TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
 TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
 TEST_EXPIRED_EMAIL = 'test_expired@zeyple.example.com'
+NO_NAME_ID = '3282A6D396FB567D'
+NO_NAME_EMAIL = 'noname@zeyple.example.com'
+NO_NAME_BRACKETS_ID = 'E235EB0AF8D4C6DF'
+NO_NAME_BRACKETS_EMAIL = 'brackets@zeyple.example.com'
 
 SIMPLE_MESSAGE = dedent("""\
     Received: by example.org (Postfix, from userid 0)
@@ -115,6 +120,19 @@ class ZeypleTest(unittest.TestCase):
 
         user_key = self.zeyple._user_key(TEST1_EMAIL_SUBADDRESS)
         assert user_key == TEST1_ID
+
+    def test_user_key_without_name(self):
+        """Returns the right ID for keys whose user ID has no name"""
+        subprocess.check_call(
+            ['gpg', '--homedir', self.homedir, '--import', KEYS_NO_NAME_FNAME],
+            stderr=subprocess.DEVNULL,
+        )
+
+        # user ID is "noname@zeyple.example.com"
+        assert self.zeyple._user_key(NO_NAME_EMAIL) == NO_NAME_ID
+
+        # user ID is "<brackets@zeyple.example.com>"
+        assert self.zeyple._user_key(NO_NAME_BRACKETS_EMAIL) == NO_NAME_BRACKETS_ID
 
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
