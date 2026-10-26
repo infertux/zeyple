@@ -93,8 +93,7 @@ class Zeyple:
             if key_id:
                 out_message = self._encrypt_message(in_message, key_id)
 
-            elif self.config.has_option('zeyple', 'force_encrypt') and \
-                    self.config.getboolean('zeyple', 'force_encrypt'):
+            elif self.force_encrypt:
                 logging.error("No keys found, message will not be sent!")
                 continue
 
@@ -107,6 +106,10 @@ class Zeyple:
             sent_messages.append(out_message)
 
         return sent_messages
+
+    @property
+    def force_encrypt(self):
+        return self.config.getboolean('zeyple', 'force_encrypt', fallback=False)
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(
@@ -267,11 +270,27 @@ class Zeyple:
         logging.info("Message %s sent", message['Message-id'])
 
 
-if __name__ == '__main__':
+def main():
     recipients = sys.argv[1:]
 
     binary_stdin = sys.stdin.buffer
     message = binary_stdin.read()
 
-    zeyple = Zeyple()
-    zeyple.process_message(message, recipients)
+    zeyple = None
+    try:
+        zeyple = Zeyple()
+        zeyple.process_message(message, recipients)
+    except Exception:
+        # Never let Postfix bounce the message as the bounce would contain it unencrypted
+        if zeyple and zeyple.force_encrypt:
+            logging.exception("Cannot process message, dropping it as force_encrypt is set")
+            return 0
+
+        logging.exception("Cannot process message, Postfix will retry later")
+        return os.EX_TEMPFAIL
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -9,12 +9,14 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
 from zeyple import zeyple
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
+ZEYPLE_SCRIPT = os.path.join(os.path.dirname(__file__), '..', 'zeyple', 'zeyple.py')
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
 TEST1_EMAIL_SUBADDRESS = 'test1+tag@zeyple.example.com'
@@ -22,6 +24,17 @@ TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
 TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
 TEST_EXPIRED_EMAIL = 'test_expired@zeyple.example.com'
+
+SIMPLE_MESSAGE = dedent("""\
+    Received: by example.org (Postfix, from userid 0)
+        id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+    To: """ + TEST1_EMAIL + """
+    Subject: Hello
+    Message-Id: <20120906233537.DD3B67981178@example.org>
+    Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+    From: root@example.org (root)
+
+    """)
 
 
 class ZeypleTest(unittest.TestCase):
@@ -259,3 +272,33 @@ class ZeypleTest(unittest.TestCase):
         assert len(sent_messages) == 1
 
         self.zeyple.config.remove_option('zeyple', 'force_encrypt')
+
+    def run_zeyple(self, message, recipients):
+        """Runs zeyple.py like Postfix does, with the relay unreachable"""
+        self.zeyple.config.set('relay', 'host', '127.0.0.1')
+        self.zeyple.config.set('relay', 'port', '1')  # nothing listens there
+        with open(self.conffile, 'w') as fp:
+            self.zeyple.config.write(fp)
+
+        return subprocess.run(
+            [sys.executable, ZEYPLE_SCRIPT] + recipients,
+            input=message, cwd=self.tmpdir, capture_output=True,
+        )
+
+    def test_defer_on_error(self):
+        """Tells Postfix to retry later instead of bouncing the message unencrypted"""
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL
+        with open(self.logfile) as fp:
+            assert 'Postfix will retry later' in fp.read()
+
+    def test_drop_on_error_with_force_encryption(self):
+        """Drops the message on error when force_encrypt is set"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == 0
+        with open(self.logfile) as fp:
+            assert 'dropping it as force_encrypt is set' in fp.read()
