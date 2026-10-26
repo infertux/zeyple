@@ -83,23 +83,30 @@ class Zeyple:
         if not recipients:
             logging.warning("Cannot find any recipients, ignoring")
 
+        already_encrypted = self._is_encrypted(in_message)
+
         sent_messages = []
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
-            key_id = self._user_key(recipient)
-            logging.info("Key ID: %s", key_id)
-
-            if key_id:
-                out_message = self._encrypt_message(in_message, key_id)
-
-            elif self.force_encrypt:
-                logging.error("No keys found, message will not be sent!")
-                continue
+            if already_encrypted:
+                logging.info("Message is already encrypted, sending it as is")
+                out_message = copy.copy(in_message)
 
             else:
-                logging.warning("No keys found, message will be sent unencrypted")
-                out_message = copy.copy(in_message)
+                key_id = self._user_key(recipient)
+                logging.info("Key ID: %s", key_id)
+
+                if key_id:
+                    out_message = self._encrypt_message(in_message, key_id)
+
+                elif self.force_encrypt:
+                    logging.error("No keys found, message will not be sent!")
+                    continue
+
+                else:
+                    logging.warning("No keys found, message will be sent unencrypted")
+                    out_message = copy.copy(in_message)
 
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
@@ -110,6 +117,19 @@ class Zeyple:
     @property
     def force_encrypt(self):
         return self.config.getboolean('zeyple', 'force_encrypt', fallback=False)
+
+    def _is_encrypted(self, message):
+        """Returns whether the whole message is already encrypted with PGP"""
+        if message.get_content_type() == 'multipart/encrypted':
+            return True
+
+        if message.is_multipart():
+            return False
+
+        # inline PGP: the body must be nothing but an encrypted block
+        payload = (message.get_payload(decode=True) or b'').strip()
+        return payload.startswith(b'-----BEGIN PGP MESSAGE-----') and \
+            payload.endswith(b'-----END PGP MESSAGE-----')
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(

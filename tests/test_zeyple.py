@@ -273,6 +273,48 @@ class ZeypleTest(unittest.TestCase):
 
         self.zeyple.config.remove_option('zeyple', 'force_encrypt')
 
+    def test_process_message_with_encrypted_message(self):
+        """Doesn't encrypt PGP/MIME messages again"""
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])[0]
+
+        email = self.zeyple.process_message(encrypted.as_bytes(), [TEST2_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+        assert email.get_payload()[1].get_payload() == \
+            encrypted.get_payload()[1].get_payload()
+
+    def test_process_message_with_inline_encrypted_message(self):
+        """Doesn't encrypt inline PGP messages again"""
+        body = dedent("""\
+            -----BEGIN PGP MESSAGE-----
+
+            hF4DQx0D2+KPKYcSAQdAmXHJb2SfL6a3sbfW5t6kz9pnRdXjU0sXZ4bW8lK0Mg8w
+            =ZZZZ
+            -----END PGP MESSAGE-----
+            """)
+
+        email = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert not email.is_multipart()
+        assert email.get_payload() == body
+
+    def test_process_message_quoting_encrypted_block(self):
+        """Encrypts messages which merely contain an inline PGP block"""
+        body = dedent("""\
+            Somebody sent this:
+            -----BEGIN PGP MESSAGE-----
+            hF4DQx0D2+KPKYcSAQdAmXHJb2SfL6a3sbfW5t6kz9pnRdXjU0sXZ4bW8lK0Mg8w
+            -----END PGP MESSAGE-----
+            and the rest of the message is in plain text.
+            """)
+
+        email = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+
     def run_zeyple(self, message, recipients):
         """Runs zeyple.py like Postfix does, with the relay unreachable"""
         self.zeyple.config.set('relay', 'host', '127.0.0.1')
