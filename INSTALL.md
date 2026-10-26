@@ -12,6 +12,8 @@ A few options are available to install Zeyple, feel free to use the one that sui
 
 You need to be _root_ here - make sure you understand what you are doing.
 
+These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie) and Ubuntu 24.04.
+
 1. Install GnuPG and the Python wrapper for the GPG library.
 
     ```bash
@@ -28,7 +30,7 @@ You need to be _root_ here - make sure you understand what you are doing.
 
     ```bash
     mkdir -p /var/lib/zeyple/keys && chmod 700 /var/lib/zeyple/keys && chown zeyple: /var/lib/zeyple/keys
-    sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld # repeat for each key
+    sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --search-keys you@domain.tld # repeat for each key
     ```
 
 1. Configure `/etc/zeyple.conf` from the template `zeyple.conf.example`.

@@ -1,6 +1,9 @@
-## v1.2.0 to v2.0.0
+## v1.2.2 to v2.0.0
 
-1. Python 3 is now required
+1. Python 3 is now required, with the official GPGME bindings instead of python-gpgme: `apt-get install python3-gpg`
+1. If you installed the .deb package, back up `/etc/zeyple.conf` and `/var/lib/zeyple/keys` before upgrading it.
+   The 1.x package removes them when it is upgraded, so restore them afterwards.
+   This is fixed from 2.0.0 onwards.
 
 ## v1.1.0 to v1.2.0
 

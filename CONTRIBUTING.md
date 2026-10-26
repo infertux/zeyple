@@ -13,12 +13,13 @@ You will need the following development dependencies.
 
 * Packages:
   * Arch Linux: `pacman -S python-gpgme`
-  * Debian/Ubuntu: `apt-get install python3-gpg`
+  * Debian/Ubuntu: `apt-get install python3-gpg python3-pytest`
   * Fedora: `yum install python3-devel gpgme-devel`
 
 ## Testing
 
-Run `python -m pytest` and see [.github/workflows/zeyple.yml](./.github/workflows/zeyple.yml) for the full testing workflow.
+Run `python3 -m pytest` and see [.github/workflows/zeyple.yml](./.github/workflows/zeyple.yml) for the full testing workflow.
+It runs the tests, builds the .deb package and sends an email through Postfix in Debian 12, Debian 13 and Ubuntu 24.04 containers, using each distro's own Python and `python3-gpg`.
 
 ### Inspec
 

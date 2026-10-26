@@ -29,8 +29,9 @@ Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/
 ## Key management
 
 * List of keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --list-keys`
-* Update imported keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --refresh-keys`
-* Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld`
+* Update imported keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --refresh-keys`
+* Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --search-keys you@domain.tld`
+* Import a key from a file: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import key.asc`
 
 ## Integration with other MTAs
 
