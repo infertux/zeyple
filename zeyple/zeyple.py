@@ -92,12 +92,14 @@ class Zeyple:
         already_encrypted = self._is_encrypted(in_message)
 
         sent_messages = []
+        # copies of in_message must be deep: shallow ones share its headers, so changing
+        # them for one recipient would also change them for the next one
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
             if already_encrypted:
                 logging.info("Message is already encrypted, sending it as is")
-                out_message = copy.copy(in_message)
+                out_message = copy.deepcopy(in_message)
 
             else:
                 key_id = self._user_key(recipient)
@@ -112,7 +114,7 @@ class Zeyple:
 
                 else:
                     logging.warning("No keys found, message will be sent unencrypted")
-                    out_message = copy.copy(in_message)
+                    out_message = copy.deepcopy(in_message)
 
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
@@ -249,7 +251,7 @@ class Zeyple:
         version = self._get_version_part()
         encrypted = self._get_encrypted_part(encrypted_payload)
 
-        out_message = copy.copy(in_message)
+        out_message = copy.deepcopy(in_message)
         out_message.preamble = "This is an OpenPGP/MIME encrypted " \
                                "message (RFC 4880 and 3156)"
 

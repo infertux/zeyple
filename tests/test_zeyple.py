@@ -253,6 +253,13 @@ class ZeypleTest(unittest.TestCase):
     def test_process_message_with_multiple_recipients(self):
         """Encrypt a message with multiple recipients"""
 
+        mime_message = dedent("""\
+            --BOUNDARY
+            Content-Type: text/plain
+
+            hello
+            --BOUNDARY--""")
+
         emails = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
@@ -265,6 +272,24 @@ class ZeypleTest(unittest.TestCase):
             hello""").encode('ascii'), [TEST1_EMAIL, TEST2_EMAIL])
 
         assert len(emails) == 2  # it has two recipients
+        # encrypting for one recipient must not change the email of the others
+        for email in emails:
+            self.assertValidMimeMessage(email, mime_message)
+            assert len(email.get_all('X-Zeyple')) == 1
+
+    def test_process_message_as_is_with_multiple_recipients(self):
+        """Gives each recipient its own copy of emails sent as is"""
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])[0]
+        del encrypted['X-Zeyple']
+
+        for message, recipients in [
+            (encrypted.as_bytes(), [TEST1_EMAIL, TEST2_EMAIL]),  # already encrypted
+            ((SIMPLE_MESSAGE + "test").encode('ascii'),  # no keys
+             ['unknown1@zeyple.example.com', 'unknown2@zeyple.example.com']),
+        ]:
+            emails = self.zeyple.process_message(message, recipients)
+            assert [len(email.get_all('X-Zeyple')) for email in emails] == [1, 1]
 
     def test_process_message_with_complex_message(self):
         """Encrypts complex messages"""
