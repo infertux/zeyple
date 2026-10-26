@@ -65,12 +65,6 @@ Although tested only with [Postfix](http://www.postfix.org/), Zeyple should inte
 
 A [Docker image](https://gitlab.com/nebulon42/zeyple-docker) is available for development purposes.
 
-## Vagrant
-
-A fully-setup test-environment is available to easily test your modifications.
-[Vagrant](https://www.vagrantup.com/) and a compatible virtualization environment ([VirtualBox](https://www.virtualbox.org/) for example) are required.
-Visit [zeyple-vagrant](https://github.com/Nithanim/zeyple-vagrant) for download and more information.
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
