@@ -33,6 +33,30 @@ Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/
 * Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --search-keys you@domain.tld`
 * Import a key from a file: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import key.asc`
 
+## Sending to aliases
+
+Zeyple looks up the key of the recipient Postfix hands it, before aliases from `/etc/aliases` are expanded.
+So an email to `root` is not encrypted with the key of the address `root` is aliased to.
+Use Postfix's `recipient_canonical_maps` instead, which rewrites the recipient before Zeyple sees it:
+
+```bash
+echo "recipient_canonical_maps = hash:/etc/postfix/recipient_canonical" >> /etc/postfix/main.cf
+echo "root me@example.com" >> /etc/postfix/recipient_canonical
+postmap /etc/postfix/recipient_canonical
+postfix reload
+```
+
+## DKIM signing
+
+Emails must be signed after Zeyple encrypts them, otherwise the DKIM signature no longer matches.
+If you sign with a milter such as OpenDKIM, remove `no_milters` from the `localhost:10026` service in `/etc/postfix/master.cf` so the milter also runs when Zeyple hands emails back to Postfix:
+
+```
+  -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+```
+
+Then run `postfix reload`.
+
 ## Integration with other MTAs
 
 Although tested only with [Postfix](http://www.postfix.org/), Zeyple should integrate nicely with any MTA which provides a [filter](http://www.postfix.org/FILTER_README.html "Postfix After-Queue Content Filter")/hook mechanism. Please let me know if you experiment with this.

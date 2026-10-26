@@ -14,6 +14,7 @@
   * [TWEAK]   Use the official GPGME Python bindings (`python3-gpg`) instead of python-gpgme (#61)
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
+  * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
   * [MISC]    Test on Debian 12, Debian 13 and Ubuntu 24.04 with GitHub Actions, including an end-to-end test of the .deb package (#63, #64)
   * [MISC]    Test keys whose user ID has no name (#69)
 
