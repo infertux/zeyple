@@ -40,9 +40,12 @@ sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg
 
 send_test_email_and_check_it_is_encrypted
 
-# Upgrading (or reinstalling) the package must keep the config and keys
+# Upgrading (or reinstalling) the package must keep the config and keys,
+# and set the recipient limit again when main.cf no longer sets it to 1
+sed -i 's/^zeyple_destination_recipient_limit/#&/' /etc/postfix/main.cf
 apt-get install -y --reinstall ./fpm/zeyple.deb
 test -f /etc/zeyple.conf
+test "$(postconf -h zeyple_destination_recipient_limit)" = 1
 sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --list-keys | grep -F '@'
 
 send_test_email_and_check_it_is_encrypted

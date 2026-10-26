@@ -23,12 +23,6 @@ content_filter = zeyple
 CONF
 }
 
-add_postfix_recipient_limit() {
-cat >> /etc/postfix/main.cf <<'CONF'
-zeyple_destination_recipient_limit = 1
-CONF
-}
-
 cp /usr/local/bin/zeyple.conf.example /etc/
 
 adduser --system --no-create-home --disabled-login zeyple
@@ -46,6 +40,6 @@ touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 grep -q zeyple /etc/postfix/master.cf || add_postfix_master_config
 grep -q zeyple /etc/postfix/main.cf || add_postfix_main_config
 # run Zeyple once per recipient, also when upgrading from older packages
-grep -q zeyple_destination_recipient_limit /etc/postfix/main.cf || add_postfix_recipient_limit
+[ "$(postconf -xh zeyple_destination_recipient_limit)" = 1 ] || postconf -e zeyple_destination_recipient_limit=1
 
 postfix reload
