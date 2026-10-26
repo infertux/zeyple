@@ -25,6 +25,8 @@ jobs:
             image: debian:trixie # Python 3.13
           - name: ubuntu-24.04
             image: ubuntu:24.04 # Python 3.12
+          - name: ubuntu-26.04
+            image: ubuntu:26.04 # Python 3.14
       fail-fast: false
     env:
       DEBIAN_FRONTEND: noninteractive

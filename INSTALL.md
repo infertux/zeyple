@@ -12,7 +12,7 @@ A few options are available to install Zeyple, feel free to use the one that sui
 
 You need to be _root_ here - make sure you understand what you are doing.
 
-These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie) and Ubuntu 24.04.
+These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04 and Ubuntu 26.04.
 
 1. Install GnuPG and the Python wrapper for the GPG library.
 
