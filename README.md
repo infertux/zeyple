@@ -55,6 +55,9 @@ If you sign with a milter such as OpenDKIM, remove `no_milters` from the `localh
   -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
 ```
 
+This service is an SMTP server, so it only runs the milters in `smtpd_milters`.
+If your signing milter is only in `non_smtpd_milters`, also add `-o smtpd_milters=$non_smtpd_milters` to the service.
+
 Then run `postfix reload`.
 
 ## Integration with other MTAs
