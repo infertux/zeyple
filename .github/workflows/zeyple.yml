@@ -43,6 +43,8 @@ jobs:
         shell: bash
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - name: Lint with pycodestyle
         run: pycodestyle --show-pep8 --max-line-length=100 .
       - name: Test with pytest
