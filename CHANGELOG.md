@@ -1,4 +1,6 @@
-## v2.0.0, unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...master))
+## v3.0.0, unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...master))
+
+There is no 2.x release. Master has called itself 2.0.0 since August 2024, so this release is 3.0.0 to tell it apart from those builds, and to match the Chef cookbook.
 
   * [BUGFIX]  Drop Python 2 support, Python 3 is now required and development is resumed!
   * [BUGFIX]  Fix crash on Python 3.12+ caused by the removal of `SafeConfigParser` (#76)

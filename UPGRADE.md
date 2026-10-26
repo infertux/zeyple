@@ -1,9 +1,9 @@
-## v1.2.2 to v2.0.0
+## v1.2.2 to v3.0.0
 
 1. Python 3 is now required, with the official GPGME bindings instead of python-gpgme: `apt-get install python3-gpg`
 1. If you installed the .deb package, back up `/etc/zeyple.conf` and `/var/lib/zeyple/keys` before upgrading it.
    The 1.x package removes them when it is upgraded, so restore them afterwards.
-   This is fixed from 2.0.0 onwards.
+   This is fixed from 3.0.0 onwards.
 1. Add `zeyple_destination_recipient_limit = 1` to `/etc/postfix/main.cf` and run `postfix reload`, so Postfix runs Zeyple once per recipient.
    The .deb package does it for you.
 
