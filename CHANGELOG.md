@@ -1,27 +1,29 @@
-## v3.0.0, unreleased ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...master))
+## v3.0.0, unreleased ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...master))
 
-There is no 2.x release. Master has called itself 2.0.0 since August 2024, so this release is 3.0.0 to tell it apart from those builds, and to match the Chef cookbook.
-
-  * [BUGFIX]  Drop Python 2 support, Python 3 is now required and development is resumed!
-  * [BUGFIX]  Fix crash on Python 3.12+ caused by the removal of `SafeConfigParser` (#76)
   * [BUGFIX]  Run with `python3` since Debian and Ubuntu no longer ship a `python` binary
   * [BUGFIX]  Don't delete the config, keys and log when the .deb package is upgraded
   * [BUGFIX]  Show the email address in the expired key error
   * [BUGFIX]  Never let Postfix bounce emails unencrypted when Zeyple fails: Postfix retries them later, or they are dropped if `force_encrypt` is set and the relay isn't just temporarily unavailable (#20)
   * [BUGFIX]  Run Zeyple once per recipient (`zeyple_destination_recipient_limit = 1`) so an error for one recipient doesn't affect the others
   * [BUGFIX]  Fix the emails of all but the first recipient when Zeyple handles several recipients in one run
-  * [FEATURE] Don't encrypt already encrypted emails again (#32)
-  * [BUGFIX]  Read the relay port from the config as an integer (#57)
-  * [FEATURE] Look up the key without the sub-address tag, e.g. `you+tag@domain.tld` (#68)
   * [BUGFIX]  Find the key when the recipient address and the key's user ID differ in case (#51)
-  * [FEATURE] Add `force_encrypt` option to never send emails unencrypted (#59)
-  * [TWEAK]   Raise an error when the recipient key is expired (#58)
-  * [TWEAK]   Use the official GPGME Python bindings (`python3-gpg`) instead of python-gpgme (#61)
+  * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
   * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
-  * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 with GitHub Actions, including an end-to-end test of the .deb package (#63, #64)
+  * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04, and stop ignoring test failures in CI
   * [MISC]    Test keys whose user ID has no name (#69)
+
+## v2.0.0, 2024-09-09 ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...v2.0.0))
+
+  * [BUGFIX]  Drop Python 2 support, Python 3 is now required and development is resumed!
+  * [BUGFIX]  Fix crash on Python 3.12+ caused by the removal of `SafeConfigParser` (#76)
+  * [BUGFIX]  Read the relay port from the config as an integer (#57)
+  * [FEATURE] Look up the key without the sub-address tag, e.g. `you+tag@domain.tld` (#68)
+  * [FEATURE] Add `force_encrypt` option to never send emails unencrypted (#59)
+  * [TWEAK]   Raise an error when the recipient key is expired (#58)
+  * [TWEAK]   Use the official GPGME Python bindings (`python3-gpg`) instead of python-gpgme (#61)
+  * [MISC]    Test with GitHub Actions, including an end-to-end test of the .deb package (#63, #64)
 
 ## v1.2.2, 2018-01-28 ([changes](https://github.com/infertux/zeyple/compare/v1.2.1...v1.2.2))
 
