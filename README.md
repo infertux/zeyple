@@ -22,6 +22,8 @@ Why would you take that risk - encrypt them all!_
 
 See [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
 
+Once installed, `man zeyple` documents every option, the Postfix setup and key management (see [zeyple.1](zeyple/zeyple.1)).
+
 ## Disable/enable Zeyple
 
 Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/main.cf` then `postfix reload`.

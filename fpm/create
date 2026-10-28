@@ -7,7 +7,6 @@ TYPE=${1:-deb}
 cd "$(dirname "$0")"
 
 fpm -f -s dir -t "$TYPE" -n zeyple \
-    --prefix="/usr/local/bin" \
     --vendor "infertux" \
     --maintainer "infertux" \
     --version "$(grep -E "^__version__ = '(.+)'$" ../zeyple/zeyple.py | cut -d\' -f2)" \
@@ -20,5 +19,6 @@ fpm -f -s dir -t "$TYPE" -n zeyple \
     --depends sudo \
     -C ../zeyple \
     -p zeyple.deb \
-    zeyple.py \
-    zeyple.conf.example
+    zeyple.py=/usr/local/bin/zeyple.py \
+    zeyple.conf.example=/usr/local/bin/zeyple.conf.example \
+    zeyple.1=/usr/local/share/man/man1/zeyple.1
