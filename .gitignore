@@ -5,3 +5,4 @@ __pycache__/
 /.tox
 /htmlcov/
 *.deb
+/man.html

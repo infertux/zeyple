@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="@NAME@(@SECTION@): the reference manual of Zeyple, the Postfix filter that encrypts outgoing emails with GnuPG.">
+<title>Zeyple Man Page</title>
+<style>
+/* Layout: a dark top bar like goaccess.io/man, then one reading column with the
+   man page's own header line, a row of section links and the manual. */
+:root {
+  --bg: #fbfbfa;
+  --fg: #2a2c2f;
+  --fg-strong: #121315;
+  --muted: #62666d;
+  --rule: #e2e3e5;
+  --code-bg: #f2f3f4;
+  --accent: #c47f0f; /* amber, like an old terminal's phosphor */
+  --accent-ink: #915c00; /* the same amber, dark enough for text */
+  --bar-bg: #1b1c1e;
+  --bar-fg: #efefec;
+  --bar-muted: #a6a9ae;
+  --bar-edge: #1b1c1e;
+  --font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416;
+    --fg: #d8d9d6;
+    --fg-strong: #f4f4f2;
+    --muted: #9b9fa6;
+    --rule: #2c2e32;
+    --code-bg: #1c1d20;
+    --accent: #f0b429;
+    --accent-ink: #f3bd4a;
+    --bar-bg: #0b0c0d;
+    --bar-fg: #efefec;
+    --bar-muted: #9b9fa6;
+    --bar-edge: #2c2e32;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416;
+  --fg: #d8d9d6;
+  --fg-strong: #f4f4f2;
+  --muted: #9b9fa6;
+  --rule: #2c2e32;
+  --code-bg: #1c1d20;
+  --accent: #f0b429;
+  --accent-ink: #f3bd4a;
+  --bar-bg: #0b0c0d;
+  --bar-fg: #efefec;
+  --bar-muted: #9b9fa6;
+  --bar-edge: #2c2e32;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.65 var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+code {
+  font: 0.9em var(--font-mono);
+  background: var(--code-bg);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.wrap {
+  max-width: 50rem;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.bar { background: var(--bar-bg); color: var(--bar-fg); border-bottom: 1px solid var(--bar-edge); }
+.bar .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-block: 0.9rem;
+}
+.brand { display: flex; align-items: baseline; gap: 0.6rem; color: var(--bar-fg); text-decoration: none; }
+.brand strong { font: 700 1.15rem/1.2 var(--font-mono); letter-spacing: 0.02em; }
+.brand strong::after { content: "_"; color: var(--accent); }
+.brand span { font-size: 0.85rem; color: var(--bar-muted); }
+.bar ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; }
+.bar nav a { color: var(--bar-muted); text-decoration: none; font-size: 0.9rem; padding-bottom: 2px; }
+.bar nav a:hover { color: var(--bar-fg); }
+.bar nav a[aria-current="page"] { color: var(--bar-fg); box-shadow: inset 0 -2px var(--accent); }
+@media (max-width: 40rem) {
+  .brand span { display: none; }
+}
+
+main { padding-block: 1.75rem 3rem; }
+.manline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  font: 0.78rem/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+h1 {
+  margin: 1.5rem 0 0.4rem;
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--fg-strong);
+  text-wrap: balance;
+}
+.lead { margin: 0; max-width: 40rem; font-size: 1.08rem; color: var(--muted); }
+
+.toc { margin: 1.75rem 0 2.5rem; padding-block: 1rem; border-block: 1px solid var(--rule); }
+.toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.toc a {
+  display: inline-block;
+  padding: 0.4rem 0.6rem;
+  font: 500 0.75rem/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--fg);
+  text-decoration: none;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+.toc a:hover { border-color: var(--accent); color: var(--accent-ink); }
+
+.manual { min-width: 0; }
+.manual p { margin: 0 0 1rem; }
+.manual p.Pp:empty { display: none; }
+.manual b { color: var(--fg-strong); font-weight: 650; }
+.manual h2.Sh {
+  margin: 2.75rem 0 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--rule);
+  font: 700 0.95rem/1.3 var(--font-mono);
+  letter-spacing: 0.09em;
+  color: var(--fg-strong);
+  scroll-margin-top: 1rem;
+}
+.manual > section.Sh:first-child h2.Sh { margin-top: 0; padding-top: 0; border-top: 0; }
+.manual h3.Ss {
+  margin: 1.75rem 0 0.5rem;
+  font: 700 0.95rem/1.3 var(--font-mono);
+  color: var(--accent-ink);
+  scroll-margin-top: 1rem;
+}
+.manual a.permalink { color: inherit; text-decoration: none; }
+.manual h2 a.permalink:hover::after,
+.manual h3 a.permalink:hover::after { content: " #"; color: var(--accent-ink); }
+.manual h2#SYNOPSIS + p {
+  padding: 0.75rem 1rem;
+  font: 0.92rem/1.5 var(--font-mono);
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.manual dl.Bl-tag { margin: 0 0 1.25rem; }
+.manual dl.Bl-tag > dt {
+  margin-top: 1.1rem;
+  font: 0.92rem/1.45 var(--font-mono);
+  color: var(--fg-strong);
+  overflow-wrap: anywhere;
+  scroll-margin-top: 1rem;
+}
+.manual dl.Bl-tag > dd { margin: 0.3rem 0 0 1.5rem; }
+.manual dl.Bl-tag > dd > p { margin-top: 0.75rem; }
+.manual ul.Bl-bullet { margin: 0 0 1rem; padding-left: 1.25rem; }
+.manual ul.Bl-bullet > li { margin: 0.4rem 0; }
+.manual li::marker { color: var(--accent); }
+.manual .Bd-indent { margin: 0; }
+.manual pre {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font: 0.84rem/1.55 var(--font-mono);
+  color: var(--fg-strong);
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+.manual a.Lk,
+.site a {
+  color: var(--fg-strong);
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.manual a.Lk:hover,
+.site a:hover { color: var(--accent-ink); }
+
+.manline.foot { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+.site { border-top: 1px solid var(--rule); }
+.site .wrap { padding-block: 1.25rem 2rem; }
+.site p { margin: 0; font-size: 0.88rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="https://github.com/infertux/zeyple"><strong>zeyple</strong><span>Zeyple Encrypts Your Precious Log Emails</span></a>
+    <nav aria-label="Zeyple">
+      <ul>
+        <li><a href="https://github.com/infertux/zeyple#readme">Overview</a></li>
+        <li><a href="https://github.com/infertux/zeyple/blob/master/INSTALL.md">Install</a></li>
+        <li><a href="https://github.com/infertux/zeyple/blob/master/UPGRADE.md">Upgrade</a></li>
+        <li><a href="#NAME" aria-current="page">Man page</a></li>
+        <li><a href="https://github.com/infertux/zeyple/blob/master/CHANGELOG.md">Changelog</a></li>
+        <li><a href="https://github.com/infertux/zeyple/issues">Issues</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="manline"><span>@TITLE@(@SECTION@)</span><span>@VOLUME@</span><span>@TITLE@(@SECTION@)</span></p>
+  <h1>Man page</h1>
+  <p class="lead">The reference manual of @VERSION@: what it does with each email, every configuration option, the Postfix setup and its exit codes. Once Zeyple is installed, read it in a terminal with <code>man @NAME@</code>.</p>
+
+  <nav class="toc" aria-label="Sections">
+    <ul>
+@TOC@
+    </ul>
+  </nav>
+
+  <article class="manual">
+@MANUAL@
+  </article>
+
+  <p class="manline foot"><span>@VERSION@</span><span>@DATE@</span><span>@TITLE@(@SECTION@)</span></p>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>Zeyple is free software, licensed under the AGPLv3 or later. This page is generated from <a href="https://github.com/infertux/zeyple/blob/master/@SOURCE@">@SOURCE@</a> with mandoc.</p>
+  </div>
+</footer>
+</body>
+</html>

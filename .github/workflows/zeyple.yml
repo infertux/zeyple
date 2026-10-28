@@ -39,7 +39,7 @@ jobs:
           debconf-set-selections <<< "postfix postfix/mailname string localhost"
           apt-get install -y --no-install-recommends \
             ca-certificates git gnupg python3 python3-gpg \
-            pycodestyle python3-pytest python3-pytest-cov \
+            pycodestyle python3-pytest python3-pytest-cov mandoc \
             postfix mailutils sudo ruby ruby-dev build-essential
           gem install --no-document fpm
         shell: bash
@@ -49,6 +49,10 @@ jobs:
           persist-credentials: false
       - name: Lint with pycodestyle
         run: pycodestyle --show-pep8 --max-line-length=100 .
+      - name: Lint man page
+        run: mandoc -Tlint -W warning zeyple/zeyple.1
+      - name: Build HTML man page
+        run: python3 docs/build-man-html.py > man.html
       - name: Test with pytest
         run: python3 -m pytest --cov=zeyple/ --cov-report=term tests/
       - name: Build deb package
@@ -60,3 +64,9 @@ jobs:
         with:
           name: zeyple-${{ matrix.name }}.deb
           path: ./fpm/zeyple.deb
+      - name: Upload HTML man page
+        if: matrix.name == 'debian-13'
+        uses: actions/upload-artifact@v5
+        with:
+          name: zeyple-man.html
+          path: ./man.html
