@@ -65,8 +65,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04
     zeyple_destination_recipient_limit = 1
     CONF
 
-    cp zeyple.py /usr/local/bin/zeyple.py
-    chmod 755 /usr/local/bin/zeyple.py && chown root:root /usr/local/bin/zeyple.py
+    install -m 755 -o root -g root zeyple.py /usr/local/bin/zeyple.py
 
     mkdir -p /usr/local/share/man/man1 && cp zeyple.1 /usr/local/share/man/man1/
 
