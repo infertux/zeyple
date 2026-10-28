@@ -9,6 +9,7 @@
   * [BUGFIX]  Find the key when the recipient address and the key's user ID differ in case (#51)
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
+  * [TWEAK]   Install `zeyple.py` as root so the zeyple user, which handles the emails, can't modify it
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
   * [DOC]     Add a `zeyple(1)` man page, installed by the .deb package, and a script that turns it into a web page
   * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
