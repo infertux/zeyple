@@ -6,9 +6,11 @@
    Zeyple can't use keys owned by root, so it would send emails unencrypted, or drop them with `force_encrypt`.
 1. Add `zeyple_destination_recipient_limit = 1` to `/etc/postfix/main.cf` and run `postfix reload`, so Postfix runs Zeyple once per recipient.
    The .deb package does it for you.
-1. Give `zeyple.py` to root, so the zeyple user, which handles the emails, can't modify it:
-   `chmod 755 /usr/local/bin/zeyple.py && chown root:root /usr/local/bin/zeyple.py`.
-   The .deb package and `upgrade.sh` do it for you.
+1. `zeyple.py` now belongs to root, so the zeyple user, which handles the emails, can't modify it.
+   Install the new version with `install -m 755 -o root -g root zeyple.py /usr/local/bin/zeyple.py`:
+   unlike `cp`, it replaces the old file instead of writing into it, so nothing that had the old file open can change the new one.
+   The .deb package does it for you, and so does `./upgrade.sh /usr/local/bin/zeyple.py`
+   (without an argument, `upgrade.sh` upgrades `/usr/sbin/zeyple`, where the Chef cookbook installs Zeyple).
 
 ## v1.2.0 to v2.0.0
 
