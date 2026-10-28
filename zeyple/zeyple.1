@@ -129,6 +129,8 @@ When there is no key for a recipient, the email is not sent to them.
 When Zeyple fails for any other reason than the relay being temporarily
 unavailable, the email is dropped rather than retried, so that Postfix never
 bounces it back unencrypted.
+This doesn't cover failures while Zeyple starts, see
+.BR "EXIT STATUS" .
 Defaults to
 .BR no ,
 but the sample configuration sets it to
@@ -277,15 +279,25 @@ With
 .BR force_encrypt ,
 Zeyple only returns 75 when the relay is temporarily unavailable, and drops
 the email otherwise.
+.IP
+Failures while Zeyple starts always return 75, even with
+.BR force_encrypt ,
+since Zeyple doesn't know its settings yet: the configuration can't be read,
+lacks a required option, has an invalid
+.B force_encrypt
+value, or the log file can't be opened.
 .PP
 Zeyple never returns an error that makes Postfix bounce the email, as the
 bounce would contain it unencrypted.
-Without
-.BR force_encrypt ,
-though, an email that keeps failing stays in the queue until Postfix's
+Still, an email that keeps getting 75 stays in the queue until Postfix's
 .B maximal_queue_lifetime
 runs out, and Postfix bounces it then.
-The reason of every failure is in the log file.
+That can happen without
+.BR force_encrypt ,
+or with it when Zeyple keeps failing to start or the relay stays down.
+.PP
+The reason of a failure is in the log file, or, when Zeyple fails before it
+can open the log file, in the Postfix mail log.
 .SH FILES
 .TP
 .I /usr/local/bin/zeyple.py
