@@ -15,8 +15,8 @@ It catches emails from the Postfix queue, encrypts them with the public key
 of each recipient it has a key for, and puts them back into the queue.
 .PP
 .nf
-     unencrypted email   ||   encrypted email
-sender --> Postfix --> Zeyple --> Postfix --> recipient(s)
+\&     unencrypted email   ||   encrypted email
+sender \-\-> Postfix \-\-> Zeyple \-\-> Postfix \-\-> recipient(s)
 .fi
 .PP
 It is meant for the emails a server sends on its own: reports and alerts
@@ -177,17 +177,17 @@ Add the filter and the service that takes emails back from it to
 .RS
 .nf
 zeyple    unix  \-       n       n       \-       \-       pipe
-  user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
-
+\&  user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
+.sp
 localhost:10026 inet  n       \-       n       \-       10      smtpd
-  \-o content_filter=
-  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
-  \-o smtpd_helo_restrictions=
-  \-o smtpd_client_restrictions=
-  \-o smtpd_sender_restrictions=
-  \-o smtpd_recipient_restrictions=permit_mynetworks,reject
-  \-o mynetworks=127.0.0.0/8,[::1]/128
-  \-o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128
+\&  \-o content_filter=
+\&  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
+\&  \-o smtpd_helo_restrictions=
+\&  \-o smtpd_client_restrictions=
+\&  \-o smtpd_sender_restrictions=
+\&  \-o smtpd_recipient_restrictions=permit_mynetworks,reject
+\&  \-o mynetworks=127.0.0.0/8,[::1]/128
+\&  \-o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128
 .fi
 .RE
 .PP
@@ -237,12 +237,12 @@ sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \-\-list\-keys
 .fi
 .RE
 .PP
-Import a key from a keyserver:
+Search a keyserver and import the keys you pick at the prompt:
 .PP
 .RS
 .nf
 sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \e
-    \-\-keyserver hkps://keys.openpgp.org \-\-search\-keys you@example.com
+\&    \-\-keyserver hkps://keys.openpgp.org \-\-search\-keys you@example.com
 .fi
 .RE
 .PP
@@ -259,7 +259,7 @@ Refresh the imported keys:
 .RS
 .nf
 sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \e
-    \-\-keyserver hkps://keys.openpgp.org \-\-refresh\-keys
+\&    \-\-keyserver hkps://keys.openpgp.org \-\-refresh\-keys
 .fi
 .RE
 .SH EXIT STATUS
@@ -328,10 +328,10 @@ A minimal
 [zeyple]
 log_file = /var/log/zeyple.log
 force_encrypt = 1
-
+.sp
 [gpg]
 home = /var/lib/zeyple/keys
-
+.sp
 [relay]
 host = localhost
 port = 10026
@@ -382,7 +382,7 @@ back to Postfix:
 .PP
 .RS
 .nf
-  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+\&  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
 .fi
 .RE
 .PP
