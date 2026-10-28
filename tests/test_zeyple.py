@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
@@ -8,13 +8,17 @@ import gpg
 import os
 import re
 import shutil
+import smtplib
 import subprocess
+import sys
 import tempfile
 import unittest
 
 from zeyple import zeyple
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
+KEYS_NO_NAME_FNAME = os.path.join(os.path.dirname(__file__), 'keys_no_name.gpg')
+ZEYPLE_SCRIPT = os.path.join(os.path.dirname(__file__), '..', 'zeyple', 'zeyple.py')
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
 TEST1_EMAIL_SUBADDRESS = 'test1+tag@zeyple.example.com'
@@ -22,6 +26,21 @@ TEST2_ID = '0422F1C597FB1687'
 TEST2_EMAIL = 'test2@zeyple.example.com'
 TEST_EXPIRED_ID = 'ED97E21F1C7F1AC6'
 TEST_EXPIRED_EMAIL = 'test_expired@zeyple.example.com'
+NO_NAME_ID = '3282A6D396FB567D'
+NO_NAME_EMAIL = 'noname@zeyple.example.com'
+NO_NAME_BRACKETS_ID = 'E235EB0AF8D4C6DF'
+NO_NAME_BRACKETS_EMAIL = 'brackets@zeyple.example.com'
+
+SIMPLE_MESSAGE = dedent("""\
+    Received: by example.org (Postfix, from userid 0)
+        id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+    To: """ + TEST1_EMAIL + """
+    Subject: Hello
+    Message-Id: <20120906233537.DD3B67981178@example.org>
+    Date: Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
+    From: root@example.org (root)
+
+    """)
 
 
 class ZeypleTest(unittest.TestCase):
@@ -99,9 +118,24 @@ class ZeypleTest(unittest.TestCase):
 
         user_key = self.zeyple._user_key(TEST1_EMAIL)
         assert user_key == TEST1_ID
+        user_key = self.zeyple._user_key(TEST1_EMAIL.upper())
+        assert user_key == TEST1_ID
 
         user_key = self.zeyple._user_key(TEST1_EMAIL_SUBADDRESS)
         assert user_key == TEST1_ID
+
+    def test_user_key_without_name(self):
+        """Returns the right ID for keys whose user ID has no name"""
+        subprocess.check_call(
+            ['gpg', '--homedir', self.homedir, '--import', KEYS_NO_NAME_FNAME],
+            stderr=subprocess.DEVNULL,
+        )
+
+        # user ID is "noname@zeyple.example.com"
+        assert self.zeyple._user_key(NO_NAME_EMAIL) == NO_NAME_ID
+
+        # user ID is "<brackets@zeyple.example.com>"
+        assert self.zeyple._user_key(NO_NAME_BRACKETS_EMAIL) == NO_NAME_BRACKETS_ID
 
     def test_encrypt_with_plain_text(self):
         """Encrypts plain text"""
@@ -118,7 +152,8 @@ class ZeypleTest(unittest.TestCase):
             self.zeyple._encrypt_payload(content, [TEST_EXPIRED_ID])
             successful = True
         except gpg.errors.GPGMEError as error:
-            assert error.error == 'Key with user email %s is expired!'.format(TEST_EXPIRED_EMAIL)
+            assert error.error == 'Key with user email {0} is expired!'.format(
+                TEST_EXPIRED_EMAIL)
 
         assert successful is None
 
@@ -220,6 +255,13 @@ class ZeypleTest(unittest.TestCase):
     def test_process_message_with_multiple_recipients(self):
         """Encrypt a message with multiple recipients"""
 
+        mime_message = dedent("""\
+            --BOUNDARY
+            Content-Type: text/plain
+
+            hello
+            --BOUNDARY--""")
+
         emails = self.zeyple.process_message(dedent("""\
             Received: by example.org (Postfix, from userid 0)
                 id DD3B67981178; Thu,  6 Sep 2012 23:35:37 +0000 (UTC)
@@ -232,6 +274,24 @@ class ZeypleTest(unittest.TestCase):
             hello""").encode('ascii'), [TEST1_EMAIL, TEST2_EMAIL])
 
         assert len(emails) == 2  # it has two recipients
+        # encrypting for one recipient must not change the email of the others
+        for email in emails:
+            self.assertValidMimeMessage(email, mime_message)
+            assert len(email.get_all('X-Zeyple')) == 1
+
+    def test_process_message_as_is_with_multiple_recipients(self):
+        """Gives each recipient its own copy of emails sent as is"""
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])[0]
+        del encrypted['X-Zeyple']
+
+        for message, recipients in [
+            (encrypted.as_bytes(), [TEST1_EMAIL, TEST2_EMAIL]),  # already encrypted
+            ((SIMPLE_MESSAGE + "test").encode('ascii'),  # no keys
+             ['unknown1@zeyple.example.com', 'unknown2@zeyple.example.com']),
+        ]:
+            emails = self.zeyple.process_message(message, recipients)
+            assert [len(email.get_all('X-Zeyple')) for email in emails] == [1, 1]
 
     def test_process_message_with_complex_message(self):
         """Encrypts complex messages"""
@@ -258,3 +318,139 @@ class ZeypleTest(unittest.TestCase):
         assert len(sent_messages) == 1
 
         self.zeyple.config.remove_option('zeyple', 'force_encrypt')
+
+    def test_process_message_with_encrypted_message(self):
+        """Doesn't encrypt PGP/MIME messages again"""
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])[0]
+
+        email = self.zeyple.process_message(encrypted.as_bytes(), [TEST2_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+        assert email.get_payload()[1].get_payload() == \
+            encrypted.get_payload()[1].get_payload()
+
+    def test_process_message_with_mislabeled_encrypted_message(self):
+        """Encrypts messages which claim to be PGP/MIME but aren't encrypted"""
+        message = SIMPLE_MESSAGE.rstrip('\n') + dedent("""
+            MIME-Version: 1.0
+            Content-Type: multipart/encrypted; protocol="application/pgp-encrypted";
+             boundary="BOUNDARY"
+
+            --BOUNDARY
+            Content-Type: application/pgp-encrypted
+
+            Version: 1
+
+            --BOUNDARY
+            Content-Type: application/octet-stream
+
+            The key is under the carpet.
+            --BOUNDARY--
+            """)
+
+        email = self.zeyple.process_message(message.encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+        assert 'under the carpet' not in email.as_string()
+
+    def test_process_message_with_inline_encrypted_message(self):
+        """Doesn't encrypt inline PGP messages again"""
+        body = self.zeyple._encrypt_payload(b'test', [TEST1_ID]).decode('ascii')
+
+        email = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert not email.is_multipart()
+        assert email.get_payload() == body
+
+    def test_process_message_with_fake_inline_encrypted_message(self):
+        """Encrypts plain text merely wrapped in PGP markers"""
+        for text in ['The key is under the carpet.',
+                     'VGhlIGtleSBpcyB1bmRlciB0aGUgY2FycGV0Lg==']:  # the same in base64
+            body = dedent("""\
+                -----BEGIN PGP MESSAGE-----
+
+                {0}
+                -----END PGP MESSAGE-----
+                """).format(text)
+
+            email = self.zeyple.process_message(
+                (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+            assert email.get_content_type() == 'multipart/encrypted'
+            assert text not in email.as_string()
+
+    def test_process_message_quoting_encrypted_block(self):
+        """Encrypts messages which merely contain an inline PGP block"""
+        body = dedent("""\
+            Somebody sent this:
+            -----BEGIN PGP MESSAGE-----
+            hF4DQx0D2+KPKYcSAQdAmXHJb2SfL6a3sbfW5t6kz9pnRdXjU0sXZ4bW8lK0Mg8w
+            -----END PGP MESSAGE-----
+            and the rest of the message is in plain text.
+            """)
+
+        email = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
+
+        assert email.get_content_type() == 'multipart/encrypted'
+
+    def run_zeyple(self, message, recipients):
+        """Runs zeyple.py like Postfix does, with the relay unreachable"""
+        self.zeyple.config.set('relay', 'host', '127.0.0.1')
+        self.zeyple.config.set('relay', 'port', '1')  # nothing listens there
+        with open(self.conffile, 'w') as fp:
+            self.zeyple.config.write(fp)
+
+        return subprocess.run(
+            [sys.executable, ZEYPLE_SCRIPT] + recipients,
+            input=message, cwd=self.tmpdir, capture_output=True,
+        )
+
+    def test_defer_on_error(self):
+        """Tells Postfix to retry later instead of bouncing the message unencrypted"""
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL
+        with open(self.logfile) as fp:
+            assert 'Postfix will retry later' in fp.read()
+
+    def test_drop_on_error_with_force_encryption(self):
+        """Drops the message on error when force_encrypt is set"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST_EXPIRED_EMAIL])
+
+        assert result.returncode == 0
+        with open(self.logfile) as fp:
+            assert 'dropping it as force_encrypt is set' in fp.read()
+
+    def test_defer_on_relay_error_with_force_encryption(self):
+        """Tells Postfix to retry later when the relay is unreachable, even with force_encrypt"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL
+        with open(self.logfile) as fp:
+            assert 'Postfix will retry later' in fp.read()
+
+    def test_is_temporary(self):
+        """Tells relay failures that retrying could fix from permanent errors"""
+        assert zeyple.is_temporary(ConnectionRefusedError())
+        assert zeyple.is_temporary(smtplib.SMTPServerDisconnected())
+        assert zeyple.is_temporary(smtplib.SMTPDataError(451, b'Try again later'))
+        assert zeyple.is_temporary(smtplib.SMTPRecipientsRefused({TEST1_EMAIL: (450, b'Busy')}))
+
+        assert not zeyple.is_temporary(smtplib.SMTPDataError(552, b'Message too big'))
+        assert not zeyple.is_temporary(smtplib.SMTPRecipientsRefused({TEST1_EMAIL: (550, b'No')}))
+        assert not zeyple.is_temporary(gpg.errors.GPGMEError('Key is expired!'))
+
+    def test_defer_on_invalid_force_encryption(self):
+        """Tells Postfix to retry later when force_encrypt is invalid"""
+        self.zeyple.config.set('zeyple', 'force_encrypt', 'maybe')
+
+        result = self.run_zeyple((SIMPLE_MESSAGE + "test").encode('ascii'), [TEST1_EMAIL])
+
+        assert result.returncode == os.EX_TEMPFAIL

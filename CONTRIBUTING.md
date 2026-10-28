@@ -13,13 +13,17 @@ You will need the following development dependencies.
 
 * Packages:
   * Arch Linux: `pacman -S python-gpgme`
-  * Debian/Ubuntu: `apt-get install python3-gpg`
+  * Debian/Ubuntu: `apt-get install python3-gpg python3-pytest`
   * Fedora: `yum install python3-devel gpgme-devel`
 
 ## Testing
 
-Run `python -m pytest` and see [.github/workflows/zeyple.yml](./.github/workflows/zeyple.yml) for the full testing workflow.
+Run `python3 -m pytest` and see [.github/workflows/zeyple.yml](./.github/workflows/zeyple.yml) for the full testing workflow.
+It runs the tests, builds the .deb package and sends an email through Postfix in Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 containers, using each distro's own Python and `python3-gpg`.
 
-### Inspec
+To try your changes against a real Postfix, start a throwaway container with `docker run --rm -it -v "$PWD:/zeyple" -w /zeyple debian:trixie bash` and run the workflow's steps in it.
+This replaces the [zeyple-vagrant](https://github.com/infertux/zeyple-vagrant) box, which is no longer maintained.
 
-The [Chef cookbook](https://github.com/infertux/chef-zeyple/blob/master/test/integration/default/inspec/zeyple_spec.rb) performs [integration tests](https://travis-ci.org/infertux/chef-zeyple) using a fully fledged Vagrant VM with Postfix installed.
+### Chef cookbook
+
+The [Chef cookbook](https://github.com/infertux/chef-zeyple) runs [integration tests](https://github.com/infertux/chef-zeyple/blob/master/test/integration/default/inspec/zeyple_spec.rb) with Test Kitchen and InSpec, which set up Postfix and Zeyple in Debian and Ubuntu containers.

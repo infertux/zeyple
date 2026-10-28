@@ -1,6 +1,16 @@
+## v2.0.0 to v3.0.0
+
+1. If you installed the .deb package, back up `/etc/zeyple.conf`, `/var/lib/zeyple/keys` and `/var/log/zeyple.log` before upgrading it.
+   The 1.x and 2.0.0 packages remove them when they are upgraded (this is fixed from 3.0.0 onwards), so restore them afterwards.
+   Then give the keys and the log back to the zeyple user with `chown -R zeyple: /var/lib/zeyple/keys /var/log/zeyple.log`.
+   Zeyple can't use keys owned by root, so it would send emails unencrypted, or drop them with `force_encrypt`.
+1. Add `zeyple_destination_recipient_limit = 1` to `/etc/postfix/main.cf` and run `postfix reload`, so Postfix runs Zeyple once per recipient.
+   The .deb package does it for you.
+
 ## v1.2.0 to v2.0.0
 
-1. Python 3 is now required
+1. Python 3 is now required, with the official GPGME bindings instead of python-gpgme: `apt-get install python3-gpg`
+1. If you installed the .deb package, back up your config, keys and log before upgrading it, as described for v3.0.0 above.
 
 ## v1.1.0 to v1.2.0
 

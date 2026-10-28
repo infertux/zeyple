@@ -11,8 +11,10 @@ fpm -f -s dir -t "$TYPE" -n zeyple \
     --vendor "infertux" \
     --maintainer "infertux" \
     --version "$(grep -E "^__version__ = '(.+)'$" ../zeyple/zeyple.py | cut -d\' -f2)" \
+    --architecture all \
     --after-install after-install.sh \
     --before-remove before-remove.sh \
+    --depends adduser \
     --depends gnupg \
     --depends python3-gpg \
     --depends sudo \

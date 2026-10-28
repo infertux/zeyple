@@ -29,8 +29,36 @@ Just comment/uncomment the line `content_filter = zeyple` in your `/etc/postfix/
 ## Key management
 
 * List of keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --list-keys`
-* Update imported keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --refresh-keys`
-* Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkp://keys.gnupg.net --search you@domain.tld`
+* Update imported keys: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --refresh-keys`
+* Import a new key: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --search-keys you@domain.tld`
+* Import a key from a file: `sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import < key.asc`
+
+## Sending to aliases
+
+Zeyple looks up the key of the recipient Postfix hands it, before aliases from `/etc/aliases` are expanded.
+So an email to `root` is not encrypted with the key of the address `root` is aliased to.
+Use Postfix's `recipient_canonical_maps` instead, which rewrites the recipient before Zeyple sees it:
+
+```bash
+echo "recipient_canonical_maps = hash:/etc/postfix/recipient_canonical" >> /etc/postfix/main.cf
+echo "root me@example.com" >> /etc/postfix/recipient_canonical
+postmap /etc/postfix/recipient_canonical
+postfix reload
+```
+
+## DKIM signing
+
+Emails must be signed after Zeyple encrypts them, otherwise the DKIM signature no longer matches.
+If you sign with a milter such as OpenDKIM, remove `no_milters` from the `localhost:10026` service in `/etc/postfix/master.cf` so the milter also runs when Zeyple hands emails back to Postfix:
+
+```
+  -o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+```
+
+This service is an SMTP server, so it only runs the milters in `smtpd_milters`.
+If your signing milter is only in `non_smtpd_milters`, also add `-o smtpd_milters=$non_smtpd_milters` to the service.
+
+Then run `postfix reload`.
 
 ## Integration with other MTAs
 
@@ -39,12 +67,6 @@ Although tested only with [Postfix](http://www.postfix.org/), Zeyple should inte
 ## Docker
 
 A [Docker image](https://gitlab.com/nebulon42/zeyple-docker) is available for development purposes.
-
-## Vagrant
-
-A fully-setup test-environment is available to easily test your modifications.
-[Vagrant](https://www.vagrantup.com/) and a compatible virtualization environment ([VirtualBox](https://www.virtualbox.org/) for example) are required.
-Visit [zeyple-vagrant](https://github.com/Nithanim/zeyple-vagrant) for download and more information.
 
 ## Contributing
 

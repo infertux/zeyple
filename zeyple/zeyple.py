@@ -1,12 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
+import base64
+import binascii
 import copy
 import email
 import email.encoders
 import email.mime.application
 import email.mime.multipart
+import email.mime.nonmultipart
 import gpg
 import logging
 import os
@@ -23,10 +26,10 @@ def encode_string(string):
 
 
 __title__ = 'Zeyple'
-__version__ = '2.0.0'
+__version__ = '3.0.0'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
-__copyright__ = 'Copyright 2012-2024 Cédric Félizard'
+__copyright__ = 'Copyright 2012-2026 Cédric Félizard'
 
 
 class Zeyple:
@@ -40,6 +43,10 @@ class Zeyple:
             filename=log_file, level=logging.DEBUG,
             format='%(asctime)s %(process)s %(levelname)s %(message)s'
         )
+
+        # raise now rather than when handling an error if the value is invalid
+        self.force_encrypt
+
         logging.info("Zeyple ready to encrypt outgoing emails")
 
     def load_configuration(self, filename):
@@ -80,32 +87,88 @@ class Zeyple:
             "Processing outgoing message %s", in_message['Message-id'])
 
         if not recipients:
-            logging.warn("Cannot find any recipients, ignoring")
+            logging.warning("Cannot find any recipients, ignoring")
+
+        already_encrypted = self._is_encrypted(in_message)
 
         sent_messages = []
+        # copies of in_message must be deep: shallow ones share its headers, so changing
+        # them for one recipient would also change them for the next one
         for recipient in recipients:
             logging.info("Recipient: %s", recipient)
 
-            key_id = self._user_key(recipient)
-            logging.info("Key ID: %s", key_id)
-
-            if key_id:
-                out_message = self._encrypt_message(in_message, key_id)
-
-            elif self.config.has_option('zeyple', 'force_encrypt') and \
-                    self.config.getboolean('zeyple', 'force_encrypt'):
-                logging.error("No keys found, message will not be sent!")
-                continue
+            if already_encrypted:
+                logging.info("Message is already encrypted, sending it as is")
+                out_message = copy.deepcopy(in_message)
 
             else:
-                logging.warn("No keys found, message will be sent unencrypted")
-                out_message = copy.copy(in_message)
+                key_id = self._user_key(recipient)
+                logging.info("Key ID: %s", key_id)
+
+                if key_id:
+                    out_message = self._encrypt_message(in_message, key_id)
+
+                elif self.force_encrypt:
+                    logging.error("No keys found, message will not be sent!")
+                    continue
+
+                else:
+                    logging.warning("No keys found, message will be sent unencrypted")
+                    out_message = copy.deepcopy(in_message)
 
             self._add_zeyple_header(out_message)
             self._send_message(out_message, recipient)
             sent_messages.append(out_message)
 
         return sent_messages
+
+    @property
+    def force_encrypt(self):
+        return self.config.getboolean('zeyple', 'force_encrypt', fallback=False)
+
+    def _is_encrypted(self, message):
+        """Returns whether the whole message is already encrypted with PGP"""
+        if message.get_content_type() == 'multipart/encrypted':
+            # PGP/MIME (RFC 3156): a version part then the encrypted data
+            parts = message.get_payload() if message.is_multipart() else []
+            protocol = str(message.get_param('protocol', '')).lower()
+            return protocol == 'application/pgp-encrypted' and len(parts) == 2 and \
+                parts[0].get_content_type() == 'application/pgp-encrypted' and \
+                self._is_pgp_message(parts[1].get_payload(decode=True))
+
+        if message.is_multipart():
+            return False
+
+        # inline PGP: the body must be nothing but an encrypted block
+        return self._is_pgp_message(message.get_payload(decode=True))
+
+    def _is_pgp_message(self, data):
+        """Returns whether data is an ASCII-armored OpenPGP encrypted message"""
+        lines = [line.strip() for line in (data or b'').strip().splitlines()]
+        if len(lines) < 3 or b'' not in lines or \
+           lines[0] != b'-----BEGIN PGP MESSAGE-----' or \
+           lines[-1] != b'-----END PGP MESSAGE-----':
+            return False
+
+        # skip the armor headers, which end with a blank line, and the checksum
+        body = lines[lines.index(b'') + 1:-1]
+        if body and body[-1].startswith(b'='):
+            body = body[:-1]
+
+        try:
+            packets = base64.b64decode(b''.join(body), validate=True)
+        except binascii.Error:
+            return False
+
+        # the data must start with a public-key or symmetric-key encrypted
+        # session key packet, so text merely wrapped in PGP markers doesn't count
+        if not packets or not packets[0] & 0x80:
+            return False
+        if packets[0] & 0x40:  # new packet format
+            tag = packets[0] & 0x3f
+        else:
+            tag = (packets[0] >> 2) & 0x0f
+        return tag in (1, 3)
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(
@@ -188,7 +251,7 @@ class Zeyple:
         version = self._get_version_part()
         encrypted = self._get_encrypted_part(encrypted_payload)
 
-        out_message = copy.copy(in_message)
+        out_message = copy.deepcopy(in_message)
         out_message.preamble = "This is an OpenPGP/MIME encrypted " \
                                "message (RFC 4880 and 3156)"
 
@@ -209,14 +272,12 @@ class Zeyple:
         """Encrypts the payload with the given keys"""
         payload = encode_string(payload)
 
-        self.gpg.armor = True
-
         recipient = [self.gpg.get_key(key_id) for key_id in key_ids]
 
         for key in recipient:
             if key.expired:
                 raise gpg.errors.GPGMEError(
-                    "Key with user email %s "
+                    "Key with user email {0} "
                     "is expired!".format(key.uids[0].email))
 
         (ciphertext, encresult, signresult) = self.gpg.encrypt(
@@ -237,7 +298,7 @@ class Zeyple:
         # for searches like "n"
         for key in self.gpg.keylist(email):
             for uid in key.uids:
-                if uid.email == email:
+                if uid.email.lower() == email.lower():
                     return key.subkeys[0].keyid
 
         # Strip sub addressing tag
@@ -268,11 +329,42 @@ class Zeyple:
         logging.info("Message %s sent", message['Message-id'])
 
 
-if __name__ == '__main__':
+def is_temporary(error):
+    """Returns whether the relay failed in a way that retrying later could fix"""
+    if isinstance(error, smtplib.SMTPRecipientsRefused):
+        codes = [code for code, _ in error.recipients.values()]
+    elif isinstance(error, smtplib.SMTPResponseException):
+        codes = [error.smtp_code]
+    else:
+        # the relay can't be reached (smtplib errors are OSErrors too)
+        return isinstance(error, OSError)
+
+    return all(400 <= code < 500 for code in codes)
+
+
+def main():
     recipients = sys.argv[1:]
 
     binary_stdin = sys.stdin.buffer
     message = binary_stdin.read()
 
-    zeyple = Zeyple()
-    zeyple.process_message(message, recipients)
+    zeyple = None
+    try:
+        zeyple = Zeyple()
+        zeyple.process_message(message, recipients)
+    except Exception as error:
+        # Never let Postfix bounce the message as the bounce would contain it unencrypted.
+        # Retrying could still end in a bounce, so with force_encrypt only retry when the
+        # relay is temporarily unavailable.
+        if zeyple and zeyple.force_encrypt and not is_temporary(error):
+            logging.exception("Cannot process message, dropping it as force_encrypt is set")
+            return 0
+
+        logging.exception("Cannot process message, Postfix will retry later")
+        return os.EX_TEMPFAIL
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
