@@ -66,7 +66,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04
     CONF
 
     cp zeyple.py /usr/local/bin/zeyple.py
-    chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
+    chmod 755 /usr/local/bin/zeyple.py && chown root:root /usr/local/bin/zeyple.py
 
     touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 
@@ -75,6 +75,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04
 
     As a side note, `localhost:10026` is used to reinject email into the queue bypassing the _zeyple_ `content_filter`.
     `zeyple_destination_recipient_limit = 1` makes Postfix run Zeyple once per recipient, so an error for one recipient doesn't affect the others.
+    `zeyple.py` belongs to root so that the _zeyple_ user, which handles the emails, can't modify it.
 
 You are good to go!
 You can send you an email with `date | mail -s test root` and check it is encrypted.

@@ -33,7 +33,8 @@ chmod 700 /var/lib/zeyple/keys
 
 chown zeyple: /var/lib/zeyple/keys
 
-chmod 744 /usr/local/bin/zeyple.py && chown zeyple: /usr/local/bin/zeyple.py
+# zeyple.py belongs to root (as packaged) so the zeyple user can't modify it
+chmod 755 /usr/local/bin/zeyple.py
 
 touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 

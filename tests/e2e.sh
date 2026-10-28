@@ -34,6 +34,7 @@ postfix start || postfix reload
 apt-get install -y ./fpm/zeyple.deb
 cp /usr/local/bin/zeyple.conf.example /etc/zeyple.conf
 test "$(postconf -h zeyple_destination_recipient_limit)" = 1
+test "$(stat -c '%U:%G %a' /usr/local/bin/zeyple.py)" = 'root:root 755'
 
 # Import GPG key
 sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg
@@ -41,11 +42,14 @@ sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --import ./tests/e2e_keys.gpg
 send_test_email_and_check_it_is_encrypted
 
 # Upgrading (or reinstalling) the package must keep the config and keys,
-# and set the recipient limit again when main.cf no longer sets it to 1
+# set the recipient limit again when main.cf no longer sets it to 1,
+# and give zeyple.py back to root as packages up to 2.0.0 gave it to zeyple
 sed -i 's/^zeyple_destination_recipient_limit/#&/' /etc/postfix/main.cf
+chown zeyple: /usr/local/bin/zeyple.py
 apt-get install -y --reinstall ./fpm/zeyple.deb
 test -f /etc/zeyple.conf
 test "$(postconf -h zeyple_destination_recipient_limit)" = 1
+test "$(stat -c '%U:%G %a' /usr/local/bin/zeyple.py)" = 'root:root 755'
 sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --list-keys | grep -F '@'
 
 send_test_email_and_check_it_is_encrypted
