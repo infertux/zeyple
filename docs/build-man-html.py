@@ -16,8 +16,12 @@ import sys
 DOCS = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(DOCS)
 
+# the page title is the only <h1>, so sections are <h2> and subsections <h3>
+HEADINGS = {'Sh': 'h2', 'Ss': 'h3'}
+
 
 def main():
+    """Prints the web page built from the man page"""
     source = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'zeyple', 'zeyple.1')
 
     with open(source, encoding='utf-8') as man_page:
@@ -32,13 +36,24 @@ def main():
     if mandoc.returncode != 0:
         sys.exit("mandoc failed on {0}, see its messages above".format(source))
 
+    # mandoc 1.14.6 wraps the manual in a <div> and the footer line in a <table>,
+    # later versions use <main> and a <div>
     manual = re.search(
-        r'<div class="manual-text">(.*)</div>\s*<table class="foot">', mandoc.stdout, re.DOTALL
-    ).group(1)
+        r'<(div|main) class="manual-text">(.*)</\1>\s*<(?:table|div) class="foot"',
+        mandoc.stdout, re.DOTALL,
+    )
+    if not manual:
+        sys.exit("can't find the manual in mandoc's output, its HTML may have changed")
+    manual = manual.group(2)
 
-    # the page title is the only <h1>, so sections become <h2> and subsections <h3>
-    manual = re.sub(r'<(/?)h2\b', r'<\1h3', manual)
-    manual = re.sub(r'<(/?)h1\b', r'<\1h2', manual)
+    # mandoc 1.14.6 puts sections in <h1> and subsections in <h2>, later versions one level lower
+    manual = re.sub(
+        r'<h\d class="(Sh|Ss)"(.*?)</h\d>',
+        lambda heading: '<{0} class="{1}"{2}</{0}>'.format(
+            HEADINGS[heading.group(1)], heading.group(1), heading.group(2)
+        ),
+        manual, flags=re.DOTALL,
+    )
 
     sections = re.findall(
         r'<h2 class="Sh" id="([^"]+)"><a class="permalink" href="#[^"]+">(.*?)</a></h2>',
@@ -63,12 +78,13 @@ def main():
         'TOC': toc,
         'MANUAL': manual,
     }
-    for key, value in values.items():
-        page = page.replace('@{0}@'.format(key), value)
+    # check the template alone, since the manual may contain text like @USER@
+    unknown = sorted(set(re.findall(r'@([A-Z]+)@', page)) - set(values))
+    if unknown:
+        sys.exit("man-template.html uses unknown placeholders: {0}".format(', '.join(unknown)))
 
-    leftover = re.search(r'@[A-Z]+@', page)
-    if leftover:
-        sys.exit("man-template.html uses an unknown placeholder: {0}".format(leftover.group()))
+    # in one pass, so that the inserted values are never searched for placeholders
+    page = re.sub(r'@([A-Z]+)@', lambda placeholder: values[placeholder.group(1)], page)
 
     sys.stdout.write(page)
 
