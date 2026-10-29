@@ -77,7 +77,14 @@ class ZeypleTest(unittest.TestCase):
         self.zeyple._send_message = Mock()  # don't try to send emails
 
     def tearDown(self):
-        shutil.rmtree(self.tmpdir)
+        # Stop gpg-agent first: once rmtree deletes its socket, GnuPG 2.2's
+        # agent deletes its other sockets itself, so rmtree can find them gone
+        try:
+            subprocess.check_call(
+                ['gpgconf', '--homedir', self.homedir, '--kill', 'gpg-agent'],
+            )
+        finally:
+            shutil.rmtree(self.tmpdir)
 
     def decrypt(self, data):
         gpg = subprocess.Popen(
