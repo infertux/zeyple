@@ -2,7 +2,7 @@
 
 A few options are available to install Zeyple, feel free to use the one that suits you best.
 
-1. [APT repository](https://deb.cyberbits.eu/zeyple/)
+1. [APT repository](#apt-repository) at https://deb.cyberbits.eu/zeyple/
 1. [Chef cookbook](https://supermarket.chef.io/cookbooks/zeyple)
 1. [Ansible role](https://galaxy.ansible.com/mimacom/zeyple/)
 1. [Bash script](https://github.com/bastelfreak/scripts/blob/master/setup_zeyple.sh) [[1]](#fn-1)
@@ -11,6 +11,24 @@ A few options are available to install Zeyple, feel free to use the one that sui
 ---
 
 You need to be _root_ here - make sure you understand what you are doing.
+
+## APT repository
+
+The `zeyple` package works on Debian 12 and 13 and Ubuntu 24.04 and 26.04 from the same `stable` suite.
+It creates the _zeyple_ user, the key directory and the log, and plugs Zeyple into Postfix (install Postfix first).
+
+```bash
+apt-get update && apt-get install ca-certificates curl gnupg
+install -d /etc/apt/keyrings
+curl -fsSL https://deb.cyberbits.eu/0x580D9B7340D7A21A.key | gpg --dearmor -o /etc/apt/keyrings/zeyple.gpg
+echo "deb [signed-by=/etc/apt/keyrings/zeyple.gpg] https://deb.cyberbits.eu/zeyple stable main" > /etc/apt/sources.list.d/zeyple.list
+apt-get update && apt-get install zeyple
+```
+
+The package installs a working `/etc/zeyple.conf` with the default settings (see `man zeyple`); your changes to it are kept on upgrade.
+Then import the recipients' keys (step 3 below).
+
+## By hand
 
 These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04 and Ubuntu 26.04.
 
