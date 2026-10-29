@@ -20,7 +20,8 @@ Why would you take that risk - encrypt them all!_
 
 ## Install & upgrade
 
-See [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
+On Debian 12 and 13 and Ubuntu 24.04 and 26.04, install the `zeyple` package from the APT repository at https://deb.cyberbits.eu/zeyple/ ([INSTALL.md](INSTALL.md#apt-repository) has the commands).
+Other options and upgrade notes are in [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
 
 Once installed, `man zeyple` documents every option, the Postfix setup and key management (see [zeyple.8](zeyple/zeyple.8)).
 

@@ -15,6 +15,7 @@
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
   * [DOC]     Add a `zeyple(8)` man page, installed by the .deb package, and a script that turns it into a web page
   * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
+  * [MISC]    Publish the .deb package in the `stable` suite of the APT repository at https://deb.cyberbits.eu/zeyple/ for Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 (#77)
   * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04, and stop ignoring test failures in CI
   * [MISC]    Test keys whose user ID has no name (#69)
 
