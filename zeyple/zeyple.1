@@ -1,0 +1,426 @@
+.TH ZEYPLE 1 2026-10-28 "Zeyple 3.0.0" "User Commands"
+.nh
+.SH NAME
+zeyple \- Zeyple Encrypts Your Precious Log Emails
+.SH SYNOPSIS
+.B zeyple.py
+.I recipient
+.RI [ recipient ...]
+.B < message
+.SH DESCRIPTION
+.B Zeyple
+is a Postfix after-queue content filter that automatically encrypts
+outgoing emails with GnuPG.
+It catches emails from the Postfix queue, encrypts them with the public key
+of each recipient it has a key for, and puts them back into the queue.
+.PP
+.nf
+\&     unencrypted email   ||   encrypted email
+sender \-\-> Postfix \-\-> Zeyple \-\-> Postfix \-\-> recipient(s)
+.fi
+.PP
+It is meant for the emails a server sends on its own: reports and alerts
+from Logwatch, Monit, Fail2ban, smartd, cron and the like, which say a lot
+about the server and should not cross the network in the clear.
+.PP
+Postfix runs
+.B zeyple.py
+through the
+.BR pipe (8)
+delivery agent, as a dedicated
+.I zeyple
+user.
+It reads one email from standard input and takes the envelope recipients as
+arguments.
+For each recipient, it looks up a key in its keyring, encrypts the email with
+it and sends the result to the SMTP relay set in the configuration, which is
+normally a second Postfix
+.BR smtpd (8)
+service that puts it back into the queue without running Zeyple again.
+.PP
+Encrypted emails use PGP/MIME (RFC 3156): the body and all attachments are
+encrypted together into a single
+.I multipart/encrypted
+message.
+Headers, including
+.BR Subject ,
+are kept as they are and stay readable.
+.PP
+How each recipient is handled:
+.IP \(bu 2
+The key is looked up by email address.
+The address must match the email of one of the key's user IDs, ignoring case.
+.IP \(bu 2
+If no key matches and the address has a sub-address tag, such as
+.IR you+tag@example.com ,
+the key of
+.I you@example.com
+is used.
+.IP \(bu 2
+Keys don't need to be signed or trusted in the keyring, any key that matches
+is used.
+An expired key is an error.
+.IP \(bu 2
+Emails that are already encrypted, either PGP/MIME or a body that is nothing
+but an inline PGP message, are sent as they are.
+.IP \(bu 2
+Without a key, the email is sent unencrypted, unless
+.B force_encrypt
+is set, in which case it is not sent to that recipient at all.
+.PP
+Each recipient gets their own SMTP transaction, with the
+.B From
+header as the envelope sender.
+.SH OPTIONS
+.B zeyple.py
+has no options: every argument is a recipient address.
+.TP
+.I recipient
+An envelope recipient of the email, as Postfix passes it with
+.BR ${recipient} .
+Several recipients can be given, but Zeyple is meant to run once per
+recipient, see
+.B zeyple_destination_recipient_limit
+in
+.BR "POSTFIX INTEGRATION" .
+When no recipient is given, nothing is sent and a warning is logged.
+.PP
+The email itself is read from standard input.
+.SH CONFIGURATION
+Zeyple reads
+.I /etc/zeyple.conf
+then
+.I zeyple.conf
+in the current directory, and a value from the second file overrides the
+first.
+At least one of them must exist.
+The format is INI, as read by Python's
+.BR configparser .
+A sample is installed as
+.IR zeyple.conf.example .
+.PP
+Boolean options accept
+.BR 1 ,
+.BR yes ,
+.B true
+and
+.B on
+to enable them, and
+.BR 0 ,
+.BR no ,
+.B false
+and
+.B off
+to disable them.
+.SS [zeyple]
+.TP
+.BI log_file " = path"
+File to log to.
+Required.
+Zeyple logs at debug level: message IDs, recipients, the key used for each
+recipient and the reason of every failure.
+The file must be writable by the
+.I zeyple
+user.
+.TP
+.BI force_encrypt " = boolean"
+Never send an email unencrypted.
+When there is no key for a recipient, the email is not sent to them.
+When Zeyple fails for any other reason than the relay being temporarily
+unavailable, the email is dropped rather than retried, so that Postfix never
+bounces it back unencrypted.
+This doesn't cover failures while Zeyple starts, see
+.BR "EXIT STATUS" .
+Defaults to
+.BR no ,
+but the sample configuration sets it to
+.BR 1 .
+.TP
+.BI add_header " = boolean"
+Add an
+.B X\-Zeyple
+header to every email Zeyple sends, such as
+.IR "X\-Zeyple: processed by Zeyple v3.0.0" .
+Defaults to
+.BR no .
+.SS [gpg]
+.TP
+.BI home " = path"
+GnuPG home directory holding the public keys of the recipients.
+Required.
+It must belong to the
+.I zeyple
+user, with mode 700.
+.TP
+.BI executable " = path"
+Path to the
+.BR gpg (1)
+binary.
+Defaults to the one GPGME finds on its own.
+.SS [relay]
+.TP
+.BI host " = hostname"
+SMTP server to send the processed emails to.
+Required.
+.TP
+.BI port " = number"
+Port of that SMTP server.
+Required.
+.PP
+The connection to the relay is plain SMTP, without TLS or authentication, so
+it should stay on the local host.
+.SH POSTFIX INTEGRATION
+Zeyple runs as a Postfix content filter.
+Add the filter and the service that takes emails back from it to
+.IR /etc/postfix/master.cf :
+.PP
+.RS
+.nf
+zeyple    unix  \-       n       n       \-       \-       pipe
+\&  user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
+.sp
+localhost:10026 inet  n       \-       n       \-       10      smtpd
+\&  \-o content_filter=
+\&  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
+\&  \-o smtpd_helo_restrictions=
+\&  \-o smtpd_client_restrictions=
+\&  \-o smtpd_sender_restrictions=
+\&  \-o smtpd_recipient_restrictions=permit_mynetworks,reject
+\&  \-o mynetworks=127.0.0.0/8,[::1]/128
+\&  \-o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128
+.fi
+.RE
+.PP
+Then enable it in
+.I /etc/postfix/main.cf
+and run
+.BR "postfix reload" :
+.PP
+.RS
+.nf
+content_filter = zeyple
+zeyple_destination_recipient_limit = 1
+.fi
+.RE
+.TP
+.B content_filter = zeyple
+Sends every email that enters the queue through Zeyple.
+Comment it out and run
+.B postfix reload
+to disable Zeyple.
+.TP
+.B zeyple_destination_recipient_limit = 1
+Makes Postfix run Zeyple once per recipient, so an error for one recipient
+doesn't affect the others.
+.TP
+.B localhost:10026
+The relay from the
+.B [relay]
+section.
+Its empty
+.B content_filter
+keeps emails from going through Zeyple a second time.
+.SH KEY MANAGEMENT
+Keys live in the
+.B [gpg] home
+directory and are managed with
+.BR gpg (1)
+as the
+.I zeyple
+user, so that it can still read them.
+.PP
+List the keys:
+.PP
+.RS
+.nf
+sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \-\-list\-keys
+.fi
+.RE
+.PP
+Search a keyserver and import the keys you pick at the prompt:
+.PP
+.RS
+.nf
+sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \e
+\&    \-\-keyserver hkps://keys.openpgp.org \-\-search\-keys you@example.com
+.fi
+.RE
+.PP
+Import a key from a file:
+.PP
+.RS
+.nf
+sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \-\-import < key.asc
+.fi
+.RE
+.PP
+Refresh the imported keys:
+.PP
+.RS
+.nf
+sudo \-u zeyple gpg \-\-homedir /var/lib/zeyple/keys \e
+\&    \-\-keyserver hkps://keys.openpgp.org \-\-refresh\-keys
+.fi
+.RE
+.SH EXIT STATUS
+Postfix's
+.BR pipe (8)
+delivery agent acts on the exit status.
+.TP
+.B 0
+The email was handled: sent to every recipient, or dropped by
+.BR force_encrypt .
+.TP
+.BR 75 " (EX_TEMPFAIL)"
+Zeyple failed: the configuration can't be read, the relay can't be reached,
+a key is expired, and so on.
+Postfix keeps the email in the queue and tries again later.
+With
+.BR force_encrypt ,
+Zeyple only returns 75 when the relay is temporarily unavailable, and drops
+the email otherwise.
+.IP
+Failures while Zeyple starts always return 75, even with
+.BR force_encrypt ,
+since Zeyple doesn't know its settings yet: the configuration can't be read,
+has no log_file or an invalid
+.B force_encrypt
+value, or the log file can't be opened.
+.PP
+Zeyple never returns an error that makes Postfix bounce the email, as the
+bounce would contain it unencrypted.
+Still, an email that keeps getting 75 stays in the queue until Postfix's
+.B maximal_queue_lifetime
+runs out, and Postfix bounces it then.
+That can happen without
+.BR force_encrypt ,
+or with it when Zeyple keeps failing to start or the relay stays down.
+.PP
+The reason of a failure is in the log file, or, when Zeyple fails before it
+can open the log file, in the Postfix mail log.
+.SH FILES
+.TP
+.I /usr/local/bin/zeyple.py
+The filter itself.
+.TP
+.I /etc/zeyple.conf
+Configuration file.
+.TP
+.I /usr/local/bin/zeyple.conf.example
+Sample configuration installed by the .deb package, to copy to
+.IR /etc/zeyple.conf .
+.TP
+.I /var/lib/zeyple/keys
+Default GnuPG home directory with the public keys of the recipients.
+.TP
+.I /var/log/zeyple.log
+Default log file.
+.TP
+.IR /etc/postfix/master.cf ", " /etc/postfix/main.cf
+Postfix configuration, see
+.BR "POSTFIX INTEGRATION" .
+.SH EXAMPLES
+A minimal
+.IR /etc/zeyple.conf :
+.PP
+.RS
+.nf
+[zeyple]
+log_file = /var/log/zeyple.log
+force_encrypt = 1
+.sp
+[gpg]
+home = /var/lib/zeyple/keys
+.sp
+[relay]
+host = localhost
+port = 10026
+.fi
+.RE
+.PP
+Send a test email and check that it arrives encrypted:
+.PP
+.RS
+.B date | mail \-s test root
+.RE
+.PP
+Follow what Zeyple does:
+.PP
+.RS
+.B tail \-f /var/log/zeyple.log
+.RE
+.PP
+Encrypt emails sent to
+.I root
+with the key of
+.IR me@example.com .
+Zeyple sees the recipient before
+.I /etc/aliases
+is applied, so rewrite the recipient with
+.B recipient_canonical_maps
+instead:
+.PP
+.RS
+.nf
+echo "recipient_canonical_maps = hash:/etc/postfix/recipient_canonical" >> /etc/postfix/main.cf
+echo "root me@example.com" >> /etc/postfix/recipient_canonical
+postmap /etc/postfix/recipient_canonical
+postfix reload
+.fi
+.RE
+.PP
+Sign encrypted emails with DKIM: emails must be signed after Zeyple encrypts
+them, otherwise the signature no longer matches.
+Remove
+.B no_milters
+from the
+.B localhost:10026
+service in
+.I /etc/postfix/master.cf
+so that the signing milter, such as OpenDKIM, runs when Zeyple hands emails
+back to Postfix:
+.PP
+.RS
+.nf
+\&  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks
+.fi
+.RE
+.PP
+That service is an SMTP server, so it only runs the milters in
+.BR smtpd_milters .
+If the signing milter is only in
+.BR non_smtpd_milters ,
+also add
+.B \-o smtpd_milters=$non_smtpd_milters
+to the service.
+Then run
+.BR "postfix reload" .
+.SH NOTES
+Zeyple is only tested with Postfix, but should work with any MTA that can
+pipe emails to a filter and take them back over SMTP.
+.PP
+Zeyple only encrypts, it never signs or decrypts.
+.SH BUGS
+Report bugs at
+.UR https://github.com/infertux/zeyple/issues
+GitHub
+.UE .
+.SH AUTHOR
+Written by C\('edric F\('elizard, with the help of many contributors.
+.SH COPYRIGHT
+Copyright 2012\-2026 C\('edric F\('elizard.
+License AGPLv3+: GNU Affero General Public License version 3 or later.
+.SH SEE ALSO
+.BR gpg (1),
+.BR postconf (5),
+.BR master (5),
+.BR pipe (8),
+.BR smtpd (8)
+.PP
+.UR https://github.com/infertux/zeyple
+Zeyple's home page
+.UE
+.PP
+.UR https://www.postfix.org/FILTER_README.html
+Postfix After-Queue Content Filter
+.UE

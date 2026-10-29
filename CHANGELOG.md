@@ -10,6 +10,7 @@
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
+  * [DOC]     Add a `zeyple(1)` man page, installed by the .deb package, and a script that turns it into a web page
   * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
   * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04, and stop ignoring test failures in CI
   * [MISC]    Test keys whose user ID has no name (#69)
