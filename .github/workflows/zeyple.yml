@@ -44,7 +44,7 @@ jobs:
           gem install --no-document fpm
         shell: bash
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Lint with pycodestyle
@@ -60,13 +60,13 @@ jobs:
       - name: End to end test using deb package
         run: bash -ex ./tests/e2e.sh
       - name: Upload deb package
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: zeyple-${{ matrix.name }}.deb
           path: ./fpm/zeyple.deb
       - name: Upload HTML man page
         if: matrix.name == 'debian-13'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: zeyple-man.html
           path: ./man.html
