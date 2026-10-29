@@ -22,7 +22,7 @@ Why would you take that risk - encrypt them all!_
 
 See [INSTALL.md](INSTALL.md) & [UPGRADE.md](UPGRADE.md).
 
-Once installed, `man zeyple` documents every option, the Postfix setup and key management (see [zeyple.1](zeyple/zeyple.1)).
+Once installed, `man zeyple` documents every option, the Postfix setup and key management (see [zeyple.8](zeyple/zeyple.8)).
 
 ## Disable/enable Zeyple
 

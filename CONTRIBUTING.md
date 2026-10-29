@@ -30,8 +30,8 @@ The [Chef cookbook](https://github.com/infertux/chef-zeyple) runs [integration t
 
 ## Man page
 
-The man page is [zeyple/zeyple.1](zeyple/zeyple.1), written with the man(7) macros.
-Read it with `man -l zeyple/zeyple.1` and check it with `mandoc -Tlint -W warning zeyple/zeyple.1`.
+The man page is [zeyple/zeyple.8](zeyple/zeyple.8), written with the man(7) macros.
+Read it with `man -l zeyple/zeyple.8` and check it with `mandoc -Tlint -W warning zeyple/zeyple.8`.
 
 `python3 docs/build-man-html.py > man.html` turns it into a web page like [GoAccess's](https://goaccess.io/man), using [docs/man-template.html](docs/man-template.html).
 It needs `mandoc`, and the workflow keeps the page it builds as an artifact.

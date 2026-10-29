@@ -50,7 +50,7 @@ jobs:
       - name: Lint with pycodestyle
         run: pycodestyle --show-pep8 --max-line-length=100 .
       - name: Lint man page
-        run: mandoc -Tlint -W warning zeyple/zeyple.1
+        run: mandoc -Tlint -W warning zeyple/zeyple.8
       - name: Build HTML man page
         run: python3 docs/build-man-html.py > man.html
       - name: Test with pytest

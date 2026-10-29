@@ -11,6 +11,14 @@
    unlike `cp`, it replaces the old file instead of writing into it, so nothing that had the old file open can change the new one.
    The .deb package does it for you, and so does `./upgrade.sh /usr/local/bin/zeyple.py`
    (without an argument, `upgrade.sh` upgrades `/usr/sbin/zeyple`, where the Chef cookbook installs Zeyple).
+1. Zeyple is now published as a .deb package, in the [APT repository](https://deb.cyberbits.eu/zeyple/).
+   The package installs Zeyple as `/usr/sbin/zeyple`, since Debian packages must not install anything in `/usr/local`, and the sample config as `/etc/zeyple.conf`.
+   To keep installing by hand, follow the step above. To switch an install by hand to the package:
+   1. Install the package. When your `/etc/zeyple.conf` differs from the sample config, dpkg asks which one to keep:
+      keep yours, which is the default, or skip the question with `apt-get install -o Dpkg::Options::=--force-confold zeyple`.
+      The package also keeps your keys and log, and since Postfix already uses Zeyple, it doesn't add the zeyple service to `/etc/postfix/master.cf` or `content_filter` to `/etc/postfix/main.cf` again.
+   1. In `/etc/postfix/master.cf`, change `argv=/usr/local/bin/zeyple.py` to `argv=/usr/sbin/zeyple` in the zeyple service, then run `postfix reload`.
+   1. Delete `/usr/local/bin/zeyple.py`.
 
 ## v1.2.0 to v2.0.0
 

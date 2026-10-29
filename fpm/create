@@ -6,6 +6,15 @@ TYPE=${1:-deb}
 
 cd "$(dirname "$0")"
 
+# Lay out the files where Debian packages put them, with the sample config
+# as the config and the man page compressed
+build=$(mktemp -d)
+trap 'rm -rf "$build"' EXIT
+install -D -m 755 ../zeyple/zeyple.py "$build/usr/sbin/zeyple"
+install -D -m 644 ../zeyple/zeyple.conf.example "$build/etc/zeyple.conf"
+mkdir -p "$build/usr/share/man/man8"
+gzip -9n < ../zeyple/zeyple.8 > "$build/usr/share/man/man8/zeyple.8.gz"
+
 fpm -f -s dir -t "$TYPE" -n zeyple \
     --vendor "infertux" \
     --maintainer "infertux" \
@@ -17,8 +26,7 @@ fpm -f -s dir -t "$TYPE" -n zeyple \
     --depends gnupg \
     --depends python3-gpg \
     --depends sudo \
-    -C ../zeyple \
+    --config-files /etc/zeyple.conf \
+    -C "$build" \
     -p zeyple.deb \
-    zeyple.py=/usr/local/bin/zeyple.py \
-    zeyple.conf.example=/usr/local/bin/zeyple.conf.example \
-    zeyple.1=/usr/local/share/man/man1/zeyple.1
+    etc usr
