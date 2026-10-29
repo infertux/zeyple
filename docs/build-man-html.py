@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Turns the zeyple man page into a web page, like https://goaccess.io/man
 
-Usage: python3 docs/build-man-html.py [zeyple/zeyple.1] > man.html
+Usage: python3 docs/build-man-html.py [zeyple/zeyple.8] > man.html
 
 mandoc(1) converts the man page, this script puts the result in man-template.html.
 """
@@ -22,7 +22,7 @@ HEADINGS = {'Sh': 'h2', 'Ss': 'h3'}
 
 def main():
     """Prints the web page built from the man page"""
-    source = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'zeyple', 'zeyple.1')
+    source = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'zeyple', 'zeyple.8')
 
     with open(source, encoding='utf-8') as man_page:
         header = next(line for line in man_page if line.startswith('.TH '))

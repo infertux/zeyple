@@ -67,7 +67,7 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04
 
     install -m 755 -o root -g root zeyple.py /usr/local/bin/zeyple.py
 
-    mkdir -p /usr/local/share/man/man1 && cp zeyple.1 /usr/local/share/man/man1/
+    mkdir -p /usr/local/share/man/man8 && cp zeyple.8 /usr/local/share/man/man8/
 
     touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
 
@@ -90,7 +90,7 @@ You can send you an email with `date | mail -s test root` and check it is encryp
 Manually remove the added lines in `/etc/postfix/{main,master}.cf` then
 
 ```bash
-rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /usr/local/share/man/man1/zeyple.1 /var/lib/zeyple /var/log/zeyple.log
+rm -rfv /etc/zeyple.conf /usr/local/bin/zeyple.py /usr/local/share/man/man8/zeyple.8 /var/lib/zeyple /var/log/zeyple.log
 userdel zeyple
 postfix reload
 ```

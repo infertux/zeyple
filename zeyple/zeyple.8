@@ -1,9 +1,9 @@
-.TH ZEYPLE 1 2026-10-28 "Zeyple 3.0.0" "User Commands"
+.TH ZEYPLE 8 2026-10-29 "Zeyple 3.0.0" "System Manager's Manual"
 .nh
 .SH NAME
 zeyple \- Zeyple Encrypts Your Precious Log Emails
 .SH SYNOPSIS
-.B zeyple.py
+.B zeyple
 .I recipient
 .RI [ recipient ...]
 .B < message
@@ -24,7 +24,7 @@ from Logwatch, Monit, Fail2ban, smartd, cron and the like, which say a lot
 about the server and should not cross the network in the clear.
 .PP
 Postfix runs
-.B zeyple.py
+.B zeyple
 through the
 .BR pipe (8)
 delivery agent, as a dedicated
@@ -72,7 +72,7 @@ Each recipient gets their own SMTP transaction, with the
 .B From
 header as the envelope sender.
 .SH OPTIONS
-.B zeyple.py
+.B zeyple
 has no options: every argument is a recipient address.
 .TP
 .I recipient
@@ -96,8 +96,11 @@ first.
 At least one of them must exist.
 The format is INI, as read by Python's
 .BR configparser .
-A sample is installed as
-.IR zeyple.conf.example .
+The .deb package installs the sample configuration as
+.IR /etc/zeyple.conf ;
+installed by hand, copy
+.I zeyple.conf.example
+there.
 .PP
 Boolean options accept
 .BR 1 ,
@@ -171,13 +174,19 @@ The connection to the relay is plain SMTP, without TLS or authentication, so
 it should stay on the local host.
 .SH POSTFIX INTEGRATION
 Zeyple runs as a Postfix content filter.
-Add the filter and the service that takes emails back from it to
-.IR /etc/postfix/master.cf :
+The .deb package sets it up when it is installed.
+Otherwise, add the filter and the service that takes emails back from it to
+.IR /etc/postfix/master.cf ,
+replacing
+.I /usr/sbin/zeyple
+with the path where you installed Zeyple, such as
+.I /usr/local/bin/zeyple.py
+when following INSTALL.md:
 .PP
 .RS
 .nf
 zeyple    unix  \-       n       n       \-       \-       pipe
-\&  user=zeyple argv=/usr/local/bin/zeyple.py ${recipient}
+\&  user=zeyple argv=/usr/sbin/zeyple ${recipient}
 .sp
 localhost:10026 inet  n       \-       n       \-       10      smtpd
 \&  \-o content_filter=
@@ -300,15 +309,16 @@ The reason of a failure is in the log file, or, when Zeyple fails before it
 can open the log file, in the Postfix mail log.
 .SH FILES
 .TP
+.I /usr/sbin/zeyple
+The filter itself, as installed by the .deb package.
+Installed by hand following INSTALL.md, it is
 .I /usr/local/bin/zeyple.py
-The filter itself.
+instead.
 .TP
 .I /etc/zeyple.conf
 Configuration file.
-.TP
-.I /usr/local/bin/zeyple.conf.example
-Sample configuration installed by the .deb package, to copy to
-.IR /etc/zeyple.conf .
+The .deb package installs the sample configuration there, and keeps your
+changes when it is upgraded.
 .TP
 .I /var/lib/zeyple/keys
 Default GnuPG home directory with the public keys of the recipients.
