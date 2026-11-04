@@ -1,0 +1,74 @@
+name: Release
+
+# Pushing a signed v* tag drafts its GitHub Release with the package that CI
+# built and tested on master for the tagged commit. tools/release, run on the
+# maintainer's machine, pushes the tag, signs the checksums and publishes the draft.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  draft:
+    name: Draft the GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the draft release
+      actions: read # download the artifact of the CI run on master
+    env:
+      GH_REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+      # Must match RELEASING.md and tools/maintainer-key.asc
+      MAINTAINER_KEY: 4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Fetch the annotated tag
+        # actions/checkout replaces a pushed tag with a lightweight one, without its signature
+        run: git fetch --force --no-tags origin "+refs/tags/$TAG:refs/tags/$TAG"
+      - name: Check that the maintainer signed the tag
+        run: |
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          install -d -m 700 "$GNUPGHOME"
+          gpg --batch --quiet --import tools/maintainer-key.asc
+          if ! git verify-tag --raw "$TAG" 2> "$RUNNER_TEMP/verify-tag"; then
+              cat "$RUNNER_TEMP/verify-tag"
+              echo "::error::$TAG isn't signed with a valid key from tools/maintainer-key.asc"
+              exit 1
+          fi
+          # the last field of VALIDSIG is the fingerprint of the signing key's primary key
+          if ! grep -Eq "^\[GNUPG:\] VALIDSIG .* $MAINTAINER_KEY\$" "$RUNNER_TEMP/verify-tag"; then
+              cat "$RUNNER_TEMP/verify-tag"
+              echo "::error::$TAG isn't signed with the maintainer's key $MAINTAINER_KEY"
+              exit 1
+          fi
+      - name: Check the version and the release date
+        run: tools/release-info --tag "$TAG"
+      - name: Download the package CI tested on master
+        run: |
+          commit=$(git rev-parse "$TAG^{commit}")
+          run_id=$(gh run list --workflow zeyple.yml --branch master --event push \
+              --commit "$commit" --status success --limit 1 --json databaseId \
+              --jq '.[0].databaseId // empty')
+          if [ -z "$run_id" ]; then
+              echo "::error::No successful CI run on master for $commit: tag a commit that passed it"
+              exit 1
+          fi
+          echo "Using the artifact of https://github.com/$GH_REPO/actions/runs/$run_id"
+          gh run download "$run_id" --name zeyple-release --dir dist
+          cd dist && sha256sum -c SHA256SUMS
+      - name: Draft the release
+        run: |
+          read -r version debian_version date < <(tools/release-info)
+          package="dist/zeyple_${debian_version}_all.deb"
+          test "$(dpkg-deb -f "$package" Version)" = "$debian_version"
+          gh release create "$TAG" --draft --verify-tag --title "Zeyple $version" \
+              --notes-file RELEASE_NOTES.md \
+              "$package" "dist/zeyple-man-$version.html" dist/SHA256SUMS
+          echo "Drafted $TAG ($date): run tools/release on the maintainer's machine to publish it"

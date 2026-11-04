@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Checks that the files carrying Zeyple's version and release date agree,
+then prints the upstream version, the Debian version and the release date.
+
+    tools/release-info                    check and print, e.g. "3.0.0 3.0.0-1 2026-11-04"
+    tools/release-info --tag v3.0.0       also check the release tag's name
+    tools/release-info --set-date [DATE]  set the release date (YYYY-MM-DD, default: today in UTC)
+"""
+
+import argparse
+import datetime
+import email.utils
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+SCRIPT = 'zeyple/zeyple.py'
+DEBIAN_CHANGELOG = 'debian/changelog'
+CHANGELOG = 'CHANGELOG.md'
+MAN_PAGE = 'zeyple/zeyple.8'
+RELEASE_NOTES = 'RELEASE_NOTES.md'
+
+# The first match of each pattern is the current release
+SCRIPT_VERSION = re.compile(r"^__version__ = '([^']+)'$", re.MULTILINE)
+DEBIAN_VERSION = re.compile(r'^zeyple \(([^)]+)\) ', re.MULTILINE)
+DEBIAN_DATE = re.compile(r'^( -- .+?>  )(.+)$', re.MULTILINE)
+CHANGELOG_HEADING = re.compile(r'^(## v(\S+), )(\S+)', re.MULTILINE)
+MAN_HEADER = re.compile(r'^(\.TH ZEYPLE 8 )(\S+)( "Zeyple (\S+)")', re.MULTILINE)
+NOTES_TITLE = re.compile(r'^# Zeyple (\S+)$', re.MULTILINE)
+
+
+def read(name):
+    try:
+        with open(os.path.join(ROOT, name), encoding='utf-8') as f:
+            return f.read()
+    except OSError as error:
+        sys.exit('{0}: {1}'.format(name, error.strerror))
+
+
+def write(name, text):
+    with open(os.path.join(ROOT, name), 'w', encoding='utf-8') as f:
+        f.write(text)
+
+
+def search(pattern, name):
+    match = pattern.search(read(name))
+    if match is None:
+        sys.exit('{0}: no line matches {1}'.format(name, pattern.pattern))
+    return match
+
+
+def iso_date(text):
+    try:
+        return datetime.date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def debian_date(text):
+    try:
+        return email.utils.parsedate_to_datetime(text).date()
+    except (TypeError, ValueError):
+        return None
+
+
+def release_info():
+    """Returns (version, Debian version, date) and the list of disagreements"""
+    debian_version = search(DEBIAN_VERSION, DEBIAN_CHANGELOG).group(1)
+    changelog = search(CHANGELOG_HEADING, CHANGELOG)
+    man = search(MAN_HEADER, MAN_PAGE)
+
+    versions = {
+        SCRIPT: search(SCRIPT_VERSION, SCRIPT).group(1),
+        DEBIAN_CHANGELOG: debian_version.rsplit('-', 1)[0],
+        CHANGELOG: changelog.group(2),
+        MAN_PAGE: man.group(4),
+        RELEASE_NOTES: search(NOTES_TITLE, RELEASE_NOTES).group(1),
+    }
+    dates = {
+        DEBIAN_CHANGELOG: debian_date(search(DEBIAN_DATE, DEBIAN_CHANGELOG).group(2)),
+        CHANGELOG: iso_date(changelog.group(3)),
+        MAN_PAGE: iso_date(man.group(2)),
+    }
+
+    errors = []
+    version = versions[SCRIPT]
+    for name, other in versions.items():
+        if other != version:
+            errors.append('{0} is at version {1} but {2} is at {3}'.format(
+                name, other, SCRIPT, version))
+    for name, date in dates.items():
+        if date is None:
+            errors.append('{0} has no release date'.format(name))
+    date = dates[DEBIAN_CHANGELOG]
+    for name, other in dates.items():
+        if None not in (date, other) and other != date:
+            errors.append('{0} says {1} but {2} says {3}'.format(
+                name, other, DEBIAN_CHANGELOG, date))
+    return version, debian_version, date, errors
+
+
+def set_date(date):
+    midnight = datetime.datetime.combine(date, datetime.time(), datetime.timezone.utc)
+    replacements = [
+        (DEBIAN_CHANGELOG, DEBIAN_DATE, r'\g<1>' + email.utils.format_datetime(midnight)),
+        (CHANGELOG, CHANGELOG_HEADING, r'\g<1>' + date.isoformat()),
+        (MAN_PAGE, MAN_HEADER, r'\g<1>' + date.isoformat() + r'\g<3>'),
+    ]
+    for name, pattern, replacement in replacements:
+        search(pattern, name)
+        write(name, pattern.sub(replacement, read(name), count=1))
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--tag', help='the release tag to check, e.g. v3.0.0')
+    parser.add_argument('--set-date', nargs='?', metavar='DATE',
+                        const=datetime.datetime.now(datetime.timezone.utc).date().isoformat(),
+                        help='set the release date first')
+    args = parser.parse_args()
+
+    if args.set_date is not None:
+        date = iso_date(args.set_date)
+        if date is None:
+            parser.error('the date must look like 2026-11-04, not {0}'.format(args.set_date))
+        set_date(date)
+
+    version, debian_version, date, errors = release_info()
+    if args.tag is not None and args.tag != 'v' + version:
+        errors.append('the tag is {0} but the version is {1}, so it should be v{1}'.format(
+            args.tag, version))
+    if errors:
+        sys.exit('\n'.join(errors))
+    print(version, debian_version, date.isoformat())
+
+
+if __name__ == '__main__':
+    main()
