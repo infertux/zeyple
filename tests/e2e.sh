@@ -95,7 +95,8 @@ check_installed_files() {
     head -1 /usr/sbin/zeyple | grep -Ex '#! ?/usr/bin/python3'
     cmp <(tail -n +2 /usr/sbin/zeyple) <(tail -n +2 ./zeyple/zeyple.py)
     test "$(stat -c '%U:%G %a' /etc/zeyple.conf)" = 'root:root 644'
-    test "$(stat -c '%U %a' /var/lib/zeyple/keys)" = 'zeyple 700'
+    test "$(stat -c '%U:%G %a' /var/lib/zeyple/keys)" = 'zeyple:zeyple 700'
+    test "$(id -gn zeyple)" = zeyple
     test "$(getent passwd zeyple | cut -d: -f6)" = /var/lib/zeyple
     test "$(stat -c '%U:%G %a' /var/log/zeyple.log)" = 'zeyple:adm 640'
 }
@@ -160,7 +161,7 @@ send_encrypted_email_and_check_it_is_sent_as_is
 # Upgrading (or reinstalling) the package must keep the config, with your changes, and the keys,
 # leave Postfix alone and give the script back to root
 cp /etc/postfix/main.cf /etc/postfix/master.cf "$postfix_config/"
-chown zeyple: /usr/sbin/zeyple
+chown zeyple:zeyple /usr/sbin/zeyple
 echo '# changed after installing' >> /etc/zeyple.conf
 apt-get install -y --reinstall "$package"
 grep -Fx '# changed after installing' /etc/zeyple.conf
@@ -217,5 +218,6 @@ test ! -e /etc/zeyple.conf
 test ! -e /var/lib/zeyple
 test ! -e /var/log/zeyple.log
 getent passwd zeyple
+getent group zeyple
 
 echo "E2E test was successful!"

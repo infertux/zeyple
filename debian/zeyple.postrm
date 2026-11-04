@@ -3,8 +3,9 @@ set -e
 
 # Keep the keys and the log until the package is purged, so removing the package
 # and installing it again doesn't lose the keys (dpkg deletes /etc/zeyple.conf,
-# a conffile, itself). Like most Debian packages, leave the zeyple system user in
-# place: its gpg-agent may still be running, and its UID must not be reused.
+# a conffile, itself). Like most Debian packages, leave the zeyple system user
+# and group in place: its gpg-agent may still be running, and its UID and GID
+# must not be reused.
 if [ "$1" = purge ]; then
     rm -rf /var/lib/zeyple /var/log/zeyple.log
 fi
