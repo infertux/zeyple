@@ -9,7 +9,8 @@
   * [BUGFIX]  Find the key when the recipient address and the key's user ID differ in case (#51)
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [BUGFIX]  Validate complete OpenPGP packets before passing encrypted emails through, including packet lengths and armor checksums
-  * [BUGFIX]  Encrypt plaintext in MIME preambles, version parts and epilogues, and keep epilogues out of the encrypted message's outer wrapper
+  * [BUGFIX]  Only send the ciphertext of already encrypted emails: remove the armor headers, MIME preamble, epilogue and part headers around it, which could hold plaintext
+  * [BUGFIX]  Keep the epilogue of multipart emails inside the ciphertext instead of also leaving it on the encrypted email's outer wrapper
   * [BUGFIX]  Allow package removal with Postfix stopped
   * [FEATURE] The .deb package installs the sample config as `/etc/zeyple.conf`, and keeps your changes to it when upgraded
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
