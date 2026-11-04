@@ -55,6 +55,8 @@ Use the distribution's Python 3 and `python3-gpg` bindings when testing.
   installs and removes packages and modifies Postfix configuration, users,
   keys, logs, and mailboxes.
 - Documentation-only changes do not require the full integration suite.
+- Run `tools/release-info` after changing the version or the release date.
+  Leave `tools/release` to the maintainer: it signs and publishes the release.
 
 For packaging and release work, follow [RELEASING.md](RELEASING.md). Report the
 checks actually run and distinguish local preparation from remote publication.

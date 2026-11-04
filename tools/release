@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Releases the version on master, on the maintainer's machine: signs and pushes
+# its tag, waits for the Release workflow to draft the GitHub Release, checks
+# the draft's files against the tested CI artifact, signs their checksums and
+# publishes it.
+# Needs git, gpg with the release key, and gh logged in with write access.
+# The APT upload stays manual: see RELEASING.md.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+key=4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B
+repo=infertux/zeyple
+
+die() {
+    echo "$*" >&2
+    exit 1
+}
+
+read -r version debian_version date < <(tools/release-info)
+tag="v$version"
+
+# Tag only the master commit that CI tested
+git fetch --quiet origin master
+test "$(git symbolic-ref --short HEAD)" = master || die "Switch to master first"
+test -z "$(git status --porcelain)" || die "Commit or stash your changes first"
+commit=$(git rev-parse HEAD)
+test "$commit" = "$(git rev-parse origin/master)" || die "Your master isn't origin/master: pull or push first"
+if git rev-parse --quiet --verify "refs/tags/$tag" > /dev/null ||
+    test -n "$(git ls-remote --tags origin "refs/tags/$tag")"; then
+    die "$tag already exists"
+fi
+run_id=$(gh run list -R "$repo" --workflow zeyple.yml --branch master --event push \
+    --commit "$commit" --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+test -n "$run_id" || die "CI hasn't passed on master for $commit yet: see https://github.com/$repo/actions"
+if [ "$date" != "$(date -u +%F)" ]; then
+    echo "Warning: the changelogs say $date, today is $(date -u +%F) (tools/release-info --set-date)" >&2
+fi
+
+echo "Releasing Zeyple $version ($debian_version, $date) from $commit"
+# the Release workflow checks an OpenPGP signature, whatever gpg.format says
+git -c gpg.format=openpgp tag -s -u "$key" -m "Zeyple $version" "$tag" "$commit"
+git verify-tag "$tag"
+git push origin "refs/tags/$tag"
+
+echo "Waiting for the Release workflow to draft $tag..."
+release_run=
+for _ in $(seq 60); do
+    release_run=$(gh run list -R "$repo" --workflow release.yml --event push --branch "$tag" \
+        --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+    test -z "$release_run" || break
+    sleep 5
+done
+test -n "$release_run" || die "The Release workflow didn't start: see https://github.com/$repo/actions"
+gh run watch -R "$repo" --exit-status "$release_run" ||
+    die "The Release workflow failed: see https://github.com/$repo/actions/runs/$release_run"
+
+# Sign the checksums of the files the draft really has, once they match the
+# artifact of the CI run that tested them
+rm -rf dist
+gh release download -R "$repo" "$tag" --dir dist
+tested=$(mktemp -d)
+trap 'rm -rf "$tested"' EXIT
+gh run download -R "$repo" "$run_id" --name zeyple-release --dir "$tested"
+cmp -s "$tested/SHA256SUMS" dist/SHA256SUMS ||
+    die "The draft's SHA256SUMS isn't the one CI built: see https://github.com/$repo/actions/runs/$run_id"
+(cd dist && sha256sum -c SHA256SUMS)
+gpg --local-user "$key" --armor --detach-sign dist/SHA256SUMS
+gpg --verify dist/SHA256SUMS.asc dist/SHA256SUMS
+gh release upload -R "$repo" "$tag" dist/SHA256SUMS.asc
+gh release edit -R "$repo" "$tag" --draft=false --latest
+
+echo "Published https://github.com/$repo/releases/tag/$tag"
+echo "Now publish dist/zeyple_${debian_version}_all.deb to the APT repository: see RELEASING.md"

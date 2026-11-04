@@ -129,6 +129,11 @@ git checkout --detach v3.0.0
 ```
 
 For downloaded release artifacts, verify `SHA256SUMS.asc` with `gpg --verify SHA256SUMS.asc SHA256SUMS`, then run `sha256sum -c SHA256SUMS` in the download directory.
+GitHub also signs an attestation of each release's files, which the [GitHub CLI](https://cli.github.com/) checks:
+
+```bash
+gh release verify-asset -R infertux/zeyple v3.0.0 zeyple_3.0.0-1_all.deb
+```
 
 # Uninstall
 

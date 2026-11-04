@@ -1,68 +1,84 @@
 # Releasing Zeyple
 
 The upstream version is `3.0.0`, the signed Git tag is `v3.0.0`, and the Debian package version is `3.0.0-1`.
-Use the publication date in both changelogs and the man page. If publication moves to another day, update them before the release commit and rerun CI.
+`tools/release-info` checks that `zeyple/zeyple.py`, `debian/changelog`, `CHANGELOG.md`, the man page and `RELEASE_NOTES.md` agree on the version and the release date, and prints them.
+
+A release takes three steps, and only the last two run on the maintainer's machine:
+
+1. Set the release date in a pull request and merge it once CI passes.
+1. Run `tools/release`: it signs the tag, and GitHub Actions drafts the GitHub Release; then it signs the checksums and publishes the release.
+1. Upload the package to the APT repository by hand.
 
 ## Build and validate
 
-`./tools/build-release` builds the Debian source and binary packages from the committed tree, plus the HTML manual and the SHA-256 checksums of the .deb and the manual, in `dist/`.
+On every push and pull request, the GitHub Actions workflow ([zeyple.yml](.github/workflows/zeyple.yml)) runs `./tools/build-release` on Debian 13, checks the packages with `lintian --info --pedantic`, then tests the same package on Debian 12/13 and Ubuntu 24.04/26.04.
+Its `zeyple-release` artifact holds the .deb, the HTML manual, their SHA-256 checksums in `SHA256SUMS` and the source package.
+The release publishes the artifact of the run on master for the tagged commit, so the files you test from that run are the ones released.
+
+`./tools/build-release` builds the Debian source and binary packages from the committed tree.
 The upstream tarball leaves out `debian/` (see `.gitattributes`), like the one GitHub serves for the tag, and the packaging goes in the Debian part of the source package.
 It needs Git, Python 3, mandoc, lintian and the Debian build tools (`apt-get install git python3 mandoc lintian build-essential debhelper dh-python`).
-The package version comes from `debian/changelog`, whose upstream part must match `__version__` in `zeyple/zeyple.py`.
-Run `lintian --info --pedantic dist/*.changes` to check the packages; CI requires it to report no errors.
-Until the ITP bug below exists, it warns `initial-upload-closes-no-bugs`.
-The GitHub Actions workflow builds these artifacts on Debian 13, then tests the same package on Debian 12/13 and Ubuntu 24.04/26.04.
+Until the ITP bug below exists, lintian warns `initial-upload-closes-no-bugs`.
 
-Merge the release changes and require all five workflow jobs to pass for that exact commit.
-Download the `zeyple-release` artifact from that successful run; these are the tested binaries to publish.
+## Set the release date
+
+Use the publication date in both changelogs and the man page:
+
+```bash
+tools/release-info --set-date 2026-11-04 # default: today in UTC
+```
+
+Commit that in a pull request, merge it and wait for the five jobs of the CI run on master.
+If publication moves to another day, set the date again: `tools/release` warns when it isn't today.
+
+## Tag and publish the GitHub Release
+
+On the maintainer's machine, with the signing key, fingerprint `4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B`, and `gh` logged in with write access to the repository:
 
 ```bash
 git switch master
 git pull --ff-only
-test -z "$(git status --porcelain)"
-release_commit=$(git rev-parse HEAD)
-gh run list --workflow zeyple.yml --commit "$release_commit"
-# Set run_id to the successful run for release_commit shown above.
-gh run view "$run_id" --json headSha,conclusion
-gh run download "$run_id" --name zeyple-release --dir dist
-(cd dist && sha256sum -c SHA256SUMS)
-test "$(dpkg-deb -f dist/zeyple_3.0.0-1_all.deb Version)" = 3.0.0-1
+tools/release
 ```
 
-The downloaded artifact contains:
+`tools/release` checks that master matches GitHub, that its CI run passed and that the tag doesn't exist yet. Then it:
 
-- `zeyple_3.0.0-1_all.deb`
-- `zeyple-man-3.0.0.html`
-- `SHA256SUMS`
-- the source package (`zeyple_3.0.0.orig.tar.gz`, `zeyple_3.0.0-1.debian.tar.xz` and `zeyple_3.0.0-1.dsc`) and its `.changes` and `.buildinfo` files, for the lintian check and the Debian archive
+1. creates the signed `v3.0.0` tag on that commit and pushes it.
+1. waits for the [Release workflow](.github/workflows/release.yml), which checks the tag's signature against [tools/maintainer-key.asc](tools/maintainer-key.asc) and the version with `tools/release-info`. It then downloads the tested artifact and drafts the GitHub Release with `RELEASE_NOTES.md`, the .deb, the HTML manual and `SHA256SUMS`.
+1. downloads the draft's files to `dist/`, checks that their `SHA256SUMS` is the one in the CI artifact and that they match it, signs it into `SHA256SUMS.asc`, uploads that, and publishes the release.
 
-## Sign and publish the tag and GitHub Release
+Then check GitHub's attestation of the published release with `gh release verify v3.0.0`.
 
-Use the maintainer's signing key, fingerprint `4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B`, in the authenticated release environment.
-Keep the private key outside the repository and CI artifacts.
+When the key's expiry date changes (it is 2027-08-24 now), publish it to keyserver.ubuntu.com and keys.openpgp.org, then update `tools/maintainer-key.asc` in a pull request before the next release:
 
 ```bash
-git tag -s -u 4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B \
-    -m 'Zeyple 3.0.0' v3.0.0 "$release_commit"
-git verify-tag v3.0.0
-test "$(git rev-parse 'v3.0.0^{commit}')" = "$release_commit"
-gpg --local-user 4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B \
-    --armor --detach-sign dist/SHA256SUMS
-gpg --verify dist/SHA256SUMS.asc dist/SHA256SUMS
-git push origin refs/tags/v3.0.0
-gh release create v3.0.0 --verify-tag --title 'Zeyple 3.0.0' \
-    --notes-file RELEASE_NOTES.md \
-    dist/zeyple_3.0.0-1_all.deb dist/zeyple-man-3.0.0.html \
-    dist/SHA256SUMS dist/SHA256SUMS.asc
+gpg --keyserver hkps://keyserver.ubuntu.com --send-keys 4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B
+gpg --export --export-options export-minimal --armor 4093F1E2C12D77D1FCAF1007EEC73D5809A98A9B > tools/maintainer-key.asc
 ```
+
+## Repository settings
+
+Two of the repository's GitHub settings protect the releases:
+
+- Release immutability ("Enable release immutability"): once a release is published, its files and its tag can't change, and GitHub signs an attestation of them.
+  `tools/release` uploads `SHA256SUMS.asc` while the release is still a draft, so it isn't affected.
+  A published release can't be fixed either: delete it and release a patch version, since the tag name can't be used again.
+- The `Release tags` tag ruleset: active, targeting `v*`, with "Restrict creations", "Restrict updates" and "Restrict deletions", and only the Repository admin role in its bypass list.
+  A tag push runs the `release.yml` of the tagged commit, so the workflow's signature check can't stop someone who can push a `v*` tag: the ruleset does.
 
 ## Publish to APT
 
-On the existing APT publishing host, import the same `zeyple_3.0.0-1_all.deb` into the `stable` suite, component `main`, of `https://deb.cyberbits.eu/zeyple/`.
-Regenerate the package indexes for the repository's advertised architectures and sign the Release/InRelease metadata with its existing key, fingerprint `B2D1F527C3EBE95B8EE6F615580D9B7340D7A21A`.
+This step stays manual because the repository's signing key, fingerprint `B2D1F527C3EBE95B8EE6F615580D9B7340D7A21A`, has a passphrase.
+On the APT publishing host, import the `dist/zeyple_3.0.0-1_all.deb` that `tools/release` downloaded (or `gh release download v3.0.0 --pattern 'zeyple_*_all.deb'`) into the `stable` suite, component `main`, of `https://deb.cyberbits.eu/zeyple/`.
+With reprepro, for example:
+
+```bash
+reprepro -b /path/to/repository includedeb stable zeyple_3.0.0-1_all.deb
+```
+
 The publisher configuration and signing key are managed on that host, outside this repository.
 
-Confirm that the published package's SHA-256 matches `dist/SHA256SUMS` and that `apt-get update` verifies the repository signature.
+Confirm that the published package's SHA-256 matches `SHA256SUMS` and that `apt-get update` verifies the repository signature.
 Follow [INSTALL.md](INSTALL.md#apt-repository) on a fresh supported system, check that `apt-cache policy zeyple` selects `3.0.0-1`, and verify encrypted delivery after provisioning the keys.
 
 ## Debian archive

@@ -28,6 +28,7 @@
   * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04, and stop ignoring test failures in CI
   * [MISC]    Test the same release package on all four distributions and decrypt the delivered email in the end-to-end test
   * [MISC]    Build the .deb package with debhelper instead of FPM, from a Debian source package meant for the Debian archive
+  * [MISC]    Draft the GitHub Release with the tested package when a signed tag is pushed, and publish it with `tools/release`
   * [MISC]    Test keys whose user ID has no name (#69)
 
 ## v2.0.0, 2024-09-09 ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...v2.0.0))
