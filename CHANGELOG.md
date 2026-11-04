@@ -18,6 +18,7 @@
   * [TWEAK]   The .deb package no longer changes the Postfix configuration when it is installed, so no email goes through Zeyple before its keys are imported: plug it in with the `postconf` commands from INSTALL.md. Removing the package still takes Zeyple out of Postfix, deleting only the relay service that `[relay]` in zeyple.conf names
   * [TWEAK]   Removing the .deb package keeps the keys and the log, purging it deletes them; the zeyple system user stays
   * [TWEAK]   Install `zeyple.py` as root so the zeyple user, which handles the emails, can't modify it
+  * [TWEAK]   The .deb package creates the zeyple system user with its own zeyple group, like most Debian packages, instead of putting it in `nogroup`
   * [TWEAK]   Only let the zeyple user and the adm group read `/var/log/zeyple.log`, since it names the recipients
   * [TWEAK]   The .deb package installs Zeyple as `/usr/sbin/zeyple` instead of `/usr/local/bin/zeyple.py`, since Debian packages must not use `/usr/local`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone

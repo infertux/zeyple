@@ -8,9 +8,10 @@ case "$1" in
     configure)
         # create the home first so adduser doesn't warn that it can't be accessed
         mkdir -p /var/lib/zeyple/keys
-        adduser --system --home /var/lib/zeyple --no-create-home --disabled-login zeyple
+        adduser --system --group --home /var/lib/zeyple --no-create-home --disabled-login zeyple
         chmod 700 /var/lib/zeyple/keys
-        chown zeyple: /var/lib/zeyple/keys
+        # name the group: Ubuntu 26.04's chown (uutils) reads "zeyple:" as zeyple:root
+        chown zeyple:zeyple /var/lib/zeyple/keys
         # the script belongs to root (as packaged) so the zeyple user can't modify it
         chmod 755 /usr/sbin/zeyple
         # the log names the recipients, so like mail.log only the adm group may read it

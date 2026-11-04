@@ -1,8 +1,11 @@
 ## v2.0.0 to v3.0.0
 
+1. The zeyple user now has its own zeyple group, but earlier versions created it in `nogroup`, and the 3.0.0 package doesn't change an existing user.
+   Before upgrading, by hand or with the package, create the group and make it the user's primary group with `addgroup --system zeyple && usermod -g zeyple zeyple`.
+   Without the group, the package fails to install, and the `chown zeyple:zeyple` commands below fail.
 1. If you installed the .deb package, back up `/etc/zeyple.conf`, `/var/lib/zeyple/keys` and `/var/log/zeyple.log` before upgrading it.
    The 1.x and 2.0.0 packages remove them when they are upgraded (this is fixed from 3.0.0 onwards), so restore them afterwards.
-   Then give the keys and the log back to the zeyple user with `chown -R zeyple: /var/lib/zeyple/keys /var/log/zeyple.log`.
+   Then give the keys and the log back to the zeyple user with `chown -R zeyple:zeyple /var/lib/zeyple/keys` and `chown zeyple:adm /var/log/zeyple.log`.
    Zeyple can't use keys owned by root, so it would send emails unencrypted, or drop them with `force_encrypt`.
    These packages also take Zeyple out of Postfix when they are upgraded, and the new package doesn't change the Postfix configuration,
    so plug Zeyple back into Postfix as [INSTALL.md](INSTALL.md#apt-repository) shows.

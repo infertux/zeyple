@@ -68,13 +68,13 @@ These steps are tested on Debian 12 (Bookworm), Debian 13 (Trixie), Ubuntu 24.04
 1. Since Zeyple is going to read and encrypt your emails, it is recommended to create a dedicated user account for this task (using the "postfix" user is very discouraged according to [the doc](http://www.postfix.org/FILTER_README.html).
 
     ```bash
-    adduser --system --home /var/lib/zeyple --no-create-home --disabled-login zeyple
+    adduser --system --group --home /var/lib/zeyple --no-create-home --disabled-login zeyple
     ```
 
 1. Import public keys for all potential recipients.
 
     ```bash
-    mkdir -p /var/lib/zeyple/keys && chmod 700 /var/lib/zeyple/keys && chown zeyple: /var/lib/zeyple/keys
+    mkdir -p /var/lib/zeyple/keys && chmod 700 /var/lib/zeyple/keys && chown zeyple:zeyple /var/lib/zeyple/keys
     sudo -u zeyple gpg --homedir /var/lib/zeyple/keys --keyserver hkps://keys.openpgp.org --search-keys you@domain.tld # repeat for each key
     ```
 
