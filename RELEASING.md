@@ -73,8 +73,12 @@ On the APT publishing host, import the `dist/zeyple_3.0.0-1_all.deb` that `tools
 With reprepro, for example:
 
 ```bash
+umask 0022
 reprepro -b /path/to/repository includedeb stable zeyple_3.0.0-1_all.deb
 ```
+
+Set the umask first: Debian 13 defaults to `0027`, so reprepro would write files that the web server can't read, and the repository answers 403.
+If that already happened, `chmod -R a+rX /path/to/repository/dists /path/to/repository/pool` fixes it.
 
 The publisher configuration and signing key are managed on that host, outside this repository.
 
