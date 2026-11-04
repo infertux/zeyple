@@ -1,0 +1,3 @@
+Test-Command: ZEYPLE_SCRIPT=/usr/sbin/zeyple python3 -m pytest -v tests/
+Depends: @, python3-pytest
+Restrictions: allow-stderr

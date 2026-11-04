@@ -1,4 +1,4 @@
-.TH ZEYPLE 8 2026-10-29 "Zeyple 3.0.0" "System Manager's Manual"
+.TH ZEYPLE 8 2026-11-03 "Zeyple 3.0.0" "System Manager's Manual"
 .nh
 .SH NAME
 zeyple \- Zeyple Encrypts Your Precious Log Emails
@@ -178,47 +178,52 @@ The connection to the relay is plain SMTP, without TLS or authentication, so
 it should stay on the local host.
 .SH POSTFIX INTEGRATION
 Zeyple runs as a Postfix content filter.
-The .deb package sets it up when it is installed.
-Otherwise, add the filter and the service that takes emails back from it to
+The .deb package doesn't change the Postfix configuration, so no email goes
+through Zeyple until it is plugged in.
+Import the recipients' keys first: with the default
+.BR "force_encrypt = 1" ,
+emails to recipients without a key are dropped.
+.PP
+Then add the filter and the service that takes emails back from it to
 .IR /etc/postfix/master.cf ,
-replacing
+enable the filter in
+.I /etc/postfix/main.cf
+and reload Postfix with these commands, which can safely be run again.
+When Zeyple isn't installed from the .deb package, replace
 .I /usr/sbin/zeyple
-with the path where you installed Zeyple, such as
+with the path where you installed it, such as
 .I /usr/local/bin/zeyple.py
 when following INSTALL.md:
 .PP
 .RS
 .nf
-zeyple    unix  \-       n       n       \-       \-       pipe
-\&  user=zeyple argv=/usr/sbin/zeyple ${recipient}
-.sp
-localhost:10026 inet  n       \-       n       \-       10      smtpd
-\&  \-o content_filter=
-\&  \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters
-\&  \-o smtpd_helo_restrictions=
-\&  \-o smtpd_client_restrictions=
-\&  \-o smtpd_sender_restrictions=
-\&  \-o smtpd_recipient_restrictions=permit_mynetworks,reject
-\&  \-o mynetworks=127.0.0.0/8,[::1]/128
-\&  \-o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128
+postconf \-M zeyple/unix='zeyple unix \- n n \- \- pipe user=zeyple argv=/usr/sbin/zeyple ${recipient}'
+postconf \-M localhost:10026/inet="localhost:10026 inet n \- n \- 10 smtpd \e
+\&    \-o content_filter= \e
+\&    \-o receive_override_options=no_unknown_recipient_checks,no_header_body_checks,no_milters \e
+\&    \-o smtpd_helo_restrictions= \e
+\&    \-o smtpd_client_restrictions= \e
+\&    \-o smtpd_sender_restrictions= \e
+\&    \-o smtpd_recipient_restrictions=permit_mynetworks,reject \e
+\&    \-o mynetworks=127.0.0.0/8,[::1]/128 \e
+\&    \-o smtpd_authorized_xforward_hosts=127.0.0.0/8,[::1]/128"
+postconf \-e content_filter=zeyple zeyple_destination_recipient_limit=1
+postfix check && postfix reload
 .fi
 .RE
 .PP
-Then enable it in
-.I /etc/postfix/main.cf
-and run
-.BR "postfix reload" :
-.PP
-.RS
-.nf
-content_filter = zeyple
-zeyple_destination_recipient_limit = 1
-.fi
-.RE
+Removing the .deb package takes Zeyple back out of Postfix.
+When the
+.B zeyple
+service is there, it also deletes the service named after the
+.B [relay]
+host and port, so if you change them, name the service after the new ones.
 .TP
 .B content_filter = zeyple
 Sends every email that enters the queue through Zeyple.
-Comment it out and run
+Run
+.B postconf \-X content_filter
+and
 .B postfix reload
 to disable Zeyple.
 .TP

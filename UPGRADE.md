@@ -4,8 +4,9 @@
    The 1.x and 2.0.0 packages remove them when they are upgraded (this is fixed from 3.0.0 onwards), so restore them afterwards.
    Then give the keys and the log back to the zeyple user with `chown -R zeyple: /var/lib/zeyple/keys /var/log/zeyple.log`.
    Zeyple can't use keys owned by root, so it would send emails unencrypted, or drop them with `force_encrypt`.
-1. Add `zeyple_destination_recipient_limit = 1` to `/etc/postfix/main.cf` and run `postfix reload`, so Postfix runs Zeyple once per recipient.
-   The .deb package does it for you.
+   These packages also take Zeyple out of Postfix when they are upgraded, and the new package doesn't change the Postfix configuration,
+   so plug Zeyple back into Postfix as [INSTALL.md](INSTALL.md#apt-repository) shows.
+1. Run `postconf -e zeyple_destination_recipient_limit=1` and `postfix reload`, so Postfix runs Zeyple once per recipient.
 1. `zeyple.py` now belongs to root, so the zeyple user, which handles the emails, can't modify it.
    Install the new version with `install -m 755 -o root -g root zeyple.py /usr/local/bin/zeyple.py`:
    unlike `cp`, it replaces the old file instead of writing into it, so nothing that had the old file open can change the new one.
@@ -16,7 +17,7 @@
    To keep installing by hand, follow the step above. To switch an install by hand to the package:
    1. Install the package. When your `/etc/zeyple.conf` differs from the sample config, dpkg asks which one to keep:
       keep yours, which is the default, or skip the question with `apt-get install -o Dpkg::Options::=--force-confold zeyple`.
-      The package also keeps your keys and log, and since Postfix already uses Zeyple, it doesn't add the zeyple service to `/etc/postfix/master.cf` or `content_filter` to `/etc/postfix/main.cf` again.
+      The package also keeps your keys and log, and it doesn't change the Postfix configuration.
    1. In `/etc/postfix/master.cf`, change `argv=/usr/local/bin/zeyple.py` to `argv=/usr/sbin/zeyple` in the zeyple service, then run `postfix reload`.
    1. Delete `/usr/local/bin/zeyple.py`.
 

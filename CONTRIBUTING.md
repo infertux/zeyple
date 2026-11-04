@@ -19,7 +19,14 @@ You will need the following development dependencies.
 ## Testing
 
 Run `python3 -m pytest` and see [.github/workflows/zeyple.yml](./.github/workflows/zeyple.yml) for the full testing workflow.
-It runs the tests, builds the .deb package and sends an email through Postfix in Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 containers, using each distro's own Python and `python3-gpg`.
+It builds one .deb package on Debian 13, then runs the tests and installs that same package in Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 containers, using each distro's own Python and `python3-gpg`.
+The end-to-end test installs the package and checks that it leaves Postfix alone, provisions a disposable key, plugs Zeyple into Postfix, then decrypts the resulting email to check its content.
+It also checks that removing the package takes Zeyple out of Postfix, leaving other services alone, and keeps the keys, and that purging it deletes them.
+
+### Debian package
+
+The Debian packaging lives in `debian/`, built with debhelper: `./tools/build-release` builds the packages from the committed tree (see [RELEASING.md](RELEASING.md)).
+The autopkgtest in `debian/tests/` runs the tests against the installed `/usr/sbin/zeyple`.
 
 To try your changes against a real Postfix, start a throwaway container with `docker run --rm -it -v "$PWD:/zeyple" -w /zeyple debian:trixie bash` and run the workflow's steps in it.
 This replaces the [zeyple-vagrant](https://github.com/infertux/zeyple-vagrant) box, which is no longer maintained.
@@ -36,3 +43,7 @@ Read it with `man -l zeyple/zeyple.8` and check it with `mandoc -Tlint -W warnin
 `python3 docs/build-man-html.py > man.html` turns it into a web page like [GoAccess's](https://goaccess.io/man), using [docs/man-template.html](docs/man-template.html).
 It needs `mandoc`, and the workflow keeps the page it builds as an artifact.
 In no-fill blocks (`.nf`), start each line that begins with spaces with `\&` and write blank lines as `.sp`, otherwise the HTML version loses them.
+
+## Releases
+
+See [RELEASING.md](RELEASING.md) for building, testing, signing and publishing a release.

@@ -6,3 +6,9 @@ __pycache__/
 /htmlcov/
 *.deb
 /man.html
+/dist/
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.substvars
+/debian/zeyple/

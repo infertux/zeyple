@@ -1,4 +1,4 @@
-## v3.0.0, unreleased ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...master))
+## v3.0.0, 2026-11-03 ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...v3.0.0))
 
   * [BUGFIX]  Run with `python3` since Debian and Ubuntu no longer ship a `python` binary
   * [BUGFIX]  Don't delete the config, keys and log when the .deb package is upgraded
@@ -10,15 +10,23 @@
   * [FEATURE] Don't encrypt already encrypted emails again (#32)
   * [BUGFIX]  Validate complete OpenPGP packets before passing encrypted emails through, including packet lengths and armor checksums
   * [BUGFIX]  Encrypt plaintext in MIME preambles, version parts and epilogues, and keep epilogues out of the encrypted message's outer wrapper
+  * [BUGFIX]  Allow package removal with Postfix stopped
   * [FEATURE] The .deb package installs the sample config as `/etc/zeyple.conf`, and keeps your changes to it when upgraded
   * [TWEAK]   Build an architecture-independent .deb package that depends on `adduser`
+  * [TWEAK]   Include package metadata, the complete AGPLv3 license and changelog, and depend on Postfix
+  * [TWEAK]   The .deb package no longer changes the Postfix configuration when it is installed, so no email goes through Zeyple before its keys are imported: plug it in with the `postconf` commands from INSTALL.md. Removing the package still takes Zeyple out of Postfix, deleting only the relay service that `[relay]` in zeyple.conf names
+  * [TWEAK]   Removing the .deb package keeps the keys and the log, purging it deletes them; the zeyple system user stays
   * [TWEAK]   Install `zeyple.py` as root so the zeyple user, which handles the emails, can't modify it
+  * [TWEAK]   Only let the zeyple user and the adm group read `/var/log/zeyple.log`, since it names the recipients
   * [TWEAK]   The .deb package installs Zeyple as `/usr/sbin/zeyple` instead of `/usr/local/bin/zeyple.py`, since Debian packages must not use `/usr/local`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
   * [DOC]     Add a `zeyple(8)` man page, installed by the .deb package, and a script that turns it into a web page
   * [DOC]     Explain how to encrypt emails sent to aliases (#54) and how to sign them with DKIM (#70)
+  * [DOC]     Plug Zeyple into Postfix with `postconf` commands, which can safely be run again
   * [MISC]    Publish the .deb package in the `stable` suite of the APT repository at https://deb.cyberbits.eu/zeyple/ for Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04 (#77)
   * [MISC]    Test on Debian 12, Debian 13, Ubuntu 24.04 and Ubuntu 26.04, and stop ignoring test failures in CI
+  * [MISC]    Test the same release package on all four distributions and decrypt the delivered email in the end-to-end test
+  * [MISC]    Build the .deb package with debhelper instead of FPM, from a Debian source package meant for the Debian archive
   * [MISC]    Test keys whose user ID has no name (#69)
 
 ## v2.0.0, 2024-09-09 ([changes](https://github.com/infertux/zeyple/compare/v1.2.2...v2.0.0))

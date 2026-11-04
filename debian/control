@@ -1,0 +1,29 @@
+Source: zeyple
+Section: mail
+Priority: optional
+Maintainer: Cédric Félizard <cedric@felizard.fr>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               python3:any,
+Standards-Version: 4.7.2
+Homepage: https://github.com/infertux/zeyple
+Vcs-Browser: https://github.com/infertux/zeyple
+Vcs-Git: https://github.com/infertux/zeyple.git
+Rules-Requires-Root: no
+
+Package: zeyple
+Architecture: all
+Depends: adduser,
+         gnupg,
+         postfix,
+         python3-gpg,
+         ${misc:Depends},
+         ${python3:Depends},
+Recommends: sudo,
+Description: Postfix filter to encrypt outgoing email with OpenPGP
+ Zeyple encrypts outgoing email bodies and attachments using recipients'
+ public keys, then reinjects the messages into Postfix. It is intended for
+ server reports and alerts that contain sensitive information.
+ .
+ The package doesn't change the Postfix configuration: plug Zeyple into
+ Postfix once the recipients' keys are imported, as zeyple(8) explains.

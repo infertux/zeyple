@@ -20,7 +20,9 @@ from zeyple import zeyple
 
 KEYS_FNAME = os.path.join(os.path.dirname(__file__), 'keys.gpg')
 KEYS_NO_NAME_FNAME = os.path.join(os.path.dirname(__file__), 'keys_no_name.gpg')
-ZEYPLE_SCRIPT = os.path.join(os.path.dirname(__file__), '..', 'zeyple', 'zeyple.py')
+# the autopkgtest runs the installed script instead
+ZEYPLE_SCRIPT = os.environ.get(
+    'ZEYPLE_SCRIPT', os.path.join(os.path.dirname(__file__), '..', 'zeyple', 'zeyple.py'))
 TEST1_ID = 'D6513C04E24C1F83'
 TEST1_EMAIL = 'test1@zeyple.example.com'
 TEST1_EMAIL_SUBADDRESS = 'test1+tag@zeyple.example.com'

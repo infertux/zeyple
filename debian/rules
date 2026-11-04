@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+# Zeyple is a single script: install it and its sample config under their Debian names
+# (dh_python3 then points the script's shebang at /usr/bin/python3)
+override_dh_auto_install:
+	install -D -m 755 zeyple/zeyple.py debian/zeyple/usr/sbin/zeyple
+	install -D -m 644 zeyple/zeyple.conf.example debian/zeyple/etc/zeyple.conf
+
+# the autopkgtest runs the tests against the installed package
+override_dh_auto_test:
+
+override_dh_installchangelogs:
+	dh_installchangelogs CHANGELOG.md
