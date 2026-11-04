@@ -3,7 +3,7 @@
 Zeyple encrypts outgoing Postfix email with OpenPGP. This release supports Debian 12 and 13 and Ubuntu 24.04 and 26.04 with their distribution-provided Python 3 and GPGME bindings.
 
 - Preserve genuine inline PGP and PGP/MIME messages without encrypting them again. Validate complete packet framing, packet contents and armor checksums before allowing passthrough.
-- Encrypt plaintext around encrypted MIME parts and prevent multipart epilogues from leaking outside the ciphertext.
+- Send only the ciphertext of already encrypted emails, without the armor comments, MIME preambles and other text around it that could hold plaintext, and keep multipart epilogues inside the ciphertext.
 - Give each recipient an independent message, match key addresses case-insensitively, and improve handling of encryption and relay failures.
 - Install a documented, architecture-independent Debian package with a man page, complete license and package metadata, built with debhelper from a source package meant for the Debian archive.
 

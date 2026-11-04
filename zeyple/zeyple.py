@@ -92,6 +92,13 @@ def encrypted_packet_sequence(data):
         tags[-1] in (9, 18, 20)
 
 
+def strip_armor_headers(data):
+    """Returns an ASCII-armored message without its armor headers, such as
+    Comment, which are outside the ciphertext so they can hold plaintext"""
+    lines = [line.strip() for line in data.strip().splitlines()]
+    return b'\n'.join(lines[:1] + lines[lines.index(b''):]).decode('ascii') + '\n'
+
+
 class Zeyple:
     """Zeyple Encrypts Your Precious Log Emails"""
 
@@ -150,6 +157,8 @@ class Zeyple:
             logging.warning("Cannot find any recipients, ignoring")
 
         already_encrypted = self._is_encrypted(in_message)
+        if already_encrypted:
+            in_message = self._strip_plaintext(in_message)
 
         sent_messages = []
         # copies of in_message must be deep: shallow ones share its headers, so changing
@@ -158,7 +167,7 @@ class Zeyple:
             logging.info("Recipient: %s", recipient)
 
             if already_encrypted:
-                logging.info("Message is already encrypted, sending it as is")
+                logging.info("Message is already encrypted, sending its ciphertext as is")
                 out_message = copy.deepcopy(in_message)
 
             else:
@@ -194,17 +203,16 @@ class Zeyple:
             protocol = str(message.get_param('protocol', '')).lower()
             if protocol != 'application/pgp-encrypted' or len(parts) != 2 or message.defects:
                 return False
-            if (message.preamble or '').strip() not in ('', PGP_PREAMBLE) or \
-               (message.epilogue or '').strip():
-                return False
             if parts[0].get_content_type() != 'application/pgp-encrypted' or \
                parts[1].get_content_type() != 'application/octet-stream':
                 return False
+            # _strip_plaintext() replaces the preamble, epilogue and version part
             version = parts[0].get_payload(decode=True)
             payload = parts[1].get_payload(decode=True)
             # Decoding can record defects, such as ignored invalid base64 text.
             return not any(part.defects for part in parts) and \
-                (version or b'').strip() == b'Version: 1' and self._is_pgp_message(payload)
+                (version or b'').strip().splitlines()[:1] == [b'Version: 1'] and \
+                self._is_pgp_message(payload)
 
         if message.is_multipart():
             return False
@@ -221,16 +229,12 @@ class Zeyple:
            lines[-1] != b'-----END PGP MESSAGE-----':
             return False
 
-        # Only known boilerplate may sit outside the encoded packets. Arbitrary
-        # armor comments can contain plaintext just like a MIME preamble.
-        headers = lines[1:lines.index(b'')]
-        if any(not re.fullmatch(rb'Version: GnuPG v?\d+(?:\.\d+)*(?: \(GNU/Linux\))?', header)
-               for header in headers):
-            return False
-
-        # skip the armor headers, which end with a blank line, and the checksum
+        # skip the armor headers, which end with a blank line and which
+        # _strip_plaintext() removes, and the checksum, which can't hold anything else
         body = lines[lines.index(b'') + 1:-1]
         if body and body[-1].startswith(b'='):
+            if not re.fullmatch(rb'=[A-Za-z0-9+/]{4}', body[-1]):
+                return False
             body = body[:-1]
 
         try:
@@ -260,6 +264,25 @@ class Zeyple:
         except (OSError, subprocess.TimeoutExpired):
             logging.warning('Cannot validate existing PGP encryption; applying recipient policy')
             return False
+
+    def _strip_plaintext(self, message):
+        """Returns a copy of an already encrypted message with only its ciphertext:
+        armor headers, MIME preamble, epilogue and part headers are outside it, so
+        they could hold plaintext, and the recipient doesn't need them"""
+        out_message = copy.deepcopy(message)
+        if message.get_content_type() == 'multipart/encrypted':
+            payload = message.get_payload()[1].get_payload(decode=True)
+            out_message.preamble = PGP_PREAMBLE
+            out_message.epilogue = None
+            out_message.set_payload([
+                self._get_version_part(),
+                self._get_encrypted_part(strip_armor_headers(payload)),
+            ])
+        else:
+            # armor is plain ASCII, so it needs no transfer encoding
+            del out_message['Content-Transfer-Encoding']
+            out_message.set_payload(strip_armor_headers(message.get_payload(decode=True)))
+        return out_message
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(

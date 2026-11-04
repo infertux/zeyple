@@ -46,6 +46,44 @@ PY
     return 1
 }
 
+# An email that is already encrypted must keep its ciphertext, without the armor comment.
+# Postfix runs Zeyple without PATH, so this also checks that Zeyple finds gpg to validate it.
+send_encrypted_email_and_check_it_is_sent_as_is() {
+    truncate -s 0 /var/mail/root 2>/dev/null || true
+
+    echo "This is an encrypted message" | \
+        gpg --homedir "$test_keys" --batch --trust-model always --armor \
+            --comment 'plaintext comment' --encrypt --recipient root@localhost | \
+        mail -s "Encrypted" root@localhost
+
+    for _ in $(seq 30); do
+        if mail -p 2>/dev/null | grep -F 'BEGIN PGP MESSAGE' > /dev/null; then
+            python3 - "$test_keys" <<'PY'
+import mailbox
+import subprocess
+import sys
+
+messages = list(mailbox.mbox('/var/mail/root'))
+assert len(messages) == 1, len(messages)
+message = messages[0]
+assert message.get_content_type() == 'text/plain', message.get_content_type()
+assert 'plaintext comment' not in message.as_string()
+decrypted = subprocess.run(
+    ['gpg', '--batch', '--homedir', sys.argv[1], '--decrypt'],
+    input=message.get_payload(decode=True), capture_output=True, check=True,
+).stdout
+assert decrypted == b'This is an encrypted message\n', decrypted
+PY
+            return 0
+        fi
+        sleep 1
+    done
+
+    mail -p || true
+    cat /var/log/zeyple.log
+    return 1
+}
+
 # set -e ignores a failed "! command", so use this instead
 refute() {
     if "$@"; then return 1; fi
@@ -117,6 +155,7 @@ plug_zeyple_into_postfix
 test "$(grep -c '^zeyple ' /etc/postfix/master.cf)" = 1
 
 send_test_email_and_check_it_is_encrypted
+send_encrypted_email_and_check_it_is_sent_as_is
 
 # Upgrading (or reinstalling) the package must keep the config, with your changes, and the keys,
 # leave Postfix alone and give the script back to root

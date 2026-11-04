@@ -62,11 +62,12 @@ is used.
 An expired key is an error.
 .IP \(bu 2
 Emails that are already encrypted, either PGP/MIME or a body that is nothing
-but an inline PGP message, are sent as they are.
-The complete OpenPGP packet stream is checked without decrypting it.
-Malformed or truncated packets, arbitrary armor comments, or plaintext
-outside the encrypted MIME part follow the normal recipient encryption policy.
-Only empty or standard boilerplate preambles can pass through unchanged.
+but an inline PGP message, are not encrypted again.
+The complete OpenPGP packet stream is checked without decrypting it, and
+malformed or truncated packets follow the normal recipient encryption policy.
+Only the ciphertext is sent: armor headers such as Comment, and the MIME
+preamble, epilogue, version part and part headers around it, could hold
+plaintext, so they are removed or replaced with standard ones.
 .IP \(bu 2
 Without a key, the email is sent unencrypted, unless
 .B force_encrypt

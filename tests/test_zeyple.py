@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from configparser import ConfigParser
+from email import message_from_bytes
 from textwrap import dedent
 from unittest.mock import Mock, patch
 import base64
@@ -484,16 +485,27 @@ class ZeypleTest(unittest.TestCase):
         ).stdout
         assert not self.zeyple._is_pgp_message(self.armor_packets(packets[:-100]))
 
-    def test_armor_comments_and_bad_checksum_are_not_passed_through(self):
+    def test_armor_headers_are_stripped(self):
+        """Armor headers can hold plaintext, so they are removed from the ciphertext sent as is"""
         body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
-        for bad in [
-            body.replace(b'\n\n', b'\nComment: plaintext secret\n\n', 1),
-            re.sub(rb'\n=[A-Za-z0-9+/]{4}\n', b'\n=AAAA\n', body),
-        ]:
+        commented = body.replace(
+            b'\n\n', b'\nVersion: Mailvelope v6\nComment: plaintext secret\n\n', 1)
+        assert commented != body
+        assert self.zeyple._is_pgp_message(commented)
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+        for recipient in [TEST1_EMAIL, 'unknown@example.org']:
+            sent = self.zeyple.process_message(SIMPLE_MESSAGE.encode() + commented, [recipient])
+            assert len(sent) == 1
+            assert 'plaintext secret' not in sent[0].as_string()
+            assert sent[0].get_payload().encode() == body
+            assert self.decrypt(sent[0].get_payload().encode()) == b'secret'
+
+    def test_bad_armor_checksums_are_not_passed_through(self):
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        for checksum in [b'=AAAA', b'=plaintext secret']:
+            bad = re.sub(rb'\n=[A-Za-z0-9+/]{4}\n', b'\n' + checksum + b'\n', body)
             assert bad != body
             assert not self.zeyple._is_pgp_message(bad)
-        versioned = body.replace(b'\n\n', b'\nVersion: GnuPG v2.2.40 (GNU/Linux)\n\n', 1)
-        assert self.zeyple._is_pgp_message(versioned)
 
     def test_pgp_parser_uses_the_gpgme_engine(self):
         """Postfix runs Zeyple without PATH, so don't rely on it to find gpg."""
@@ -509,23 +521,32 @@ class ZeypleTest(unittest.TestCase):
         self.zeyple.config.set('gpg', 'executable', '/missing/gpg')
         assert not self.zeyple._is_pgp_message(body)
 
-    def test_plaintext_around_pgp_mime_is_encrypted_and_preserved(self):
+    def test_plaintext_around_pgp_mime_is_stripped(self):
+        """Only the ciphertext of PGP/MIME emails is sent as is"""
         encrypted = self.zeyple.process_message(
             (SIMPLE_MESSAGE + 'secret').encode(), [TEST1_EMAIL])[0]
-        for location in ['preamble', 'epilogue', 'version']:
+        del encrypted['X-Zeyple']
+        ciphertext = encrypted.get_payload()[1].get_payload()
+        for location in ['preamble', 'epilogue', 'version', 'part header', 'armor header']:
             with self.subTest(location=location):
                 message = copy.deepcopy(encrypted)
+                version, part = message.get_payload()
                 if location == 'version':
-                    message.get_payload()[0].set_payload('Version: 1\nplaintext secret')
+                    version.set_payload('Version: 1\nplaintext secret')
+                elif location == 'part header':
+                    part.replace_header('Content-Description', 'plaintext secret')
+                elif location == 'armor header':
+                    part.set_payload(
+                        ciphertext.replace('\n\n', '\nComment: plaintext secret\n\n', 1))
                 else:
                     setattr(message, location, 'plaintext secret')
+                assert 'plaintext secret' in message.as_string()
                 self.zeyple.config.set('zeyple', 'force_encrypt', '1')
-                sent = self.zeyple.process_message(message.as_bytes(), ['unknown@example.org'])
-                assert sent == []
-                sent = self.zeyple.process_message(message.as_bytes(), [TEST1_EMAIL])[0]
-                assert 'plaintext secret' not in sent.as_string()
-                decrypted = self.decrypt(sent.get_payload()[1].get_payload().encode())
-                assert b'plaintext secret' in decrypted
+                for recipient in [TEST1_EMAIL, 'unknown@example.org']:
+                    sent = self.zeyple.process_message(message.as_bytes(), [recipient])[0]
+                    assert 'plaintext secret' not in sent.as_string()
+                    assert sent.get_payload()[1].get_payload() == ciphertext
+                    assert self.zeyple._is_encrypted(message_from_bytes(sent.as_bytes()))
 
     def test_pgp_mime_requires_expected_parts(self):
         encrypted = self.zeyple.process_message(
