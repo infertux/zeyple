@@ -15,7 +15,9 @@ import logging
 import os
 import re
 import smtplib
+import subprocess
 import sys
+import tempfile
 
 
 def encode_string(string):
@@ -30,6 +32,64 @@ __version__ = '3.0.0'
 __author__ = 'Cédric Félizard'
 __license__ = 'AGPLv3+'
 __copyright__ = 'Copyright 2012-2026 Cédric Félizard'
+PGP_PREAMBLE = 'This is an OpenPGP/MIME encrypted message (RFC 4880 and 3156)'
+
+
+def encrypted_packet_sequence(data):
+    """Check complete OpenPGP packet framing; GnuPG validates the packet bodies."""
+    offset = 0
+    tags = []
+
+    def read_integer(size):
+        nonlocal offset
+        if offset + size > len(data):
+            raise ValueError('Truncated packet header')
+        value = int.from_bytes(data[offset:offset + size], 'big')
+        offset += size
+        return value
+
+    try:
+        while offset < len(data):
+            header = read_integer(1)
+            if not header & 0x80:
+                return False
+            size = 0
+            if header & 0x40:
+                tag = header & 0x3f
+                # New-format packets can have several partial-length chunks,
+                # followed by a final chunk with a definite length (RFC 4880).
+                while True:
+                    length = read_integer(1)
+                    partial = 224 <= length < 255
+                    if length == 255:
+                        length = read_integer(4)
+                    elif partial:
+                        length = 1 << (length & 0x1f)
+                    elif length >= 192:
+                        length = ((length - 192) << 8) + read_integer(1) + 192
+                    if offset + length > len(data):
+                        return False
+                    offset += length
+                    size += length
+                    if not partial:
+                        break
+            else:
+                tag = (header >> 2) & 0x0f
+                length_type = header & 3
+                size = len(data) - offset if length_type == 3 else read_integer(1 << length_type)
+                if offset + size > len(data):
+                    return False
+                offset += size
+            if not size:
+                return False
+            tags.append(tag)
+    except ValueError:
+        return False
+
+    # Only session keys followed by one encrypted data packet are eligible.
+    # Literal, compressed, signature and trailing packets must not bypass encryption.
+    return len(tags) >= 2 and all(tag in (1, 3) for tag in tags[:-1]) and \
+        tags[-1] in (9, 18, 20)
 
 
 class Zeyple:
@@ -132,15 +192,26 @@ class Zeyple:
             # PGP/MIME (RFC 3156): a version part then the encrypted data
             parts = message.get_payload() if message.is_multipart() else []
             protocol = str(message.get_param('protocol', '')).lower()
-            return protocol == 'application/pgp-encrypted' and len(parts) == 2 and \
-                parts[0].get_content_type() == 'application/pgp-encrypted' and \
-                self._is_pgp_message(parts[1].get_payload(decode=True))
+            if protocol != 'application/pgp-encrypted' or len(parts) != 2 or message.defects:
+                return False
+            if (message.preamble or '').strip() not in ('', PGP_PREAMBLE) or \
+               (message.epilogue or '').strip():
+                return False
+            if parts[0].get_content_type() != 'application/pgp-encrypted' or \
+               parts[1].get_content_type() != 'application/octet-stream':
+                return False
+            version = parts[0].get_payload(decode=True)
+            payload = parts[1].get_payload(decode=True)
+            # Decoding can record defects, such as ignored invalid base64 text.
+            return not any(part.defects for part in parts) and \
+                (version or b'').strip() == b'Version: 1' and self._is_pgp_message(payload)
 
         if message.is_multipart():
             return False
 
         # inline PGP: the body must be nothing but an encrypted block
-        return self._is_pgp_message(message.get_payload(decode=True))
+        payload = message.get_payload(decode=True)
+        return not message.defects and self._is_pgp_message(payload)
 
     def _is_pgp_message(self, data):
         """Returns whether data is an ASCII-armored OpenPGP encrypted message"""
@@ -148,6 +219,13 @@ class Zeyple:
         if len(lines) < 3 or b'' not in lines or \
            lines[0] != b'-----BEGIN PGP MESSAGE-----' or \
            lines[-1] != b'-----END PGP MESSAGE-----':
+            return False
+
+        # Only known boilerplate may sit outside the encoded packets. Arbitrary
+        # armor comments can contain plaintext just like a MIME preamble.
+        headers = lines[1:lines.index(b'')]
+        if any(not re.fullmatch(rb'Version: GnuPG v?\d+(?:\.\d+)*(?: \(GNU/Linux\))?', header)
+               for header in headers):
             return False
 
         # skip the armor headers, which end with a blank line, and the checksum
@@ -160,15 +238,28 @@ class Zeyple:
         except binascii.Error:
             return False
 
-        # the data must start with a public-key or symmetric-key encrypted
-        # session key packet, so text merely wrapped in PGP markers doesn't count
-        if not packets or not packets[0] & 0x80:
+        if not encrypted_packet_sequence(packets):
             return False
-        if packets[0] & 0x40:  # new packet format
-            tag = packets[0] & 0x3f
-        else:
-            tag = (packets[0] >> 2) & 0x0f
-        return tag in (1, 3)
+
+        # Neither the first packet tag nor GPGME's identify() validates a
+        # complete message. Use GnuPG's parser, without decrypting or accessing
+        # the recipient keyring. Framing above also catches truncated ciphertext
+        # that --list-only deliberately skips without reporting an error.
+        # the same gpg as GPGME uses, also when PATH doesn't lead to it
+        executable = self.config.get('gpg', 'executable', fallback=None) or \
+            self.gpg.engine_info.file_name
+        try:
+            with tempfile.TemporaryDirectory(prefix='zeyple-pgp-') as home:
+                result = subprocess.run(
+                    [executable, '--no-options', '--batch', '--no-tty', '--no-autostart',
+                     '--no-auto-key-retrieve', '--homedir', home, '--list-only', '--list-packets'],
+                    input=data, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    timeout=30,
+                )
+            return result.returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            logging.warning('Cannot validate existing PGP encryption; applying recipient policy')
+            return False
 
     def _get_version_part(self):
         ret = email.mime.application.MIMEApplication(
@@ -252,8 +343,10 @@ class Zeyple:
         encrypted = self._get_encrypted_part(encrypted_payload)
 
         out_message = copy.deepcopy(in_message)
-        out_message.preamble = "This is an OpenPGP/MIME encrypted " \
-                               "message (RFC 4880 and 3156)"
+        out_message.preamble = PGP_PREAMBLE
+        # The original epilogue is already inside encrypted_payload. Keeping it
+        # on the copied outer message would also send it in plaintext.
+        out_message.epilogue = None
 
         if 'Content-Type' not in out_message:
             out_message['Content-Type'] = 'multipart/encrypted'
