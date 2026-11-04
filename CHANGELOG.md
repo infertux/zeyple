@@ -1,4 +1,4 @@
-## v3.0.0, 2026-11-03 ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...v3.0.0))
+## v3.0.0, 2026-11-04 ([changes](https://github.com/infertux/zeyple/compare/v2.0.0...v3.0.0))
 
   * [BUGFIX]  Run with `python3` since Debian and Ubuntu no longer ship a `python` binary
   * [BUGFIX]  Don't delete the config, keys and log when the .deb package is upgraded
