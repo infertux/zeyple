@@ -12,9 +12,40 @@ permissions:
 
 jobs:
   build:
-    name: ${{ matrix.name }} (${{ matrix.image }})
+    name: Build release artifacts (debian:trixie)
     runs-on: ubuntu-latest
-    # Test against the distro's own Python and python3-gpg, the way Zeyple is deployed
+    container: debian:trixie
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git python3 mandoc build-essential debhelper dh-python lintian
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build packages, HTML manual and checksums
+        # the checkout belongs to the runner's user, not the container's root
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          ./tools/build-release
+      - name: Check Debian packages
+        run: lintian --info --display-info --pedantic dist/*.changes
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: zeyple-release
+          path: ./dist/
+          if-no-files-found: error
+
+  test:
+    name: ${{ matrix.name }} (${{ matrix.image }})
+    needs: build
+    runs-on: ubuntu-latest
+    # Test the same package with each distro's own Python and python3-gpg.
     container: ${{ matrix.image }}
     strategy:
       matrix:
@@ -40,13 +71,19 @@ jobs:
           apt-get install -y --no-install-recommends \
             ca-certificates git gnupg python3 python3-gpg \
             pycodestyle python3-pytest python3-pytest-cov mandoc \
-            postfix mailutils sudo ruby ruby-dev build-essential
-          gem install --no-document fpm
+            postfix mailutils sudo
         shell: bash
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Download release artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: zeyple-release
+          path: ./dist/
+      - name: Verify artifact checksums
+        run: cd dist && sha256sum -c SHA256SUMS
       - name: Lint with pycodestyle
         run: pycodestyle --show-pep8 --max-line-length=100 .
       - name: Lint man page
@@ -55,18 +92,5 @@ jobs:
         run: python3 docs/build-man-html.py > man.html
       - name: Test with pytest
         run: python3 -m pytest --cov=zeyple/ --cov-report=term tests/
-      - name: Build deb package
-        run: ./fpm/create
-      - name: End to end test using deb package
-        run: bash -ex ./tests/e2e.sh
-      - name: Upload deb package
-        uses: actions/upload-artifact@v7
-        with:
-          name: zeyple-${{ matrix.name }}.deb
-          path: ./fpm/zeyple.deb
-      - name: Upload HTML man page
-        if: matrix.name == 'debian-13'
-        uses: actions/upload-artifact@v7
-        with:
-          name: zeyple-man.html
-          path: ./man.html
+      - name: End to end test using the release package
+        run: bash -ex ./tests/e2e.sh ./dist/zeyple_*_all.deb

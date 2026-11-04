@@ -1,0 +1,3 @@
+# Keep the Debian packaging out of release tarballs (git archive and GitHub honor this),
+# as Debian builds it on top of the upstream tarball
+/debian export-ignore

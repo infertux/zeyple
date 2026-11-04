@@ -1,0 +1,43 @@
+#!/bin/sh
+set -e
+
+# Prints the name of the Postfix service Zeyple hands emails back to, from the
+# [relay] section of /etc/zeyple.conf, read the way Zeyple reads it.
+# Prints nothing when the config can't be read.
+relay_service() {
+    python3 -c '
+from configparser import ConfigParser
+config = ConfigParser()
+config.read("/etc/zeyple.conf")
+host = config.get("relay", "host").strip("[]")
+port = config.getint("relay", "port")
+print("[%s]:%d/inet" % (host, port) if ":" in host else "%s:%d/inet" % (host, port))
+' 2>/dev/null || true
+}
+
+# When the package is removed (not upgraded) and Zeyple is plugged into Postfix,
+# unplug it so Postfix doesn't pipe emails to a missing script.
+# The relay service is only deleted when the zeyple service is there, and only
+# the one that zeyple.conf names, so a listener that belongs to something else
+# stays when Zeyple was never plugged in or was moved to another port.
+# postconf -X does nothing for parameters that aren't there.
+if [ "$1" = remove ] && command -v postconf >/dev/null 2>&1; then
+    case "$(postconf -xh content_filter)" in
+        zeyple|zeyple:*) postconf -X content_filter ;;
+    esac
+    postconf -X zeyple_destination_recipient_limit
+    if [ -n "$(postconf -M zeyple/unix 2>/dev/null)" ]; then
+        postconf -MX zeyple/unix
+        relay=$(relay_service)
+        if [ -n "$relay" ]; then
+            postconf -MX "$relay"
+        fi
+    fi
+    if postfix status >/dev/null 2>&1; then
+        postfix reload
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

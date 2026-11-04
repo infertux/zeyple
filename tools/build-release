@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Builds the Debian source and binary packages from the committed tree,
+# then puts the .deb, the HTML manual and their SHA-256 checksums in dist/
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+version=$(dpkg-parsechangelog -S Version)
+upstream=${version%-*}
+if [ "$upstream" != "$(sed -n "s/^__version__ = '\(.*\)'$/\1/p" zeyple/zeyple.py)" ]; then
+    echo "debian/changelog is at $version but zeyple/zeyple.py isn't at $upstream" >&2
+    exit 1
+fi
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+    echo "Commit your changes first: the source package is built from HEAD" >&2
+    exit 1
+fi
+
+package="zeyple_${version}_all.deb"
+manual="zeyple-man-${upstream}.html"
+build=$(mktemp -d)
+trap 'rm -rf "$build"' EXIT
+
+mandoc -Tlint -W warning zeyple/zeyple.8
+
+# The upstream tarball, like the one GitHub serves for the v$upstream tag (without debian/,
+# see .gitattributes), then the Debian packaging on top of it
+git archive --format=tar.gz --prefix="zeyple-$upstream/" -o "$build/zeyple_$upstream.orig.tar.gz" HEAD
+tar -xzf "$build/zeyple_$upstream.orig.tar.gz" -C "$build"
+git ls-files -z debian | tar -cf - --null -T - | tar -xf - -C "$build/zeyple-$upstream"
+(cd "$build/zeyple-$upstream" && dpkg-buildpackage --no-sign)
+
+rm -rf dist
+mkdir dist
+cp "$build"/zeyple_"$version"* "$build"/zeyple_"$upstream".orig.tar.gz dist/
+python3 docs/build-man-html.py > "dist/$manual"
+cd dist
+sha256sum "$package" "$manual" > SHA256SUMS
