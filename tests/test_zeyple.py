@@ -3,7 +3,9 @@
 
 from configparser import ConfigParser
 from textwrap import dedent
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+import base64
+import copy
 import gpg
 import os
 import re
@@ -70,7 +72,7 @@ class ZeypleTest(unittest.TestCase):
         os.mkdir(self.homedir, 0o700)
         subprocess.check_call(
             ['gpg', '--homedir', self.homedir, '--import', KEYS_FNAME],
-            stderr=open('/dev/null'),
+            stderr=subprocess.DEVNULL,
         )
 
         self.zeyple = zeyple.Zeyple(self.conffile)
@@ -402,6 +404,164 @@ class ZeypleTest(unittest.TestCase):
             (SIMPLE_MESSAGE + body).encode('ascii'), [TEST1_EMAIL])[0]
 
         assert email.get_content_type() == 'multipart/encrypted'
+
+    def encrypted_packets(self):
+        """Return real ciphertext and the offset after its session-key packet."""
+        armor = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        packets = subprocess.run(
+            ['gpg', '--homedir', self.homedir, '--dearmor'], input=armor,
+            capture_output=True, check=True,
+        ).stdout
+        listing = subprocess.run(
+            ['gpg', '--homedir', self.homedir, '--list-only', '--list-packets'],
+            input=packets, capture_output=True, check=True,
+        ).stdout
+        offsets = re.findall(rb'^# off=(\d+)', listing, re.MULTILINE)
+        return packets, int(offsets[1])
+
+    @staticmethod
+    def armor_packets(packets):
+        return b'-----BEGIN PGP MESSAGE-----\n\n' + base64.b64encode(packets) + \
+            b'\n-----END PGP MESSAGE-----\n'
+
+    def test_malformed_encrypted_packets_follow_recipient_policy(self):
+        """Malformed PGP must not bypass force_encrypt or the recipient's key."""
+        packets, session_end = self.encrypted_packets()
+        literal = b'\xcb\x0cb\x00\x00\x00\x00\x00secret'
+        for bad in [
+            b'\xc1\x00secret',  # the old first-byte check accepted this
+            b'\xc1\x01\x00' + packets[session_end:],  # valid lengths, invalid session key
+            packets[:-10],  # GnuPG --list-only accepts truncated encrypted data
+            packets[:session_end],  # a session key without encrypted data
+            packets + literal,
+            packets[:session_end] + literal + packets[session_end:],
+            packets + b'plaintext',
+            b'\xc1\xff\xff',  # truncated length header
+        ]:
+            with self.subTest(packets=bad[:8], size=len(bad)):
+                body = self.armor_packets(bad)
+                message = SIMPLE_MESSAGE.encode() + body
+                self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+                assert self.zeyple.process_message(message, ['unknown@example.org']) == []
+                encrypted = self.zeyple.process_message(message, [TEST1_EMAIL])[0]
+                assert encrypted.get_content_type() == 'multipart/encrypted'
+                assert body in self.decrypt(encrypted.get_payload()[1].get_payload().encode())
+                self.zeyple.config.set('zeyple', 'force_encrypt', '0')
+                plain = self.zeyple.process_message(message, ['unknown@example.org'])[0]
+                assert plain.get_payload().encode() == body
+
+    def test_valid_encrypted_message_needs_no_recipient_key(self):
+        """Passthrough validates ciphertext without having any decryption key."""
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+        message = SIMPLE_MESSAGE.encode() + body
+        self.zeyple._user_key = Mock(side_effect=AssertionError('key lookup during passthrough'))
+        sent = self.zeyple.process_message(message, ['unknown@example.org'])[0]
+        assert sent.get_payload().encode() == body
+
+    def test_multiple_session_keys_are_valid(self):
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID, TEST2_ID])
+        assert self.zeyple._is_pgp_message(body)
+
+    def test_symmetric_encrypted_message_is_valid(self):
+        body = subprocess.run(
+            ['gpg', '--homedir', self.homedir, '--batch', '--pinentry-mode', 'loopback',
+             '--passphrase', 'test-only', '--symmetric', '--armor'],
+            input=b'secret', capture_output=True, check=True,
+        ).stdout
+        assert self.zeyple._is_pgp_message(body)
+
+    def test_partial_packet_lengths(self):
+        """Accept complete partial-length ciphertext but reject a missing final chunk."""
+        # Large uncompressible input makes GnuPG emit partial body lengths.
+        body = self.zeyple._encrypt_payload(os.urandom(100000), [TEST1_ID])
+        assert self.zeyple._is_pgp_message(body)
+        packets = subprocess.run(
+            ['gpg', '--homedir', self.homedir, '--dearmor'], input=body,
+            capture_output=True, check=True,
+        ).stdout
+        assert not self.zeyple._is_pgp_message(self.armor_packets(packets[:-100]))
+
+    def test_armor_comments_and_bad_checksum_are_not_passed_through(self):
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        for bad in [
+            body.replace(b'\n\n', b'\nComment: plaintext secret\n\n', 1),
+            re.sub(rb'\n=[A-Za-z0-9+/]{4}\n', b'\n=AAAA\n', body),
+        ]:
+            assert bad != body
+            assert not self.zeyple._is_pgp_message(bad)
+        versioned = body.replace(b'\n\n', b'\nVersion: GnuPG v2.2.40 (GNU/Linux)\n\n', 1)
+        assert self.zeyple._is_pgp_message(versioned)
+
+    def test_pgp_parser_uses_the_gpgme_engine(self):
+        """Postfix runs Zeyple without PATH, so don't rely on it to find gpg."""
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        with patch.dict(os.environ, {'PATH': '/nonexistent'}):
+            assert self.zeyple._is_pgp_message(body)
+
+    def test_pgp_parser_failure_does_not_allow_passthrough(self):
+        body = self.zeyple._encrypt_payload(b'secret', [TEST1_ID])
+        for error in [FileNotFoundError(), subprocess.TimeoutExpired('gpg', 30)]:
+            with patch('zeyple.zeyple.subprocess.run', side_effect=error):
+                assert not self.zeyple._is_pgp_message(body)
+        self.zeyple.config.set('gpg', 'executable', '/missing/gpg')
+        assert not self.zeyple._is_pgp_message(body)
+
+    def test_plaintext_around_pgp_mime_is_encrypted_and_preserved(self):
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + 'secret').encode(), [TEST1_EMAIL])[0]
+        for location in ['preamble', 'epilogue', 'version']:
+            with self.subTest(location=location):
+                message = copy.deepcopy(encrypted)
+                if location == 'version':
+                    message.get_payload()[0].set_payload('Version: 1\nplaintext secret')
+                else:
+                    setattr(message, location, 'plaintext secret')
+                self.zeyple.config.set('zeyple', 'force_encrypt', '1')
+                sent = self.zeyple.process_message(message.as_bytes(), ['unknown@example.org'])
+                assert sent == []
+                sent = self.zeyple.process_message(message.as_bytes(), [TEST1_EMAIL])[0]
+                assert 'plaintext secret' not in sent.as_string()
+                decrypted = self.decrypt(sent.get_payload()[1].get_payload().encode())
+                assert b'plaintext secret' in decrypted
+
+    def test_pgp_mime_requires_expected_parts(self):
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + 'secret').encode(), [TEST1_EMAIL])[0]
+        for part, content_type in [(0, 'text/plain'), (1, 'text/plain')]:
+            message = copy.deepcopy(encrypted)
+            message.get_payload()[part].set_type(content_type)
+            assert not self.zeyple._is_encrypted(message)
+        encrypted.get_payload().append(copy.deepcopy(encrypted.get_payload()[0]))
+        assert not self.zeyple._is_encrypted(encrypted)
+
+    def test_invalid_mime_base64_is_not_passed_through(self):
+        encrypted = self.zeyple.process_message(
+            (SIMPLE_MESSAGE + 'secret').encode(), [TEST1_EMAIL])[0]
+        for index in (0, 1):
+            message = copy.deepcopy(encrypted)
+            part = message.get_payload()[index]
+            encoded = base64.b64encode(part.get_payload(decode=True)).decode()
+            part['Content-Transfer-Encoding'] = 'base64'
+            part.set_payload(encoded + '!?!')
+            assert not self.zeyple._is_encrypted(message)
+
+    def test_multipart_epilogue_only_appears_inside_ciphertext(self):
+        message = dedent('''\
+            From: root@example.org
+            Content-Type: multipart/mixed; boundary="part"
+
+            --part
+            Content-Type: text/plain
+
+            hello
+            --part--
+            plaintext epilogue secret
+            ''')
+        sent = self.zeyple.process_message(message.encode(), [TEST1_EMAIL])[0]
+        assert 'plaintext epilogue secret' not in sent.as_string()
+        decrypted = self.decrypt(sent.get_payload()[1].get_payload().encode())
+        assert b'plaintext epilogue secret' in decrypted
 
     def run_zeyple(self, message, recipients):
         """Runs zeyple.py like Postfix does, with the relay unreachable"""
