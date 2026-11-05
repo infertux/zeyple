@@ -2,6 +2,7 @@ name: Zeyple test and deb package build
 
 on:
   push:
+    branches: [master] # pull requests are tested by the pull_request event, don't run twice
   pull_request:
   workflow_dispatch:
   schedule:
