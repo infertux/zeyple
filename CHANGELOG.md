@@ -20,6 +20,7 @@
   * [TWEAK]   Install `zeyple.py` as root so the zeyple user, which handles the emails, can't modify it
   * [TWEAK]   The .deb package creates the zeyple system user with its own zeyple group, like most Debian packages, instead of putting it in `nogroup`
   * [TWEAK]   Only let the zeyple user and the adm group read `/var/log/zeyple.log`, since it names the recipients
+  * [TWEAK]   Drop the experimental SELinux policy: Debian and Ubuntu use AppArmor
   * [TWEAK]   The .deb package installs Zeyple as `/usr/sbin/zeyple` instead of `/usr/local/bin/zeyple.py`, since Debian packages must not use `/usr/local`
   * [DOC]     Use keys.openpgp.org since the SKS keyserver pool is gone
   * [DOC]     Add a `zeyple(8)` man page, installed by the .deb package, and a script that turns it into a web page
